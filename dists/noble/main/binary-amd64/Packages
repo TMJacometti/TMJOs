@@ -9,10 +9,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: metapackages
 Filename: pool/main/t/tmjos/tmjos_1.3.0-1_all.deb
-Size: 1752
-SHA256: 3c2912cafed52ca034fd7fc0670d5cc501e86f03eb556fb0c331bc5a1c858745
-SHA1: 534084a084236e3f64520711db3870b684ea9100
-MD5sum: ca08f47f47782f3dfad1246832ce78dd
+Size: 1754
+SHA256: be18dffe8cd07d5c591a90d5ad5b827a4447b612b761166064c57dd17d532084
+SHA1: 77032d03cd164f651b182e89139088ccbe927902
+MD5sum: a556b051ff16dff78dc7b38627a21e53
 Description: TMJOs metapackage — pulls in the entire TMJOs experience
  Installing this package on a base Ubuntu 24.04 noble system gives
  you the complete TMJOs setup:
@@ -71,9 +71,9 @@ Priority: optional
 Section: gnome
 Filename: pool/main/t/tmjos-defaults/tmjos-defaults_1.3.0-1_all.deb
 Size: 2336
-SHA256: 23d914364c0a280d5dc5d07c60a4281ed12a642341fe6635f78b7c1f39d6c8db
-SHA1: 73f228c56d73f7a4d9da74aa549d8a03ebb8459c
-MD5sum: 0b8f678f0b2c913eee864a3392e77cb7
+SHA256: b659520d6edcc1228ed7c0aba0e4758f54b93b71e7f8a757371517423d7dc277
+SHA1: a92e0c54d4170aa56335e00f7320acd010ea6e5d
+MD5sum: 28af92a481b252d598342c7ae83e621e
 Description: TMJOs system-wide dconf defaults (dark mode, fonts, dock-off)
  Sets system-wide dconf defaults for the TMJOs experience:
   * Dark color scheme (color-scheme=prefer-dark, gtk-theme=Adwaita-dark)
@@ -100,10 +100,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: x11
 Filename: pool/main/t/tmjos-dock/tmjos-dock_1.3.0-1_all.deb
-Size: 4676
-SHA256: 8df4de571d0704e00fd218c70e320d29d809f171afd37899195507efc4922569
-SHA1: c39da12ad6fb3706ab7bf82924693ef01bfb16e0
-MD5sum: 1b44336791a9f0e27367360b09d2d726
+Size: 4678
+SHA256: 7214aa2c08fc5ea063b47d41e1a9f8d8fda7bfc00d53f672dfe8ea3614f5aeca
+SHA1: f853a2a2afa0fe0f1334f6fe1a200279e507cf51
+MD5sum: 646f138022af918f9e44ba8d00ebf4ff
 Description: TMJOs Plank dock pre-configured with sticky launchers
  Pre-configured Plank dock for TMJOs:
   * /etc/skel/.config/plank/dock1/settings — bottom dock, transparent
@@ -159,10 +159,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-os-identity/tmjos-os-identity_1.3.0-2_all.deb
-Size: 2994
-SHA256: 3c7ac6a9f5db87f161d7645b6e211cb0d716c8418683a95459d1dd073e97459d
-SHA1: 0e45e456703558e79a41caf5f163d230873d7f83
-MD5sum: fdcc554c55a9dd6231b955bb51b6edf1
+Size: 2996
+SHA256: d6ebc62049067f06fb74a918a0c2759d81b0a8e0344741c2d1e09739e76eb589
+SHA1: 2706ab85900a8e6893b6cd86ef96b3760f678083
+MD5sum: 8bac2b658a9d36b1d33aa5e86c9d1589
 Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
  Replaces the Ubuntu identity files with TMJOs-branded versions:
   * /etc/os-release    — TMJOs 1.x (insano), shows in GNOME About
@@ -193,10 +193,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: gnome
 Filename: pool/main/t/tmjos-shell-tweaks/tmjos-shell-tweaks_1.3.0-1_all.deb
-Size: 2340
-SHA256: 95d7cbd60b76936b9169052801d8d51ed5532d9b6dcb408acfea0329948d678d
-SHA1: 7397bca3526cc4ab4f18e5e8efc201ecf71a0856
-MD5sum: 9ea7b62a136d83f2f0b36381082611c1
+Size: 2344
+SHA256: ebe60d0e22870fd02a5bba84b3616c98c026d41b78c7e7de903ea8272ee87e98
+SHA1: 89b4f339723cb151aa7a6e0a57e0e6b75fbfa19e
+MD5sum: de3907370dc6dceecdeb234b98281438
 Description: TMJOs GNOME Shell tweaks (hide Activities button)
  Hides the GNOME Activities button in the top-left corner of the
  panel — TMJOs uses Plank's "Todos os Apps" launcher as the entry
