@@ -1,18 +1,18 @@
 Package: tmjos
-Version: 1.3.0-1
+Version: 1.3.0-2
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
 Installed-Size: 7
-Depends: tmjos-branding (>= 1.3.0), tmjos-os-identity (>= 1.3.0), tmjos-dock (>= 1.3.0), tmjos-defaults (>= 1.3.0), tmjos-shell-tweaks (>= 1.3.0), tmjpad (>= 0.1.1)
+Depends: tmjos-branding (>= 1.3.0), tmjos-os-identity (>= 1.3.0), tmjos-dock (>= 1.3.0), tmjos-defaults (>= 1.3.0), tmjos-shell-tweaks (>= 1.3.0), tmjos-installer (>= 1.3.0), tmjpad (>= 0.1.2)
 Recommends: code, git, git-flow, docker.io, docker-compose, gnome-tweaks, dconf-editor, gnome-shell-extensions, gnome-shell-extension-manager, python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1, spice-vdagent, qemu-guest-agent, zram-config, preload, curl, htop, neofetch, vim, dnsutils, net-tools, traceroute
 Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: metapackages
-Filename: pool/main/t/tmjos/tmjos_1.3.0-1_all.deb
-Size: 1744
-SHA256: 67ba7e5d4b68bc2616e6ac2b04151a39f98c92e08e37d11bd49e80df7b3a08ac
-SHA1: ed5b522bf8419c0d297fc38ae633d0f758334009
-MD5sum: 1902cca02a0c21e462d7fbb40bef0a84
+Filename: pool/main/t/tmjos/tmjos_1.3.0-2_all.deb
+Size: 1938
+SHA256: c35c425fe8dc7caa97ab4602c37e6e72dbf49c7699121a31de61acd0cbcfe19e
+SHA1: 677662ebbe300744fdc09e124a560971db1bb9a1
+MD5sum: 2eef7280c5977ae4c661c26817228d4f
 Description: TMJOs metapackage — pulls in the entire TMJOs experience
  Installing this package on a base Ubuntu 24.04 noble system gives
  you the complete TMJOs setup:
@@ -70,10 +70,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: gnome
 Filename: pool/main/t/tmjos-defaults/tmjos-defaults_1.3.0-2_all.deb
-Size: 2498
-SHA256: dadd0b7f7efe335b185a926cad94e153b1c41d2d464802573b1979bb735227fd
-SHA1: 33182f072e44aa0addce1b28f5ea3566bcf564f3
-MD5sum: 9f48f2f788a38c066133529820f262f1
+Size: 2502
+SHA256: 9032a22dbadcb89713df652f672d59d9d67703f9b5981e82acd6e9e92a980259
+SHA1: e3078907c2367be0f20a2298c157067c45d5cdee
+MD5sum: 56ddb15ee2d3c513fd1a9f3b9f83e14f
 Description: TMJOs system-wide dconf defaults (dark mode, fonts, dock-off)
  Sets system-wide dconf defaults for the TMJOs experience:
   * Dark color scheme (color-scheme=prefer-dark, gtk-theme=Adwaita-dark)
@@ -149,6 +149,37 @@ Description: TMJOs pipeline smoke test package
  Provides a single command `tmjos-hello` that prints a banner.
  Safe to keep installed; safe to remove.
 
+Package: tmjos-installer
+Version: 1.3.0-1
+Architecture: all
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Installed-Size: 8
+Depends: ubiquity, ubiquity-frontend-gtk
+Homepage: https://github.com/TMJacometti/TMJOs
+Priority: optional
+Section: admin
+Filename: pool/main/t/tmjos-installer/tmjos-installer_1.3.0-1_all.deb
+Size: 2060
+SHA256: c98a0b01f37caa6e9204c333a0460069fd56ea43394dbc28c9a147bf57ed51b6
+SHA1: dd494838eb4715e9361b8334f8d239279ed80b2a
+MD5sum: 50f7dea69ec8e5c7ed92b302df277991
+Description: Ubuntu graphical installer (ubiquity) configured for TMJOs
+ Ensures the TMJOs live-CD ships with a working graphical installer.
+ Ubuntu 24.04's default install path is snapd-based, which TMJOs
+ removes via "Slim Aggressive". This package pulls in the classic
+ deb-based ubiquity installer + GTK frontend, plus a desktop entry
+ (delegated to ubiquity's own) so users can install TMJOs to disk
+ from the live session.
+ .
+ Slideshow component (ubiquity-slideshow-ubuntu) is intentionally
+ NOT a dependency: it requires WebKit2GTK, which TMJOs slims out.
+ The installer works fine without it (just no marketing carousel
+ during the copy phase).
+ .
+ Postinst cleans /root/.config/pulse and /root/.cache: stray
+ PulseAudio runtime sockets there cause permission-denied errors
+ when ubiquity rsyncs the live filesystem to the target disk.
+
 Package: tmjos-os-identity
 Version: 1.3.0-2
 Architecture: all
@@ -159,10 +190,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-os-identity/tmjos-os-identity_1.3.0-2_all.deb
-Size: 2994
-SHA256: 0b999d0c822accdc7357b6d2962b6693746bd514deda6d72582d37879fc5453d
-SHA1: cc56d99a4349b70fc9b70ace7ba9288cead33055
-MD5sum: f74122cf94cb5ee4126c7b11d693fd9e
+Size: 2998
+SHA256: aaeccf834297aabc6f3a04fd67bc7a8f029f192cf95d2fe9cb8854419c0c9853
+SHA1: 4232a83adb98b4ad055eef72b998eb09ebd7c73e
+MD5sum: f60a4e40e4d03b4b4d84a83c111f683d
 Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
  Replaces the Ubuntu identity files with TMJOs-branded versions:
   * /etc/os-release    — TMJOs 1.x (insano), shows in GNOME About
@@ -194,9 +225,9 @@ Priority: optional
 Section: gnome
 Filename: pool/main/t/tmjos-shell-tweaks/tmjos-shell-tweaks_1.3.0-3_all.deb
 Size: 3166
-SHA256: 1b402b13ef0365356add98541fda084a1d518af96fa5b6d7ff6f6e42d1666047
-SHA1: 5afa91e36e3c031155421a10956534ae30865e11
-MD5sum: 317aabf4d7bbf84adbb041e04ba917be
+SHA256: cb82884f392753a3e69d59a657eca267abe03d7dbe8e7a949cefd2b51f04f045
+SHA1: 874e10fe40686a31f6642ddd7a30d4445da78f20
+MD5sum: 42fa29e2fff65329a0c9924319b3c4b2
 Description: TMJOs GNOME Shell extension (hide Activities button)
  Ships a GNOME Shell extension at
  /usr/share/gnome-shell/extensions/tmjos-tweaks@tmjos.local/ that
@@ -219,20 +250,20 @@ Description: TMJOs GNOME Shell extension (hide Activities button)
  those diverts so the upstream Yaru bytes return.
 
 Package: tmjpad
-Version: 0.1.1-1
+Version: 0.1.2-1
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Installed-Size: 1043
+Installed-Size: 3032
 Depends: python3 (>= 3.10), python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1
 Recommends: fonts-jetbrains-mono
 Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjpad
 Priority: optional
 Section: editors
-Filename: pool/main/t/tmjpad/tmjpad_0.1.1-1_all.deb
-Size: 1024372
-SHA256: 5a1c87aa56fdccd163a0e8e494a6225d5198de4b37412a6b54af6fc05aa54508
-SHA1: 466d6ac8eed1fa47825cfec2017096114d701006
-MD5sum: 1b25cadd19ce96966ce70a53f46a9490
+Filename: pool/main/t/tmjpad/tmjpad_0.1.2-1_all.deb
+Size: 1025030
+SHA256: 1c19e4e04805d16527875aea0a3682dbff07fe324724890b493b3ae886063b57
+SHA1: cd535e0a05b1887524bacdde2130157e8fc28b3a
+MD5sum: 45bafa1a75b6879bbcd6a3e61c5d8b49
 Description: TMJOs text editor with full session persistence
  TMJPad is the native TMJOs text editor — no plugins, no syntax
  highlighting, just multiple tabs and total session persistence.
