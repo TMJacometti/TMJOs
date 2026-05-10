@@ -136,7 +136,8 @@ $SUDO apt install -y plank gnome-tweaks dconf-editor \
 
 # CLI essenciais
 $SUDO apt install -y curl wget htop neofetch vim nano build-essential \
-    dnsutils net-tools traceroute
+    dnsutils net-tools traceroute \
+    xdotool wmctrl  # pra tmjos-show-apps simular Super key (X11)
 
 # Python + GTK4 + Adwaita (necessário pro TMJPad)
 $SUDO apt install -y python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
@@ -382,17 +383,46 @@ EOF
 # pinneds e o usuário não tem ponto de entrada pro app drawer no dock.
 echo -e "  ${GREEN}→${NC} Launcher 'Todos os Apps' (Plank → GNOME Apps view)"
 
-# Wrapper script: abre o overview de apps via gdbus (GNOME Shell)
+# Wrapper script: abre o overview de apps via vários métodos.
+# GNOME 46+ desativa org.gnome.Shell.Eval por segurança em release builds
+# (retorna OK mas não executa). Por isso o wrapper tenta múltiplas
+# abordagens em fallback até uma funcionar.
 $SUDO tee /usr/local/bin/tmjos-show-apps > /dev/null << 'EOF'
 #!/bin/sh
-# Abre a Apps View do GNOME Shell (mesma tela do Activities → Apps grid).
-# Usa Eval do GNOME Shell — disponível por default no Ubuntu desktop.
+# Abre a Apps View do GNOME Shell. Tenta:
+#  1. xdotool key Super (works no X11 — abre overview, depois App grid)
+#  2. ydotool key Super (works no Wayland se ydotool tá rodando)
+#  3. gdbus Eval (works em GNOME ≤ 45)
+#  4. dbus-send pra org.gnome.Shell ShowApplications
+
+# Detecta sessão
+SESSION_TYPE="${XDG_SESSION_TYPE:-x11}"
+
+# Método 1+2: simular tecla Super (mostra Activities + abre App grid após)
+if [ "$SESSION_TYPE" = "x11" ] && command -v xdotool >/dev/null 2>&1; then
+    xdotool key Super 2>/dev/null && exit 0
+fi
+if [ "$SESSION_TYPE" = "wayland" ] && command -v ydotool >/dev/null 2>&1; then
+    ydotool key 125:1 125:0 2>/dev/null && exit 0  # 125 = Super_L
+fi
+
+# Método 3: GNOME Shell Eval (legacy, mas tenta)
 gdbus call --session \
     --dest org.gnome.Shell \
     --object-path /org/gnome/Shell \
     --method org.gnome.Shell.Eval \
     "Main.overview.dash.showAppsButton.checked = true; Main.overview.show();" \
-    >/dev/null 2>&1 || true
+    >/dev/null 2>&1 && exit 0
+
+# Método 4: dbus-send via interface ShowApplications (GNOME ≥ 46)
+dbus-send --session --print-reply=literal \
+    --dest=org.gnome.Shell \
+    /org/gnome/Shell \
+    org.gnome.Shell.ShowApplications \
+    >/dev/null 2>&1 && exit 0
+
+# Último recurso: abre Files com apps:// URI (só lista mas não é o ideal)
+xdg-open "applications:///" 2>/dev/null || true
 EOF
 $SUDO chmod +x /usr/local/bin/tmjos-show-apps
 
