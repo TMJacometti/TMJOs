@@ -1,3 +1,20 @@
+tmjpad (0.1.2-1) noble; urgency=medium
+
+  * Fix: TMJPad icon not appearing in v1.3.0-1 ISO despite gtk-update-icon-cache.
+    Root cause: hicolor icon-theme.cache can be stale on live-CD boot
+    (squashfs is read-only, cache rebuild from postinst doesn't always
+    propagate to the running gnome-shell instance).
+  * Solution: install the icon in 3 paths for maximum fallback coverage:
+      - /usr/share/icons/hicolor/512x512/apps/tmjpad.png (matches the
+        real 1024×1024 source asset; 512 is the largest standard
+        hicolor bucket)
+      - /usr/share/icons/hicolor/256x256/apps/tmjpad.png (legacy)
+      - /usr/share/pixmaps/tmjpad.png — XDG fallback path that is
+        ALWAYS consulted by Icon=name lookups regardless of cache state.
+    The pixmaps fallback is what fixes the live-CD case.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 22:05:00 -0300
+
 tmjpad (0.1.1-1) noble; urgency=medium
 
   * First .deb-packaged release.

@@ -1,0 +1,29 @@
+Source: tmjos-installer
+Section: admin
+Priority: optional
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/TMJacometti/TMJOs
+
+Package: tmjos-installer
+Architecture: all
+Depends: ${misc:Depends},
+         ubiquity,
+         ubiquity-frontend-gtk
+Description: Ubuntu graphical installer (ubiquity) configured for TMJOs
+ Ensures the TMJOs live-CD ships with a working graphical installer.
+ Ubuntu 24.04's default install path is snapd-based, which TMJOs
+ removes via "Slim Aggressive". This package pulls in the classic
+ deb-based ubiquity installer + GTK frontend, plus a desktop entry
+ (delegated to ubiquity's own) so users can install TMJOs to disk
+ from the live session.
+ .
+ Slideshow component (ubiquity-slideshow-ubuntu) is intentionally
+ NOT a dependency: it requires WebKit2GTK, which TMJOs slims out.
+ The installer works fine without it (just no marketing carousel
+ during the copy phase).
+ .
+ Postinst cleans /root/.config/pulse and /root/.cache: stray
+ PulseAudio runtime sockets there cause permission-denied errors
+ when ubiquity rsyncs the live filesystem to the target disk.

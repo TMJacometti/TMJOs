@@ -168,6 +168,12 @@ $SUDO apt autoclean -y
 $SUDO rm -rf /tmp/* /var/tmp/* 2>/dev/null || true
 $SUDO rm -rf /var/lib/apt/lists/* 2>/dev/null || true
 
+# Sockets/cookies do PulseAudio em /root/.config/pulse fazem o
+# ubiquity quebrar com "permission denied" no rsync pro target disk.
+# tmjos-installer postinst já cuida disso, mas garantir aqui também
+# protege contra qualquer pacote que rode pulseaudio depois.
+$SUDO rm -rf /root/.config/pulse /root/.cache/pulse 2>/dev/null || true
+
 # ===========================================
 # VERIFICAÇÃO
 # ===========================================

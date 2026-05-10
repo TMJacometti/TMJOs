@@ -32,6 +32,17 @@ override_dh_auto_install:
 	mkdir -p debian/tmjpad/usr/share/applications
 	cp vendor/tmjpad.desktop debian/tmjpad/usr/share/applications/
 
-	# Icon → /usr/share/icons/hicolor/256x256/apps/tmjpad.png
+	# Icon — installed in multiple paths for maximum fallback coverage:
+	#   1. hicolor 512x512 (real PNG size is 1024x1024, but 512 is the
+	#      largest standard hicolor bucket — GTK downscales).
+	#   2. hicolor 256x256 (older lookup paths).
+	#   3. /usr/share/pixmaps/ — XDG fallback. ALWAYS consulted by
+	#      Icon=name desktop entries even if hicolor cache is stale,
+	#      which is the failure mode we hit on v1.3.0-1 (icon file
+	#      present but GNOME shows generic fallback).
+	mkdir -p debian/tmjpad/usr/share/icons/hicolor/512x512/apps
+	cp vendor/tmjpad.png debian/tmjpad/usr/share/icons/hicolor/512x512/apps/
 	mkdir -p debian/tmjpad/usr/share/icons/hicolor/256x256/apps
 	cp vendor/tmjpad.png debian/tmjpad/usr/share/icons/hicolor/256x256/apps/
+	mkdir -p debian/tmjpad/usr/share/pixmaps
+	cp vendor/tmjpad.png debian/tmjpad/usr/share/pixmaps/tmjpad.png
