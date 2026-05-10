@@ -18,7 +18,9 @@ TMJOs é uma distribuição Linux customizada baseada em **Ubuntu 24.04 LTS**, c
 - **🎨 Interface Limpa**: GNOME desktop customizado, sem bloat
 - **🍎 Dock estilo Mac**: Plank dock na barra inferior (tipo macOS)
 - **💻 Pronto para Código**: VSCode, Git e Docker pré-instalados
-- **⚡ Slim & Rápido**: ~2.5GB ISO, boot rápido
+- **📝 TMJPad**: editor de texto nativo com persistência total — fechou e reabriu, suas abas voltam exatamente como estavam
+- **🐉 Identidade Própria**: branding completo (wallpapers, logo, dark mode, identidade do sistema em `/etc/os-release`)
+- **⚡ Slim & Rápido**: ~3GB ISO, boot rápido
 - **🔧 Desenvolvedor-Friendly**: Otimizado para devs
 - **❤️ Open Source**: Totalmente gratuito e comunidade-driven
 
@@ -66,8 +68,8 @@ docker --version   # Docker
 │                                                      │
 │                                                      │
 ├──────────────────────────────────────────────────────┤
-│    📁    📝    💻    ⚙️    ℹ️                      │
-│  Files VSCode Terminal Settings About              │
+│    ⚙️    📁    💻    📝    🖥️                       │
+│ Settings Files VSCode TMJPad Terminal              │
 └──────────────────────────────────────────────────────┘
 ```
 
@@ -88,16 +90,28 @@ docker --version   # Docker
 - **Icons**: Adwaita (minimalista)
 
 ### Development Tools
-- **VSCode** - Editor de código avançado
-- **Git** - Controle de versão
-- **Docker** - Containerização
+- **VSCode** - Editor de código avançado (do repo oficial Microsoft)
+- **Git + git-flow** - Controle de versão
+- **Docker + docker-compose** - Containerização
+- **build-essential** - GCC, make, libs de build
 - **curl/wget** - Download tools
-- **vim/nano** - Editors
+- **vim/nano** - Editors no terminal
+- **Python 3 + GTK4 + libadwaita** - Stack pra apps GNOME
+
+### Apps Próprios TMJOs
+- **[TMJPad](apps/tmjpad/)** - Editor de texto sem frescura, persistência total das abas
+  (fecha-abre, tudo volta), dark mode, atalhos padrão. Comando: `tmjpad`
+
+### Network & Diagnostics
+- **dnsutils** - `nslookup`, `dig`, `host`
+- **net-tools** - `ifconfig`, `netstat`, `route`
+- **traceroute** - `traceroute`
+- **htop, neofetch** - System monitor + flex
 
 ### Utilities
 - **Files** (Nautilus) - Gerenciador de arquivos
 - **Terminal** - GNOME Terminal
-- **GNOME Tweaks** - Customizações
+- **GNOME Tweaks + dconf-editor** - Customizações
 - **Settings** - Configurações do sistema
 
 ---
@@ -148,6 +162,7 @@ qemu-system-x86_64 -cdrom ~/tmjos-build/output/tmjos-*.iso -m 4G
 - **[docs/BUILD.md](docs/BUILD.md)** - Guia passo-a-passo de build
 - **[docs/CHECKLIST.md](docs/CHECKLIST.md)** - Checklist de criação
 - **[docs/DESIGN.md](docs/DESIGN.md)** - Referência visual & branding
+- **[apps/tmjpad/README.md](apps/tmjpad/README.md)** - TMJPad (editor de texto)
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Como contribuir
 - **[CHANGELOG.md](CHANGELOG.md)** - Histórico de versões
 
@@ -193,24 +208,31 @@ git push origin feature/sua-feature
 
 ### ✅ v1.0 (Current)
 - [x] Base GNOME limpa
-- [x] Plank dock (tipo Mac)
+- [x] Plank dock (tipo Mac) com autostart system-wide
 - [x] VSCode, Git, Docker
-- [x] ISO slim (~2.5GB)
+- [x] **TMJPad** — editor de texto nativo com persistência total
+- [x] Wallpaper oficial TMJOs (com dragão)
+- [x] Logo TMJOs em SVG (3 variantes)
+- [x] Dark mode default + dconf system-wide
+- [x] Identidade própria (`/etc/os-release`, `/etc/lsb-release`)
+- [x] ISO ~3GB
 - [x] Documentação completa
 
 ### 🔄 v1.1 (Próxima)
-- [ ] Tema GNOME customizado
-- [ ] Wallpaper oficial TMJOs
-- [ ] Ícones customizados
+- [ ] Plymouth boot splash com logo TMJOs
 - [ ] GRUB theme personalizado
-- [ ] Boot splash screen
+- [ ] GDM (login screen) com wallpaper TMJOs
+- [ ] Ícones customizados (theme TMJOs)
+- [ ] Empacotamento `.deb` do TMJPad
+- [ ] TMJPad: Find & Replace (Ctrl+F, Ctrl+H)
+- [ ] TMJPad: ícone próprio (não o do TMJOs)
 
 ### 🚀 v2.0 (Futuro)
-- [ ] TMJCode (VSCode customizado)
-- [ ] Repo oficial de pacotes
+- [ ] TMJCode (VSCode customizado com tema TMJOs)
+- [ ] Repo APT oficial (`packages.tmjos.dev`)
 - [ ] Website oficial
-- [ ] Community forums
-- [ ] Release cycles
+- [ ] Sistema de release automatizado (GitHub Actions)
+- [ ] Multi-arch builds (arm64)
 
 ---
 
