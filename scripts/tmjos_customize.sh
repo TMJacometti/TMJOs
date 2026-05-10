@@ -144,13 +144,27 @@ echo -e "  ${GREEN}→${NC} Wallpaper"
 $SUDO mkdir -p /usr/share/backgrounds/tmjos
 $SUDO cp "$TMJOS_SRC"/assets/wallpapers/tmjos_wallpaper.png /usr/share/backgrounds/tmjos/
 
-# 6b) Logo (icon theme + pixmaps fallback). PNG-only since the v1.1 logo
-# came from Nano Banana as a 1024x1024 PNG. SVG fallback was deprecated
-# when we switched to the dragon-and-gear hand-illustrated style.
-echo -e "  ${GREEN}→${NC} Logo"
-$SUDO mkdir -p /usr/share/icons/hicolor/512x512/apps /usr/share/pixmaps
-$SUDO cp "$TMJOS_SRC"/assets/logos/tmjos_logo.png /usr/share/icons/hicolor/512x512/apps/tmjos.png
-$SUDO cp "$TMJOS_SRC"/assets/logos/tmjos_logo.png /usr/share/pixmaps/tmjos.png
+# 6b) Logo — 3 variantes do Nano Banana (Circular, Rounded, Square).
+# Rounded = app icon principal (estilo macOS/iOS).
+# Circular e Square ficam disponíveis pra outros usos (avatar, banner).
+echo -e "  ${GREEN}→${NC} Logos (3 variantes)"
+$SUDO mkdir -p \
+    /usr/share/icons/hicolor/512x512/apps \
+    /usr/share/icons/tmjos \
+    /usr/share/pixmaps
+
+# App icon principal: usa o Rounded (combina com tema GNOME app icons)
+$SUDO cp "$TMJOS_SRC"/assets/logos/TMJOs_Logo_Rounded.png \
+    /usr/share/icons/hicolor/512x512/apps/tmjos.png
+$SUDO cp "$TMJOS_SRC"/assets/logos/TMJOs_Logo_Rounded.png \
+    /usr/share/pixmaps/tmjos.png
+
+# Variantes adicionais em /usr/share/icons/tmjos/ pra apps que queiram
+# escolher (about dialog redondo, banner, etc)
+$SUDO cp "$TMJOS_SRC"/assets/logos/TMJOs_Logo_Circular.png /usr/share/icons/tmjos/
+$SUDO cp "$TMJOS_SRC"/assets/logos/TMJOs_Logo_Rounded.png  /usr/share/icons/tmjos/
+$SUDO cp "$TMJOS_SRC"/assets/logos/TMJOs_Logo_Square.png   /usr/share/icons/tmjos/
+
 # Refresh icon cache (silencia warnings se hicolor não tiver index)
 $SUDO gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
 
@@ -446,6 +460,9 @@ check_file() {
 check_file "Wallpaper TMJOs" "/usr/share/backgrounds/tmjos/tmjos_wallpaper.png"
 check_file "Logo PNG (icon theme)" "/usr/share/icons/hicolor/512x512/apps/tmjos.png"
 check_file "Logo PNG (pixmaps)" "/usr/share/pixmaps/tmjos.png"
+check_file "Logo Rounded variant" "/usr/share/icons/tmjos/TMJOs_Logo_Rounded.png"
+check_file "Logo Circular variant" "/usr/share/icons/tmjos/TMJOs_Logo_Circular.png"
+check_file "Logo Square variant" "/usr/share/icons/tmjos/TMJOs_Logo_Square.png"
 check_file "/etc/os-release TMJOs" "/etc/os-release"
 check_file "Plank autostart" "/etc/xdg/autostart/plank.desktop"
 check_file "dconf defaults" "/etc/dconf/db/local.d/00-tmjos-defaults"
