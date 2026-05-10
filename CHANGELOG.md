@@ -8,8 +8,8 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 ## [Unreleased]
 
 ### Planejado (v1.1)
-- Plymouth boot splash com logo TMJOs (atualmente usa tema 'spinner' neutro)
 - GRUB theme personalizado (atualmente: GRUB_DISTRIBUTOR='TMJOs', visual default)
+- Plymouth: progress bar animada (atualmente: logo com breathing glow)
 - GDM (login screen) com wallpaper TMJOs
 - **Regenerar wallpaper + logo:** v1.0 tem ambiguidade visual (parece
   "TM T JOs" por causa do T grande central separando "TM" e "JOs").

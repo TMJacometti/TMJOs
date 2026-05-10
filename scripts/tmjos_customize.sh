@@ -375,15 +375,18 @@ if [ -f /etc/default/grub ]; then
         || echo -e "    ${YELLOW}(update-grub falhou no chroot, vai rodar no install)${NC}"
 fi
 
-# Plymouth — troca pro tema 'spinner' (neutro, sem branding Ubuntu).
-# Pra v1.1 a ideia é fazer um tema TMJOs custom com logo + animação.
+# Plymouth — instala tema TMJOs custom (logo + breathing animation)
+echo -e "  ${GREEN}→${NC} Plymouth tema TMJOs (logo no boot splash)"
+$SUDO mkdir -p /usr/share/plymouth/themes/tmjos
+$SUDO cp -r "$TMJOS_SRC"/assets/plymouth/tmjos/. /usr/share/plymouth/themes/tmjos/
+
 if command -v plymouth-set-default-theme >/dev/null 2>&1; then
-    if plymouth-set-default-theme --list 2>/dev/null | grep -qx 'spinner'; then
-        $SUDO plymouth-set-default-theme -R spinner 2>/dev/null \
-            && echo -e "    ${GREEN}plymouth: spinner (neutro)${NC}" \
-            || echo -e "    ${YELLOW}(plymouth -R falhou no chroot, vai aplicar no install)${NC}"
+    if plymouth-set-default-theme --list 2>/dev/null | grep -qx 'tmjos'; then
+        $SUDO plymouth-set-default-theme -R tmjos 2>/dev/null \
+            && echo -e "    ${GREEN}plymouth: TMJOs theme ativo${NC}" \
+            || echo -e "    ${YELLOW}(plymouth -R falhou no chroot, vai regenerar no install)${NC}"
     else
-        echo -e "    ${YELLOW}(plymouth: tema 'spinner' não disponível)${NC}"
+        echo -e "    ${YELLOW}(plymouth: tema 'tmjos' não foi reconhecido após copy)${NC}"
     fi
 fi
 
@@ -463,6 +466,8 @@ check_file "Logo PNG (pixmaps)" "/usr/share/pixmaps/tmjos.png"
 check_file "Logo Rounded variant" "/usr/share/icons/tmjos/TMJOs_Logo_Rounded.png"
 check_file "Logo Circular variant" "/usr/share/icons/tmjos/TMJOs_Logo_Circular.png"
 check_file "Logo Square variant" "/usr/share/icons/tmjos/TMJOs_Logo_Square.png"
+check_file "Plymouth theme dir" "/usr/share/plymouth/themes/tmjos/tmjos.plymouth"
+check_file "Plymouth logo" "/usr/share/plymouth/themes/tmjos/logo.png"
 check_file "/etc/os-release TMJOs" "/etc/os-release"
 check_file "Plank autostart" "/etc/xdg/autostart/plank.desktop"
 check_file "dconf defaults" "/etc/dconf/db/local.d/00-tmjos-defaults"
