@@ -1,0 +1,14 @@
+tmjos-branding (1.3.0-1) noble; urgency=low
+
+  * Initial .deb release. Contains the visual assets that v1.2 ISO
+    installed via cp in customize.sh:
+      - Wallpapers (1920x1080 + 4K) in /usr/share/backgrounds/tmjos/
+      - 3 logo variants in /usr/share/icons/tmjos/, Rounded as system
+        "tmjos" icon
+      - Plymouth theme TMJOs (script + logo + loading + watermark)
+  * postinst: refresh icon cache, set Plymouth default, regenerate
+    initramfs.
+  * Versioned as 1.3.0 to align with the metapackage release this
+    package belongs to.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 18:30:00 -0300

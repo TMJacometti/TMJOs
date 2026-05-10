@@ -1,0 +1,23 @@
+#!/bin/sh
+# postrm do tmjos-branding — desfaz alternatives + cache refresh
+set -e
+
+case "$1" in
+    remove|purge)
+        if command -v update-alternatives >/dev/null 2>&1; then
+            update-alternatives --remove default.plymouth \
+                /usr/share/plymouth/themes/tmjos/tmjos.plymouth \
+                2>/dev/null || true
+        fi
+        if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+            gtk-update-icon-cache --quiet --force /usr/share/icons/hicolor || true
+        fi
+        if command -v update-initramfs >/dev/null 2>&1; then
+            update-initramfs -u 2>/dev/null || true
+        fi
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
