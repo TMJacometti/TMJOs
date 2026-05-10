@@ -25,6 +25,7 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - GNOME Tweaks + dconf-editor
 - Extensões GNOME (gnome-shell-extensions)
 - Ferramentas utilitárias: curl, wget, htop, neofetch, vim, nano, build-essential
+- Ferramentas de rede: dnsutils (nslookup, dig, host), net-tools, traceroute
 - Script automatizado de customização (`scripts/tmjos_customize.sh`)
 - Documentação completa de build (`docs/BUILD.md`)
 - Checklist passo-a-passo de criação (`docs/CHECKLIST.md`)

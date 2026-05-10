@@ -126,7 +126,8 @@ $SUDO apt install -y gnome-shell-extensions gnome-shell-extension-manager
 
 # Ferramentas utilitárias
 echo -e "  Instalando: ${GREEN}Ferramentas utilitárias${NC}"
-$SUDO apt install -y curl wget htop neofetch vim nano build-essential
+$SUDO apt install -y curl wget htop neofetch vim nano build-essential \
+    dnsutils net-tools traceroute
 
 # ===========================================
 # FASE 5: CONFIGURAR PLANK (DOCK)
