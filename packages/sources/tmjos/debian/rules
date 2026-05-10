@@ -1,0 +1,7 @@
+#!/usr/bin/make -f
+
+# Metapackage — sem files instalados, só dependências.
+# debhelper sequence é suficiente.
+
+%:
+	dh $@

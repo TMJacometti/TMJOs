@@ -1,0 +1,11 @@
+tmjos (1.3.0-1) noble; urgency=medium
+
+  * Initial metapackage release.
+  * Depends on the five tmjos-* core packages + tmjpad.
+  * Recommends mirror the v1.2 ISO's preinstalled set (VSCode, Docker,
+    Git, fonts, network tools, etc).
+  * `sudo apt install tmjos` on a base Ubuntu 24.04 turns it into
+    TMJOs. `sudo apt upgrade tmjos` pulls latest versions of every
+    component — the v1.3 update mechanism in one command.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 19:45:00 -0300
