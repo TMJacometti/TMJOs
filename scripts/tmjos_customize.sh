@@ -458,16 +458,26 @@ if [ -L /etc/alternatives/default.plymouth ]; then
     echo -e "    default.plymouth → $target"
 fi
 
-# 2) Regenerate initramfs explicitly. Cubic mounts /proc /sys /dev no
-# chroot, então update-initramfs deve funcionar — mas se não funcionar,
-# o Cubic regenera o casper initrd na hora de gerar a ISO usando a
-# config atual de /etc/alternatives, então o tema ainda aparece.
-echo -e "    regenerating initramfs..."
-if $SUDO update-initramfs -u -k all 2>&1 | tail -3 | sed 's/^/    /'; then
-    echo -e "    ${GREEN}initramfs OK${NC}"
-else
-    echo -e "    ${YELLOW}(update-initramfs falhou — Cubic regenera no ISO build)${NC}"
+# 2) Garantir que arquivos do tema têm permissão correta
+$SUDO chmod -R a+rX /usr/share/plymouth/themes/tmjos
+
+# 3) Regenerate initramfs verbosely. Cubic mounts /proc /sys /dev no chroot.
+echo -e "    regenerating initramfs (verbose)..."
+$SUDO update-initramfs -u -k all 2>&1 | sed 's/^/    [initramfs] /' || true
+
+# 4) Sanity check: o tema tmjos chegou no initrd?
+echo -e "    verifying initramfs contains tmjos theme..."
+INITRD_PATH=$(find /boot -maxdepth 1 -name 'initrd.img-*' -print -quit 2>/dev/null)
+if [ -n "$INITRD_PATH" ] && command -v lsinitramfs >/dev/null 2>&1; then
+    if $SUDO lsinitramfs "$INITRD_PATH" 2>/dev/null | grep -q "plymouth/themes/tmjos"; then
+        echo -e "    ${GREEN}✓ tmjos theme found in $(basename "$INITRD_PATH")${NC}"
+    else
+        echo -e "    ${RED}✗ tmjos theme NOT in initrd — Plymouth will fall back to Ubuntu!${NC}"
+        echo -e "    ${YELLOW}contents of $INITRD_PATH (plymouth section):${NC}"
+        $SUDO lsinitramfs "$INITRD_PATH" 2>/dev/null | grep -i plymouth | sed 's/^/      /' || echo "      (no plymouth files)"
+    fi
 fi
+
 # update-grub já foi rodado na seção GRUB acima (linha ~373), não duplicar.
 
 # ===========================================

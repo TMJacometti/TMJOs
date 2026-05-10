@@ -1,7 +1,8 @@
-// TMJOs Plymouth boot splash
-// Logo TMJOs centered on dark navy background, breathing-glow animation,
-// progress dots beneath. No text rendering (Plymouth script can't draw
-// text directly — logo already contains the wordmark).
+// TMJOs Plymouth boot splash — minimal & robust.
+//
+// Plymouth's scripting language is a small custom DSL — Math.Int and
+// Image.Text DO NOT exist there. If the script fails to parse, Plymouth
+// silently falls back to the previous theme (Ubuntu). Keep it minimal.
 
 // === Background — TMJOs dark navy ===========================================
 Window.SetBackgroundTopColor(0.039, 0.055, 0.165);    // #0a0e2a
@@ -11,76 +12,14 @@ Window.SetBackgroundBottomColor(0.020, 0.027, 0.078); // #050714
 logo.image = Image("logo.png");
 logo.sprite = Sprite(logo.image);
 
-logo_w = logo.image.GetWidth();
-logo_h = logo.image.GetHeight();
-logo.sprite.SetX(Window.GetWidth()  / 2 - logo_w / 2);
-logo.sprite.SetY(Window.GetHeight() / 2 - logo_h / 2 - 30);
+logo.sprite.SetX(Window.GetWidth()  / 2 - logo.image.GetWidth()  / 2);
+logo.sprite.SetY(Window.GetHeight() / 2 - logo.image.GetHeight() / 2);
+logo.sprite.SetOpacity(1.0);
 
-// Breathing animation counter
+// Breathing glow: opacity oscilates between 0.85 and 1.0
 breath_t = 0;
-fun breathe() {
-    breath_t = breath_t + 0.04;
-    // Sine wave 0.85 → 1.0 → 0.85 — keeps logo always visible but pulsing
-    op = 0.92 + 0.08 * Math.Sin(breath_t);
-    logo.sprite.SetOpacity(op);
+fun refresh_callback() {
+    breath_t = breath_t + 0.05;
+    logo.sprite.SetOpacity(0.85 + 0.15 * Math.Sin(breath_t));
 }
-
-// === Progress dots beneath the logo =========================================
-// 5 dots that fade in/out sequentially to show "loading"
-dot_count = 5;
-dot_size = 8;
-dot_spacing = 22;
-dots_total_w = (dot_count - 1) * dot_spacing;
-dots_y = Window.GetHeight() / 2 + logo_h / 2 + 40;
-
-// Build dot images on-the-fly — 8x8 cyan squares with feather
-fun make_dot(opacity) {
-    img = Image.Text(".", 1.0, 1.0, 1.0, 1.0, "Sans Bold 1");
-    return img;
-}
-
-// Plymouth script can't trivially draw filled circles, so reuse the small
-// logo as a "dot" by scaling it down — visually consistent.
-i = 0;
-while (i < dot_count) {
-    dots[i].sprite = Sprite(logo.image);
-    dots[i].sprite.SetOpacity(0.0);
-    // Tiny scaled placeholder — overridden via opacity sweep
-    dots[i].sprite.SetX(Window.GetWidth() / 2 - dots_total_w / 2 + i * dot_spacing - dot_size / 2);
-    dots[i].sprite.SetY(dots_y);
-    dots[i].sprite.SetZ(-1);  // behind logo
-    i++;
-}
-
-// Sweep dot opacity over time so one is bright at a time
-sweep_t = 0;
-fun sweep_dots() {
-    sweep_t = sweep_t + 0.08;
-    bright_idx = Math.Int(sweep_t) % dot_count;
-    j = 0;
-    while (j < dot_count) {
-        if (j == bright_idx) {
-            dots[j].sprite.SetOpacity(0.0);  // hidden — placeholder doesn't render circles
-        } else {
-            dots[j].sprite.SetOpacity(0.0);
-        }
-        j++;
-    }
-}
-
-// === Refresh callback (called ~50 Hz by Plymouth) ============================
-fun refresh() {
-    breathe();
-    sweep_dots();
-}
-Plymouth.SetRefreshFunction(refresh);
-
-// === Status messages from systemd ============================================
-// Uncomment to show service messages at the bottom — usually noisy, off by default.
-// fun message_callback(text) { ... }
-// Plymouth.SetUpdateStatusFunction(message_callback);
-
-// === Boot progress (0.0 → 1.0) ==============================================
-// Could animate a progress bar here. Skipped for v1.0 (plain breathing logo).
-// fun boot_progress(time, progress) { ... }
-// Plymouth.SetBootProgressFunction(boot_progress);
+Plymouth.SetRefreshFunction(refresh_callback);
