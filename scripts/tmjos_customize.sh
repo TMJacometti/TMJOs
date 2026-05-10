@@ -139,17 +139,18 @@ git clone --depth 1 --branch "$TMJOS_BRANCH" "$TMJOS_REPO" "$TMJOS_SRC"
 
 echo -e "${YELLOW}[6/8] Aplicando branding TMJOs...${NC}"
 
-# 6a) Wallpapers
-echo -e "  ${GREEN}→${NC} Wallpapers"
+# 6a) Wallpaper
+echo -e "  ${GREEN}→${NC} Wallpaper"
 $SUDO mkdir -p /usr/share/backgrounds/tmjos
-$SUDO cp "$TMJOS_SRC"/assets/wallpapers/*.png /usr/share/backgrounds/tmjos/
+$SUDO cp "$TMJOS_SRC"/assets/wallpapers/tmjos_wallpaper.png /usr/share/backgrounds/tmjos/
 
-# 6b) Logo (icon theme + pixmaps fallback)
+# 6b) Logo (icon theme + pixmaps fallback). PNG-only since the v1.1 logo
+# came from Nano Banana as a 1024x1024 PNG. SVG fallback was deprecated
+# when we switched to the dragon-and-gear hand-illustrated style.
 echo -e "  ${GREEN}→${NC} Logo"
-$SUDO mkdir -p /usr/share/icons/hicolor/scalable/apps /usr/share/pixmaps
-$SUDO cp "$TMJOS_SRC"/assets/logos/logo.svg /usr/share/icons/hicolor/scalable/apps/tmjos.svg
-$SUDO cp "$TMJOS_SRC"/assets/logos/icon.svg /usr/share/icons/hicolor/scalable/apps/tmjos-symbolic.svg
-$SUDO cp "$TMJOS_SRC"/assets/logos/logo.svg /usr/share/pixmaps/tmjos.svg
+$SUDO mkdir -p /usr/share/icons/hicolor/512x512/apps /usr/share/pixmaps
+$SUDO cp "$TMJOS_SRC"/assets/logos/tmjos_logo.png /usr/share/icons/hicolor/512x512/apps/tmjos.png
+$SUDO cp "$TMJOS_SRC"/assets/logos/tmjos_logo.png /usr/share/pixmaps/tmjos.png
 # Refresh icon cache (silencia warnings se hicolor não tiver index)
 $SUDO gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
 
@@ -195,13 +196,13 @@ EOF
 
 $SUDO tee /etc/dconf/db/local.d/00-tmjos-defaults > /dev/null << 'EOF'
 [org/gnome/desktop/background]
-picture-uri='file:///usr/share/backgrounds/tmjos/TMJOs_Wallpaper.png'
-picture-uri-dark='file:///usr/share/backgrounds/tmjos/TMJOs_Wallpaper.png'
+picture-uri='file:///usr/share/backgrounds/tmjos/tmjos_wallpaper.png'
+picture-uri-dark='file:///usr/share/backgrounds/tmjos/tmjos_wallpaper.png'
 picture-options='zoom'
 primary-color='#0a0e2a'
 
 [org/gnome/desktop/screensaver]
-picture-uri='file:///usr/share/backgrounds/tmjos/TMJOs_Wallpaper.png'
+picture-uri='file:///usr/share/backgrounds/tmjos/tmjos_wallpaper.png'
 picture-options='zoom'
 
 [org/gnome/desktop/interface]
@@ -411,8 +412,9 @@ check_file() {
     fi
 }
 
-check_file "Wallpaper TMJOs" "/usr/share/backgrounds/tmjos/TMJOs_Wallpaper.png"
-check_file "Logo SVG" "/usr/share/icons/hicolor/scalable/apps/tmjos.svg"
+check_file "Wallpaper TMJOs" "/usr/share/backgrounds/tmjos/tmjos_wallpaper.png"
+check_file "Logo PNG (icon theme)" "/usr/share/icons/hicolor/512x512/apps/tmjos.png"
+check_file "Logo PNG (pixmaps)" "/usr/share/pixmaps/tmjos.png"
 check_file "/etc/os-release TMJOs" "/etc/os-release"
 check_file "Plank autostart" "/etc/xdg/autostart/plank.desktop"
 check_file "dconf defaults" "/etc/dconf/db/local.d/00-tmjos-defaults"
