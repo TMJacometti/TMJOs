@@ -4,7 +4,8 @@
 	dh $@
 
 override_dh_auto_install:
-	# Drop a snippet of CSS that postinst appends to the Yaru theme(s)
-	mkdir -p debian/tmjos-shell-tweaks/usr/share/tmjos-shell-tweaks
-	install -m644 files/hide-activities.css \
-		debian/tmjos-shell-tweaks/usr/share/tmjos-shell-tweaks/hide-activities.css
+	# Extension goes to system-wide GNOME Shell extensions dir
+	EXT_DIR=debian/tmjos-shell-tweaks/usr/share/gnome-shell/extensions/tmjos-tweaks@tmjos.local; \
+	mkdir -p "$$EXT_DIR"; \
+	install -m644 files/extension/metadata.json "$$EXT_DIR/metadata.json"; \
+	install -m644 files/extension/extension.js  "$$EXT_DIR/extension.js"

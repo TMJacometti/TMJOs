@@ -1,8 +1,29 @@
+tmjos-shell-tweaks (1.3.0-3) noble; urgency=medium
+
+  * Replace failed CSS hack with a 4-line GJS extension.
+  * 1.3.0-1's approach (dpkg-divert on Yaru CSS) didn't actually
+    hide the button on GNOME 46 — panel selectors changed. The
+    extension calls Main.panel.statusArea.activities.hide() instead,
+    which works regardless of theme.
+  * Extension installed at /usr/share/gnome-shell/extensions/
+    tmjos-tweaks@tmjos.local/, enabled by tmjos-defaults's dconf
+    override.
+  * postinst migrates from 1.3.0-1: undoes the dpkg-divert on Yaru
+    files so the upstream theme contents return.
+  * Note on safety: GJS extensions are sandboxed by gnome-shell
+    (no network, no exec, no filesystem outside GNOME APIs). The
+    full source is in /usr/share/gnome-shell/extensions/
+    tmjos-tweaks@tmjos.local/extension.js — auditable in 30 seconds.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 21:30:00 -0300
+
 tmjos-shell-tweaks (1.3.0-1) noble; urgency=low
 
   * Initial .deb release.
   * Replaces phase 6e.2 of v1.2 customize.sh (CSS hack inline).
   * Uses dpkg-divert pra modificar Yaru theme files de forma reversível
     (original mantido como .tmjos-orig).
+  * (Broken — CSS selector doesn't match GNOME 46 panel. Replaced
+    in 1.3.0-3 with GJS extension + cleanup migration.)
 
  -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 19:30:00 -0300

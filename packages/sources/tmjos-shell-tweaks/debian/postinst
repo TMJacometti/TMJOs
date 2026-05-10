@@ -1,34 +1,25 @@
 #!/bin/sh
-# postinst do tmjos-shell-tweaks — usa dpkg-divert pra modificar
-# arquivos do tema Yaru de forma reversível.
+# postinst do tmjos-shell-tweaks 1.3.0-3 (no-op)
+#
+# Cleanup migration: se a 1.3.0-1 deixou um dpkg-divert no Yaru
+# theme, desfaz pra o upstream voltar a servir o arquivo.
+# Idempotente — não faz nada se a divert já não existe.
+
 set -e
 
-SNIPPET=/usr/share/tmjos-shell-tweaks/hide-activities.css
-
-apply_to() {
+undo_divert() {
     css="$1"
-    [ -f "$css" ] || return 0
-
-    # Marker check — se já aplicado, skip
-    if grep -q "TMJOs hide activities" "$css" 2>/dev/null; then
-        return 0
+    if dpkg-divert --list "$css" 2>/dev/null | grep -q "$css"; then
+        rm -f "$css"
+        dpkg-divert --quiet --local --rename --remove "$css" || true
     fi
-
-    # Divert original out of the way (rename → .tmjos-orig)
-    dpkg-divert --quiet --local --rename \
-        --divert "${css}.tmjos-orig" --add "$css"
-
-    # Restore original content + append our snippet
-    cp "${css}.tmjos-orig" "$css"
-    cat "$SNIPPET" >> "$css"
 }
 
 case "$1" in
     configure)
-        apply_to /usr/share/gnome-shell/theme/Yaru/gnome-shell.css
-        apply_to /usr/share/gnome-shell/theme/Yaru-dark/gnome-shell.css
-        # Yaru baseline (sem -dark) também — alguns sistemas só têm essa
-        apply_to /usr/share/gnome-shell/gnome-shell.css
+        undo_divert /usr/share/gnome-shell/theme/Yaru/gnome-shell.css
+        undo_divert /usr/share/gnome-shell/theme/Yaru-dark/gnome-shell.css
+        undo_divert /usr/share/gnome-shell/gnome-shell.css
         ;;
 esac
 

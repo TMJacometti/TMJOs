@@ -1,3 +1,11 @@
+tmjos-defaults (1.3.0-2) noble; urgency=medium
+
+  * Add 'tmjos-tweaks@tmjos.local' to org.gnome.shell enabled-extensions.
+    This activates the TMJOs Tweaks extension shipped by
+    tmjos-shell-tweaks 1.3.0-3 (hides Activities button via JS).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 21:35:00 -0300
+
 tmjos-defaults (1.3.0-1) noble; urgency=low
 
   * Initial .deb release.
