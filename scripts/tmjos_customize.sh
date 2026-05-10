@@ -124,6 +124,10 @@ $SUDO apt install -y curl wget htop neofetch vim nano build-essential \
 # Python + GTK4 + Adwaita (necessário pro TMJPad)
 $SUDO apt install -y python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
 
+# Fontes — JetBrains Mono é referenciada no dconf default; sem ela o
+# GNOME cai pra fallback feio. Cantarell já vem mas garantimos.
+$SUDO apt install -y fonts-jetbrains-mono fonts-cantarell fonts-noto-color-emoji
+
 # ===========================================
 # FASE 5 — Clonar repo TMJOs (pra pegar assets)
 # ===========================================
@@ -265,7 +269,7 @@ $SUDO tee "$SKEL_PLANK_DIR/settings" > /dev/null << 'EOF'
 alignment='center'
 auto-pinch=false
 current-workspace-only=false
-dock-items=['gnome-control-center.dockitem', 'org.gnome.Nautilus.dockitem', 'code.dockitem', 'tmjpad.dockitem', 'org.gnome.Terminal.dockitem']
+dock-items=['tmjos-show-apps.dockitem', 'gnome-control-center.dockitem', 'org.gnome.Nautilus.dockitem', 'code.dockitem', 'tmjpad.dockitem', 'org.gnome.Terminal.dockitem']
 hide-delay=0
 hide-mode='window-dodge'
 hide-on-focus=false
@@ -281,6 +285,39 @@ show-dock-item=true
 theme='Transparent'
 unhide-delay=0
 use-custom-font=false
+EOF
+
+# 6g.1) Launcher "Todos os Apps" — botão estilo macOS Launchpad que abre
+# o GNOME Activities Apps view. Sem isso, o Plank vira só uma row de
+# pinneds e o usuário não tem ponto de entrada pro app drawer no dock.
+echo -e "  ${GREEN}→${NC} Launcher 'Todos os Apps' (Plank → GNOME Apps view)"
+
+# Wrapper script: abre o overview de apps via gdbus (GNOME Shell)
+$SUDO tee /usr/local/bin/tmjos-show-apps > /dev/null << 'EOF'
+#!/bin/sh
+# Abre a Apps View do GNOME Shell (mesma tela do Activities → Apps grid).
+# Usa Eval do GNOME Shell — disponível por default no Ubuntu desktop.
+gdbus call --session \
+    --dest org.gnome.Shell \
+    --object-path /org/gnome/Shell \
+    --method org.gnome.Shell.Eval \
+    "Main.overview.dash.showAppsButton.checked = true; Main.overview.show();" \
+    >/dev/null 2>&1 || true
+EOF
+$SUDO chmod +x /usr/local/bin/tmjos-show-apps
+
+# .desktop entry — o Plank usa o ID do .desktop como nome do .dockitem
+$SUDO tee /usr/share/applications/tmjos-show-apps.desktop > /dev/null << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Todos os Apps
+GenericName=All Applications
+Comment=Abre a lista de todos os apps instalados
+Exec=/usr/local/bin/tmjos-show-apps
+Icon=view-app-grid-symbolic
+Terminal=false
+Categories=Utility;
+Keywords=apps;launcher;launchpad;overview;
 EOF
 
 # 6h) First-run setup: copia config do Plank pro user atual se ainda não tem.
