@@ -44,6 +44,19 @@ via apt e listados na store.
 
 ## [Backlog v1.3.x] — patches via apt
 
+- **ISO v1.3 não tem installer.** Slim Aggressive remove `snapd`, e em
+  Ubuntu 24.04 o `ubuntu-desktop-installer` (novo Flutter installer) é
+  distribuído como snap. Sem snapd → sem installer. Resultado: usuários
+  bootando live-CD não conseguem instalar TMJOs em disco.
+  Fix planejado: adicionar `ubiquity` (installer clássico Debian, não-snap)
+  ao customize.sh OR criar pacote `tmjos-installer` que Depends ubiquity.
+  Workaround pro user atual no live-CD:
+  ```
+  sudo apt install -y ubiquity ubiquity-frontend-gtk ubiquity-slideshow-ubuntu
+  sudo ubiquity gtk_ui
+  ```
+
+
 - `tmjos-os-identity 1.3.0-3`: trocar `dpkg-divert --rename` por
   `--no-rename` em postinst/postrm. dpkg loga warning sobre
   rename de Essential package — funciona OK mas é boa prática
