@@ -239,8 +239,8 @@ v1.2.0 é o primeiro build com TUDO polido e Find/Replace funcional.
   launcher aparece automaticamente na Plank. Cria os `.dockitem`
   faltantes em `launchers/` no caminho.
 - **Sticky:** `tmjos-show-apps.dockitem` permanece SEMPRE no início.
-- **Unidirecional** (Activities → Plank). A direção contrária
-  (Plank → Activities) precisa de lock anti-loop e fica pra v1.3.
+- **Unidirecional** (Activities → Plank) por design. A direção contrária
+  não faz sentido prático — pin no Plank é via right-click "Keep in Dock".
 - Autostart entry em `/etc/xdg/autostart/tmjos-dock-sync.desktop`.
   - Instalado em `/opt/tmjpad/` com wrapper em `/usr/local/bin/tmjpad`
   - Entry no menu de apps (`/usr/share/applications/tmjpad.desktop`)
