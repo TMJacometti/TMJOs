@@ -1,0 +1,52 @@
+Package: tmjos-hello
+Version: 0.1.0-1
+Architecture: all
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Installed-Size: 10
+Homepage: https://github.com/TMJacometti/TMJOs
+Priority: optional
+Section: utils
+Filename: pool/main/t/tmjos-hello/tmjos-hello_0.1.0-1_all.deb
+Size: 1694
+SHA256: bd978783d07d271ae5c282eb961e395268a172d5b3755e5b4b7f2e04f26cad20
+SHA1: 1baad21987eccfabda31d6d90c153457b67e03cd
+MD5sum: 15756f39b89a26c6e64e3d39840298d8
+Description: TMJOs pipeline smoke test package
+ A trivial "hello world" package that exists only to validate the
+ TMJOs APT repo pipeline end-to-end (build → sign → publish to
+ gh-pages → install via apt on a TMJOs system).
+ .
+ Provides a single command `tmjos-hello` that prints a banner.
+ Safe to keep installed; safe to remove.
+
+Package: tmjpad
+Version: 0.1.1-1
+Architecture: all
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Installed-Size: 1043
+Depends: python3 (>= 3.10), python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1
+Recommends: fonts-jetbrains-mono
+Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjpad
+Priority: optional
+Section: editors
+Filename: pool/main/t/tmjpad/tmjpad_0.1.1-1_all.deb
+Size: 1024372
+SHA256: 5a1c87aa56fdccd163a0e8e494a6225d5198de4b37412a6b54af6fc05aa54508
+SHA1: 466d6ac8eed1fa47825cfec2017096114d701006
+MD5sum: 1b25cadd19ce96966ce70a53f46a9490
+Description: TMJOs text editor with full session persistence
+ TMJPad is the native TMJOs text editor — no plugins, no syntax
+ highlighting, just multiple tabs and total session persistence.
+ .
+ Closing the window saves the state of every tab (including unsaved
+ ones); reopening restores everything exactly as it was. Auto-save
+ of buffers happens on every modification (debounced 500ms), so
+ crashes and forced kills never lose content.
+ .
+ Features:
+   * Multiple tabs (Ctrl+N / Ctrl+W / Ctrl+Tab)
+   * Total session persistence with atomic writes
+   * Find & Replace (Ctrl+F / Ctrl+H)
+   * Dark theme only, JetBrains Mono font
+   * GTK4 + libadwaita native
+

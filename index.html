@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html><head><title>TMJOs APT Repo</title>
+<style>body{font-family:monospace;background:#0a0e2a;color:#e6e6e6;
+max-width:760px;margin:40px auto;padding:0 20px}
+a{color:#00d4ff}h1{color:#00d4ff}code{background:#1a1e3a;
+padding:2px 6px;border-radius:3px}</style></head>
+<body>
+<h1>🐉 TMJOs APT Repo</h1>
+<p>Pacotes oficiais TMJOs assinados com GPG.</p>
+<h2>Setup</h2>
+<pre><code>curl -fsSL https://tmjacometti.github.io/TMJOs/keys/tmjos-archive-keyring.gpg \
+  | sudo tee /usr/share/keyrings/tmjos-archive-keyring.gpg > /dev/null
+echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] \
+  https://tmjacometti.github.io/TMJOs/ noble main' \
+  | sudo tee /etc/apt/sources.list.d/tmjos.list
+sudo apt update</code></pre>
+<h2>Pacotes disponíveis</h2>
+<p>Veja <a href="dists/noble/main/binary-amd64/Packages">Packages</a></p>
+</body></html>

@@ -1,0 +1,8 @@
+Origin: TMJOs
+Label: TMJOs
+Codename: noble
+Suite: stable
+Architectures: amd64 source
+Components: main
+Description: TMJOs custom packages for Ubuntu 24.04 noble
+SignWith: 8691DF2D301C2C43401F5EB7754858E2A58C4363
