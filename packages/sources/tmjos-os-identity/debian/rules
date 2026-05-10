@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	mkdir -p debian/tmjos-os-identity/etc
+	install -m644 files/os-release    debian/tmjos-os-identity/etc/os-release
+	install -m644 files/lsb-release   debian/tmjos-os-identity/etc/lsb-release
+	install -m644 files/issue         debian/tmjos-os-identity/etc/issue
+	install -m644 files/issue.net     debian/tmjos-os-identity/etc/issue.net

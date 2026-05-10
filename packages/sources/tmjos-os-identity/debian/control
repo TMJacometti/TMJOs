@@ -1,0 +1,30 @@
+Source: tmjos-os-identity
+Section: misc
+Priority: optional
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/TMJacometti/TMJOs
+
+Package: tmjos-os-identity
+Architecture: all
+Depends: ${misc:Depends}
+Conflicts: base-files (<< 999~)
+Replaces: base-files (<< 999~)
+Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
+ Replaces the Ubuntu identity files with TMJOs-branded versions:
+  * /etc/os-release    — TMJOs 1.x (insano), shows in GNOME About
+                         and modern tools that read PRETTY_NAME / ID
+  * /etc/lsb-release   — KEPT AS UBUNTU NOBLE intentionally so that
+                         add-apt-repository, NodeJS install scripts,
+                         Docker get.docker.com, k8s setup and every
+                         other "lsb_release -cs"-based script
+                         continues to find a valid Ubuntu codename.
+                         Identity is shown via /etc/os-release; lsb
+                         is for compat.
+  * /etc/issue         — "TMJOs <ver> \n \l" banner shown at TTY login
+  * /etc/issue.net     — same content for telnet/ssh banner
+  * /etc/lsb-release   keeps DISTRIB_ID=Ubuntu (script compatibility)
+ .
+ Conflicts with base-files (the package that normally owns these
+ files in Ubuntu) so dpkg knows to take over the slots cleanly.
