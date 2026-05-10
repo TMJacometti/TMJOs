@@ -1,2 +1,296 @@
-# TMJOs
-Clean Ubuntu 24.04 based OS for developers
+# 🐧 TMJOs Linux Distribution
+
+> **Clean • Minimal • Beautiful** — A customized Ubuntu-based Linux distribution designed for developers.
+
+![TMJOs](https://img.shields.io/badge/version-1.0-blue)
+![License](https://img.shields.io/badge/license-GPLv3-green)
+![Ubuntu](https://img.shields.io/badge/based%20on-Ubuntu%2024.04%20LTS-orange)
+![GNOME](https://img.shields.io/badge/desktop-GNOME-blue)
+
+---
+
+## ✨ O que é TMJOs?
+
+TMJOs é uma distribuição Linux customizada baseada em **Ubuntu 24.04 LTS**, com foco em **minimalismo, beleza e produtividade** para desenvolvedores.
+
+### 🎯 Características Principais
+
+- **🎨 Interface Limpa**: GNOME desktop customizado, sem bloat
+- **🍎 Dock estilo Mac**: Plank dock na barra inferior (tipo macOS)
+- **💻 Pronto para Código**: VSCode, Git e Docker pré-instalados
+- **⚡ Slim & Rápido**: ~2.5GB ISO, boot rápido
+- **🔧 Desenvolvedor-Friendly**: Otimizado para devs
+- **❤️ Open Source**: Totalmente gratuito e comunidade-driven
+
+---
+
+## 🚀 Quick Start
+
+### Download & Install
+
+```bash
+# 1. Baixar ISO
+wget https://github.com/tmjacometti/tmjos/releases/download/v1.0/tmjos-1.0-amd64.iso
+
+# 2. Criar LiveUSB
+sudo dd if=tmjos-1.0-amd64.iso of=/dev/sdX bs=4M status=progress && sync
+
+# 3. Botar pela pen e instalar
+# Seguir o installer padrão do Ubuntu
+```
+
+### Primeira Inicialização
+
+```bash
+# Atualizar sistema (primeira vez)
+sudo apt update && sudo apt upgrade
+
+# Verificar apps instalados
+code --version     # VSCode
+git --version      # Git
+docker --version   # Docker
+```
+
+---
+
+## 📸 Visual Preview
+
+```
+┌──────────────────────────────────────────────────────┐
+│  Activities │ TMJOs ~    │     🕐 │ 🔊 🔋          │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│                                                      │
+│         [Wallpaper Clean - Minimalista]             │
+│                                                      │
+│                                                      │
+│                                                      │
+├──────────────────────────────────────────────────────┤
+│    📁    📝    💻    ⚙️    ℹ️                      │
+│  Files VSCode Terminal Settings About              │
+└──────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📦 O que vem instalado?
+
+### Base System
+- **OS**: Ubuntu 24.04 LTS (jammy)
+- **Kernel**: Linux 6.8+
+- **Init**: systemd
+- **Package Manager**: APT
+
+### Desktop Environment
+- **DE**: GNOME 46+
+- **Dock**: Plank (estilo Mac)
+- **Theme**: Adwaita Dark (customizado)
+- **Icons**: Adwaita (minimalista)
+
+### Development Tools
+- **VSCode** - Editor de código avançado
+- **Git** - Controle de versão
+- **Docker** - Containerização
+- **curl/wget** - Download tools
+- **vim/nano** - Editors
+
+### Utilities
+- **Files** (Nautilus) - Gerenciador de arquivos
+- **Terminal** - GNOME Terminal
+- **GNOME Tweaks** - Customizações
+- **Settings** - Configurações do sistema
+
+---
+
+## 🛠️ Como Construir TMJOs do Zero
+
+### Pré-requisitos
+
+```bash
+# Hardware
+- Mínimo 30GB de espaço em disco
+- 4GB RAM recomendado
+- Ubuntu 24.04 LTS instalado
+
+# Software
+sudo add-apt-repository ppa:cubic-wizard/cubic
+sudo apt update && sudo apt install cubic
+```
+
+### Build Process
+
+```bash
+# 1. Clone este repositório
+git clone https://github.com/tmjacometti/tmjos.git
+cd tmjos
+
+# 2. Abrir Cubic e criar projeto novo
+cubic
+# Project Directory: ~/tmjos-build/project
+# Output Directory:  ~/tmjos-build/output
+
+# 3. Dentro do chroot do Cubic, rodar o script de customização
+bash /caminho/para/scripts/tmjos_customize.sh
+
+# 4. Gerar ISO no Cubic
+# Botão: "Generate ISO"
+
+# 5. Testar em VM antes de gravar pen drive
+qemu-system-x86_64 -cdrom ~/tmjos-build/output/tmjos-*.iso -m 4G
+```
+
+📖 **Guia Detalhado**: Veja [docs/BUILD.md](docs/BUILD.md) e [docs/CHECKLIST.md](docs/CHECKLIST.md)
+
+---
+
+## 📚 Documentação
+
+- **[docs/BUILD.md](docs/BUILD.md)** - Guia passo-a-passo de build
+- **[docs/CHECKLIST.md](docs/CHECKLIST.md)** - Checklist de criação
+- **[docs/DESIGN.md](docs/DESIGN.md)** - Referência visual & branding
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Como contribuir
+- **[CHANGELOG.md](CHANGELOG.md)** - Histórico de versões
+
+---
+
+## 🤝 Como Contribuir
+
+Adoramos contribuições! Seja reportando bugs, sugestões ou código:
+
+### 1. **Fork & Clone**
+```bash
+git clone https://github.com/SEU_FORK/tmjos.git
+cd tmjos
+git checkout -b feature/sua-feature
+```
+
+### 2. **Faça suas mudanças**
+```bash
+# Edite arquivos, customizations, scripts, etc
+# Commit com mensagens claras
+git commit -m "feat: adiciona tema customizado"
+```
+
+### 3. **Push & Pull Request**
+```bash
+git push origin feature/sua-feature
+# Abra um PR no GitHub com descrição detalhada
+```
+
+### Tipos de Contribuição Bem-Vindo
+
+- 🐛 **Bug Reports** - Encontrou um problema?
+- 💡 **Sugestões** - Ideias para melhorias
+- 📝 **Documentação** - Melhorar guias & docs
+- 🎨 **Design** - Temas, wallpapers, ícones
+- 💻 **Código** - Customizações, scripts, ferramentas
+- 🧪 **Testes** - Testar em diferentes hardwares
+- 🌍 **Tradução** - Localizar para outros idiomas
+
+---
+
+## 📋 Roadmap
+
+### ✅ v1.0 (Current)
+- [x] Base GNOME limpa
+- [x] Plank dock (tipo Mac)
+- [x] VSCode, Git, Docker
+- [x] ISO slim (~2.5GB)
+- [x] Documentação completa
+
+### 🔄 v1.1 (Próxima)
+- [ ] Tema GNOME customizado
+- [ ] Wallpaper oficial TMJOs
+- [ ] Ícones customizados
+- [ ] GRUB theme personalizado
+- [ ] Boot splash screen
+
+### 🚀 v2.0 (Futuro)
+- [ ] TMJCode (VSCode customizado)
+- [ ] Repo oficial de pacotes
+- [ ] Website oficial
+- [ ] Community forums
+- [ ] Release cycles
+
+---
+
+## 🐛 Bug Reports & Issues
+
+Encontrou um bug? Abra uma [issue](https://github.com/tmjacometti/tmjos/issues)!
+
+**Template básico:**
+```markdown
+**Descreva o bug:**
+Uma descrição clara do problema.
+
+**Como reproduzir:**
+1. Fazer isso
+2. Depois aquilo
+3. Resultado esperado vs real
+
+**Screenshots:**
+Se aplicável, adicione prints
+
+**Ambiente:**
+- Hardware: [ex: Notebook Dell XPS]
+- ISO version: [ex: v1.0]
+- Testem em: [ex: VM/Hardware real]
+```
+
+---
+
+## 💬 Comunidade & Discussões
+
+- **GitHub Discussions**: [Vá para discussions](https://github.com/tmjacometti/tmjos/discussions)
+- **Issues**: [Reportar bugs](https://github.com/tmjacometti/tmjos/issues)
+
+---
+
+## 📝 Licença
+
+TMJOs é lançado sob **GPLv3** License. Veja [LICENSE](LICENSE) para detalhes.
+
+```
+TMJOs - Clean Linux Distribution
+Copyright (C) 2026 TMJOs Contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+```
+
+---
+
+## 🌟 Créditos & Agradecimentos
+
+- **Ubuntu Team** - Base da distribuição
+- **GNOME Project** - Desktop environment
+- **Plank Developers** - Dock
+- **Todos os contribuidores** - Que fazem isso acontecer! ❤️
+
+---
+
+## 📊 Stats & Analytics
+
+![GitHub stars](https://img.shields.io/github/stars/tmjacometti/tmjos?style=social)
+![GitHub forks](https://img.shields.io/github/forks/tmjacometti/tmjos?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/tmjacometti/tmjos?style=social)
+![GitHub issues](https://img.shields.io/github/issues/tmjacometti/tmjos)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/tmjacometti/tmjos)
+
+---
+
+## 🚀 Let's Build Something Amazing Together!
+
+**TMJOs: Clean Linux for Developers** 🐧✨
+
+```
+┌────────────────────────────────────────┐
+│  Give us a star if you like TMJOs! ⭐  │
+└────────────────────────────────────────┘
+```
+
+---
+
+*Last updated: 2026 | Made with ❤️ by TMJOs Community*
