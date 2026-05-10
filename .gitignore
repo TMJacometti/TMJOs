@@ -54,3 +54,25 @@ logs/
 secrets/
 *.key
 *.pem
+
+# GPG private keys — NUNCA commitar
+*-private-key*.asc
+*.gpg-secret*
+private-keys-v1.d/
+
+# Build artefatos de packages
+packages/sources/**/debian/files
+packages/sources/**/debian/*.substvars
+packages/sources/**/debian/*.debhelper.log
+packages/sources/**/debian/.debhelper/
+packages/sources/**/debian/<pkg>/
+packages/sources/**/debian/tmp/
+packages/dist/
+packages/*.deb
+packages/*.changes
+packages/*.buildinfo
+packages/*.dsc
+packages/*.tar.*
+packages/db/
+packages/lists/
+packages/incoming/

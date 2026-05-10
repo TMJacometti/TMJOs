@@ -1,0 +1,121 @@
+name: Build & publish .deb packages
+
+on:
+  push:
+    branches:
+      - main
+      - feature/apt-repo
+    paths:
+      - 'packages/sources/**'
+      - 'packages/conf/**'
+      - 'packages/keys/**'
+      - '.github/workflows/build-deb.yml'
+  workflow_dispatch:
+
+# Required for peaceiris/actions-gh-pages to push to gh-pages branch
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+              devscripts debhelper dpkg-dev reprepro \
+              gnupg lintian fakeroot
+
+      - name: Import GPG signing key
+        env:
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+        run: |
+          if [ -z "$GPG_SIGNING_KEY" ]; then
+            echo "::error::GPG_SIGNING_KEY secret is not set."
+            echo "::error::Add the TMJOs private key to repo secrets."
+            exit 1
+          fi
+          echo "$GPG_SIGNING_KEY" | gpg --batch --import
+          gpg --list-secret-keys
+
+      - name: Build all packages in packages/sources/
+        run: |
+          set -e
+          mkdir -p packages/dist
+          for pkg_dir in packages/sources/*/; do
+              pkg_name=$(basename "$pkg_dir")
+              echo "::group::Building $pkg_name"
+              (
+                  cd "$pkg_dir"
+                  dpkg-buildpackage -us -uc -b
+              )
+              # debs vão pra packages/sources/<pkg>/../*.deb (pai)
+              mv packages/sources/*.deb        packages/dist/ 2>/dev/null || true
+              mv packages/sources/*.changes    packages/dist/ 2>/dev/null || true
+              mv packages/sources/*.buildinfo  packages/dist/ 2>/dev/null || true
+              echo "::endgroup::"
+          done
+          ls -lah packages/dist/
+
+      - name: Setup reprepro and build APT repo
+        run: |
+          set -e
+          mkdir -p apt-repo
+          cp -r packages/conf apt-repo/
+          # Importa as .debs no reprepro
+          for deb in packages/dist/*.deb; do
+              echo "Adding $deb to reprepro..."
+              reprepro --basedir apt-repo includedeb noble "$deb"
+          done
+          # Copia a public key pro repo (user adiciona como signed-by)
+          mkdir -p apt-repo/keys
+          cp packages/keys/tmjos-archive-keyring.asc apt-repo/keys/
+          # Convert pra formato binário de keyring (signed-by espera isso)
+          gpg --dearmor < packages/keys/tmjos-archive-keyring.asc \
+              > apt-repo/keys/tmjos-archive-keyring.gpg
+          # README e index simples
+          cat > apt-repo/index.html << 'HTML'
+          <!DOCTYPE html>
+          <html><head><title>TMJOs APT Repo</title>
+          <style>body{font-family:monospace;background:#0a0e2a;color:#e6e6e6;
+          max-width:760px;margin:40px auto;padding:0 20px}
+          a{color:#00d4ff}h1{color:#00d4ff}code{background:#1a1e3a;
+          padding:2px 6px;border-radius:3px}</style></head>
+          <body>
+          <h1>🐉 TMJOs APT Repo</h1>
+          <p>Pacotes oficiais TMJOs assinados com GPG.</p>
+          <h2>Setup</h2>
+          <pre><code>curl -fsSL https://tmjacometti.github.io/TMJOs/keys/tmjos-archive-keyring.gpg \
+            | sudo tee /usr/share/keyrings/tmjos-archive-keyring.gpg > /dev/null
+          echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] \
+            https://tmjacometti.github.io/TMJOs/ noble main' \
+            | sudo tee /etc/apt/sources.list.d/tmjos.list
+          sudo apt update</code></pre>
+          <h2>Pacotes disponíveis</h2>
+          <p>Veja <a href="dists/noble/main/binary-amd64/Packages">Packages</a></p>
+          </body></html>
+          HTML
+          ls -R apt-repo/dists/ | head -30
+
+      - name: Deploy to gh-pages
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./apt-repo
+          publish_branch: gh-pages
+          enable_jekyll: false
+          commit_message: 'apt repo update from ${{ github.sha }}'
+
+      - name: Upload .deb artifacts (PR builds)
+        if: github.ref != 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tmjos-debs
+          path: packages/dist/*.deb
+          retention-days: 14

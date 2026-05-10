@@ -1,0 +1,7 @@
+tmjos-hello (0.1.0-1) noble; urgency=low
+
+  * Initial release.
+  * Pipeline smoke-test package — proves the APT repo / GPG signing /
+    GitHub Pages publishing path works end-to-end.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 17:00:00 -0300

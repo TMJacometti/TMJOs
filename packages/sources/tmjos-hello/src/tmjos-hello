@@ -1,0 +1,20 @@
+#!/bin/sh
+# TMJOs pipeline smoke-test command.
+# If you can run this on a TMJOs system AFTER `sudo apt install tmjos-hello`,
+# the entire APT repo + GPG signing + GitHub Pages chain is working.
+
+cat << 'EOF'
+   ╔═══════════════════════════════════════════╗
+   ║       🐉  Hello from TMJOs!  🐉          ║
+   ║                                           ║
+   ║  Você acabou de instalar tmjos-hello      ║
+   ║  via packages.tmjos.dev — APT repo está   ║
+   ║  funcionando end-to-end.                  ║
+   ║                                           ║
+   ║  Próximos pacotes vão ser de verdade:     ║
+   ║    tmjos-branding, tmjos-os-identity,     ║
+   ║    tmjos-dock, tmjos-defaults, tmjos.     ║
+   ╚═══════════════════════════════════════════╝
+
+      OS DA TMJOS · OS MELHORES · OS INSANOS
+EOF
