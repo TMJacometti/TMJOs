@@ -499,15 +499,20 @@ TMJOS_RELEASE_URL="https://github.com/TMJacometti/TMJOs/blob/main/CHANGELOG.md"
 
 # Procura em /etc, /usr/share, /usr/lib, /cdrom, /isolinux, /boot
 # por strings tipo 'ubuntu.com/getubuntu/releasenotes' e troca pela URL TMJOs.
-# Inclui GRUB cfg, casper script, .disk metadata, update-manager configs.
+# IMPORTANTE: grep retornar 0 matches sai com exit 1, e combinado com
+# set -o pipefail mata o script. Por isso `|| true` em cada chamada.
 SEARCH_DIRS=(/etc /usr/share /usr/lib /cdrom /isolinux /boot)
 for d in "${SEARCH_DIRS[@]}"; do
     [ -d "$d" ] || continue
-    $SUDO grep -rlI "ubuntu.com/getubuntu/releasenotes" "$d" 2>/dev/null | while read -r f; do
-        $SUDO sed -i \
+    files=$($SUDO grep -rlI "ubuntu.com/getubuntu/releasenotes" "$d" 2>/dev/null || true)
+    [ -z "$files" ] && continue
+    while IFS= read -r f; do
+        if $SUDO sed -i \
             "s|http[s]\?://www\.ubuntu\.com/getubuntu/releasenotes[^\"' )]*|$TMJOS_RELEASE_URL|g" \
-            "$f" 2>/dev/null && echo "    rewrote $f"
-    done
+            "$f" 2>/dev/null; then
+            echo "    rewrote $f"
+        fi
+    done <<< "$files"
 done
 
 # .disk/release_notes_url (texto puro com URL) — algumas vezes o Cubic
