@@ -1,0 +1,40 @@
+#!/bin/sh
+# postinst do tmjos-os-identity — dpkg-divert + cp pra cada um dos
+# 4 identity files.
+set -e
+
+SHARE=/usr/share/tmjos-os-identity
+
+divert_and_install() {
+    target="$1"      # ex: /etc/os-release
+    source="$2"      # ex: $SHARE/os-release
+
+    [ -f "$source" ] || return 0
+
+    # Já patcheado? skip
+    if dpkg-divert --list "$target" 2>/dev/null | grep -q "$target"; then
+        # Garante que o arquivo atual reflete nossa versão (post-upgrade)
+        cp "$source" "$target"
+        return 0
+    fi
+
+    # Divert original
+    dpkg-divert --quiet --local --rename \
+        --divert "${target}.tmjos-orig" --add "$target"
+
+    # Instala nosso
+    cp "$source" "$target"
+}
+
+case "$1" in
+    configure)
+        divert_and_install /etc/os-release   "$SHARE/os-release"
+        divert_and_install /etc/lsb-release  "$SHARE/lsb-release"
+        divert_and_install /etc/issue        "$SHARE/issue"
+        divert_and_install /etc/issue.net    "$SHARE/issue.net"
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

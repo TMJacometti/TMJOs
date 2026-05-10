@@ -1,3 +1,19 @@
+tmjos-os-identity (1.3.0-2) noble; urgency=high
+
+  * Fix install conflict with base-files. Previous version (1.3.0-1)
+    declared `Conflicts: base-files (<< 999~)` to take ownership of
+    /etc/os-release, lsb-release, issue, issue.net. base-files is
+    Essential — apt refuses to remove it, so the conflict broke the
+    install entirely:
+        E: Unable to correct problems, you have held broken packages.
+  * Refactored to use dpkg-divert (same approach as
+    tmjos-shell-tweaks for Yaru's gnome-shell.css). Files now ship
+    in /usr/share/tmjos-os-identity/ and the postinst diverts each
+    target path, renaming the upstream file with .tmjos-orig suffix.
+  * postrm restores the originals byte-for-byte on remove/purge.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 20:15:00 -0300
+
 tmjos-os-identity (1.3.0-1) noble; urgency=low
 
   * Initial .deb release.
@@ -5,7 +21,7 @@ tmjos-os-identity (1.3.0-1) noble; urgency=low
   * /etc/os-release pinned to "TMJOs 1.3 (insano)".
   * /etc/lsb-release intentionally left as Ubuntu/noble for compat.
   * /etc/issue + /etc/issue.net branded.
-  * Conflicts with base-files (<< 999~) so apt gives this package
-    ownership of the four identity files.
+  * (Broken: Conflicts: base-files isn't installable; replaced
+    in 1.3.0-2.)
 
  -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 18:45:00 -0300

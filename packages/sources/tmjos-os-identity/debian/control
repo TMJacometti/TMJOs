@@ -8,9 +8,8 @@ Homepage: https://github.com/TMJacometti/TMJOs
 
 Package: tmjos-os-identity
 Architecture: all
-Depends: ${misc:Depends}
-Conflicts: base-files (<< 999~)
-Replaces: base-files (<< 999~)
+Depends: ${misc:Depends},
+         dpkg
 Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
  Replaces the Ubuntu identity files with TMJOs-branded versions:
   * /etc/os-release    — TMJOs 1.x (insano), shows in GNOME About
@@ -24,7 +23,9 @@ Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
                          is for compat.
   * /etc/issue         — "TMJOs <ver> \n \l" banner shown at TTY login
   * /etc/issue.net     — same content for telnet/ssh banner
-  * /etc/lsb-release   keeps DISTRIB_ID=Ubuntu (script compatibility)
  .
- Conflicts with base-files (the package that normally owns these
- files in Ubuntu) so dpkg knows to take over the slots cleanly.
+ Implementation: uses dpkg-divert to take ownership of the four
+ files from the upstream base-files package. Originals are renamed
+ with .tmjos-orig suffix and restored cleanly on package removal.
+ base-files is "essential" so we can't Conflicts/Replaces it; divert
+ is the policy-friendly way.

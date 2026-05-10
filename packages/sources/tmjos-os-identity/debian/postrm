@@ -1,0 +1,25 @@
+#!/bin/sh
+# postrm do tmjos-os-identity — desfaz dpkg-divert e restaura
+# os arquivos originais do base-files.
+set -e
+
+undo() {
+    target="$1"
+    if dpkg-divert --list "$target" 2>/dev/null | grep -q "$target"; then
+        rm -f "$target"
+        dpkg-divert --quiet --local --rename --remove "$target" || true
+    fi
+}
+
+case "$1" in
+    remove|purge)
+        undo /etc/os-release
+        undo /etc/lsb-release
+        undo /etc/issue
+        undo /etc/issue.net
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
