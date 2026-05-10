@@ -269,7 +269,7 @@ $SUDO tee "$SKEL_PLANK_DIR/settings" > /dev/null << 'EOF'
 alignment='center'
 auto-pinch=false
 current-workspace-only=false
-dock-items=['tmjos-show-apps.dockitem', 'gnome-control-center.dockitem', 'org.gnome.Nautilus.dockitem', 'code.dockitem', 'tmjpad.dockitem', 'org.gnome.Terminal.dockitem']
+dock-items=['tmjos-show-apps.dockitem', 'code.dockitem', 'tmjpad.dockitem', 'org.gnome.Terminal.dockitem']
 hide-delay=0
 hide-mode='window-dodge'
 hide-on-focus=false
@@ -326,12 +326,37 @@ EOF
 echo -e "  ${GREEN}→${NC} TMJOs first-run autostart (Plank config no live-CD)"
 $SUDO tee /usr/local/bin/tmjos-first-run > /dev/null << 'EOF'
 #!/bin/sh
-# Copia config do Plank do /etc/skel pro user atual se ainda não existe.
-# Roda no autostart phase=Initialization, antes do Plank ser iniciado.
+# TMJOs first-run / every-login setup. Roda no autostart phase=Initialization,
+# antes do Plank iniciar. Faz duas coisas:
+#
+# 1. Copia config do Plank do /etc/skel pro user se ainda não existe.
+#    Resolve o caso live-CD onde o user 'ubuntu' já existe e nunca pegou
+#    o /etc/skel.
+#
+# 2. Garante que 'tmjos-show-apps.dockitem' está SEMPRE como primeiro
+#    item no dock. O user pode remover/reorganizar os outros launchers
+#    (VSCode, TMJPad, Terminal) — mas o "Todos os Apps" volta no próximo
+#    login, porque é o ponto de entrada pro app drawer e a distro não
+#    funciona bem sem ele.
+
+PLANK_DIR="$HOME/.config/plank/dock1"
+PLANK_SETTINGS="$PLANK_DIR/settings"
+
+# 1) First-time copy from /etc/skel
 if [ ! -d "$HOME/.config/plank" ] && [ -d /etc/skel/.config/plank ]; then
     mkdir -p "$HOME/.config"
     cp -r /etc/skel/.config/plank "$HOME/.config/"
 fi
+
+# 2) Re-injetar 'tmjos-show-apps.dockitem' como primeiro item se faltar
+if [ -f "$PLANK_SETTINGS" ]; then
+    if ! grep -q "tmjos-show-apps.dockitem" "$PLANK_SETTINGS"; then
+        # Insere depois de "dock-items=[" — entra como primeiro item da lista
+        sed -i "s|^dock-items=\[|dock-items=['tmjos-show-apps.dockitem', |" \
+            "$PLANK_SETTINGS"
+    fi
+fi
+
 exit 0
 EOF
 $SUDO chmod +x /usr/local/bin/tmjos-first-run
