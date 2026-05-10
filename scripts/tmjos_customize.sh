@@ -675,6 +675,12 @@ sys.exit(main())
 EOF
 $SUDO chmod +x /usr/local/bin/tmjpad
 
+# Ícone próprio do TMJPad (Icon=tmjpad no .desktop)
+$SUDO mkdir -p /usr/share/icons/hicolor/256x256/apps
+$SUDO cp "$TMJOS_SRC"/apps/tmjpad/assets/logo/tmjpad.png \
+    /usr/share/icons/hicolor/256x256/apps/tmjpad.png
+$SUDO gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
+
 # Desktop entry
 $SUDO cp "$TMJOS_SRC"/apps/tmjpad/data/tmjpad.desktop /usr/share/applications/
 

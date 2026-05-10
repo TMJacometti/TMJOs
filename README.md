@@ -234,7 +234,6 @@ git push origin feature/sua-feature
 - [ ] Plymouth: progress bar animada além do breathing glow
 - [ ] GDM (login screen) com wallpaper TMJOs
 - [ ] Empacotamento `.deb` do TMJPad
-- [ ] TMJPad: ícone próprio
 - [ ] Sons custom de boot/shutdown
 - [ ] **APT repo próprio** (`packages.tmjos.dev`) — distribuir apps TMJOs via apt
 - [ ] **TMJOs Software Center** (GTK4 GUI) — store com branding TMJOs sobre apt

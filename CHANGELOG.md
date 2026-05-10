@@ -15,7 +15,6 @@ tracker3 e adição de zram/preload já entram na release pública.)
 - GRUB theme com visual TMJOs (v1.2 só renomeia distributor para "TMJOs")
 - Plymouth: progress bar animada além do breathing glow do logo
 - GDM (login screen) com wallpaper e logo TMJOs
-- Ícone próprio do TMJPad (atualmente usa o logo geral do TMJOs)
 - Empacotamento `.deb` do TMJPad (atualmente roda via wrapper em /usr/local/bin)
 - Sounds de boot/shutdown customizados
 - ARM64 build
@@ -147,6 +146,9 @@ v1.2.0 é o primeiro build com TUDO polido e Find/Replace funcional.
   - Atalhos: Ctrl+N/W/Tab/S, foco automático no text view ao abrir aba
   - **Find & Replace:** Ctrl+F (busca), Ctrl+H (busca + replace), Esc fecha,
     Enter/Shift+Enter navega entre matches, Replace All com undo único
+  - **Ícone próprio** (`apps/tmjpad/assets/logo/tmjpad.png`) instalado
+    em `/usr/share/icons/hicolor/256x256/apps/tmjpad.png` — estilo
+    macOS app icon com livro + letras T M J coloridas
   - Instalado em `/opt/tmjpad/` com wrapper em `/usr/local/bin/tmjpad`
   - Entry no menu de apps (`/usr/share/applications/tmjpad.desktop`)
 
