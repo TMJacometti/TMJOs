@@ -85,6 +85,34 @@ headerbar {
     color: #e6e6e6;
     border-bottom: 1px solid #1a1e3a;
 }
+
+.tmjpad-find-bar {
+    background-color: #050714;
+    border-bottom: 1px solid #1a1e3a;
+}
+.tmjpad-find-bar entry {
+    background-color: #0a0e2a;
+    color: #e6e6e6;
+    border: 1px solid #1a1e3a;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+.tmjpad-find-bar entry:focus {
+    border-color: #00d4ff;
+    box-shadow: 0 0 0 1px #00d4ff;
+}
+.tmjpad-find-bar entry.error {
+    border-color: #ff2d95;
+    color: #ff2d95;
+}
+.tmjpad-find-bar button {
+    background-color: #1a1e3a;
+    color: #00d4ff;
+    border-radius: 4px;
+}
+.tmjpad-find-bar button:hover {
+    background-color: #252a4d;
+}
 """
 
 
@@ -186,6 +214,200 @@ class _Tab:
         self.state.cursor_offset = self.buffer.props.cursor_position
 
 
+class _FindReplaceBar(Gtk.Box):
+    """Inline find/replace bar above the notebook.
+
+    Hidden by default. Opened by Ctrl+F (find only) or Ctrl+H (with replace).
+    Esc closes. Search uses Gtk.TextBuffer.forward/backward search with the
+    case-sensitive flag off by default.
+    """
+
+    def __init__(self, window: TMJPadWindow):
+        super().__init__(
+            orientation=Gtk.Orientation.HORIZONTAL,
+            spacing=6,
+            margin_top=4,
+            margin_bottom=4,
+            margin_start=8,
+            margin_end=8,
+        )
+        self.window = window
+        self.add_css_class("tmjpad-find-bar")
+        self.set_visible(False)
+
+        self.find_entry = Gtk.Entry(
+            placeholder_text="Find",
+            hexpand=True,
+        )
+        self.replace_entry = Gtk.Entry(
+            placeholder_text="Replace with",
+            hexpand=True,
+        )
+
+        self.prev_btn = Gtk.Button.new_from_icon_name("go-up-symbolic")
+        self.prev_btn.set_tooltip_text("Previous (Shift+Enter)")
+        self.next_btn = Gtk.Button.new_from_icon_name("go-down-symbolic")
+        self.next_btn.set_tooltip_text("Next (Enter)")
+        self.replace_btn = Gtk.Button(label="Replace")
+        self.replace_all_btn = Gtk.Button(label="Replace All")
+        self.close_btn = Gtk.Button.new_from_icon_name("window-close-symbolic")
+        self.close_btn.set_tooltip_text("Close (Esc)")
+
+        # Layout
+        self.append(self.find_entry)
+        self.append(self.prev_btn)
+        self.append(self.next_btn)
+        self.append(self.replace_entry)
+        self.append(self.replace_btn)
+        self.append(self.replace_all_btn)
+        self.append(self.close_btn)
+
+        # Signals
+        self.find_entry.connect("activate", lambda _e: self.find_next())
+        self.replace_entry.connect("activate", lambda _e: self.replace_one())
+        self.next_btn.connect("clicked", lambda _b: self.find_next())
+        self.prev_btn.connect("clicked", lambda _b: self.find_prev())
+        self.replace_btn.connect("clicked", lambda _b: self.replace_one())
+        self.replace_all_btn.connect("clicked", lambda _b: self.replace_all())
+        self.close_btn.connect("clicked", lambda _b: self.close())
+
+        # Esc fecha quando o foco está no bar
+        for entry in (self.find_entry, self.replace_entry):
+            kc = Gtk.EventControllerKey()
+            kc.connect("key-pressed", self._on_key_pressed)
+            entry.add_controller(kc)
+
+    def _on_key_pressed(self, _ctrl, keyval, _keycode, _state) -> bool:
+        if keyval == Gdk.KEY_Escape:
+            self.close()
+            return True
+        return False
+
+    def open(self, replace: bool) -> None:
+        """Open the bar. If replace=True, show replace entry + buttons."""
+        self.replace_entry.set_visible(replace)
+        self.replace_btn.set_visible(replace)
+        self.replace_all_btn.set_visible(replace)
+        self.set_visible(True)
+
+        # Pre-fill find with current selection if there's one
+        tab = self.window._active_tab()
+        if tab is not None:
+            buf = tab.buffer
+            if buf.get_has_selection():
+                start, end = buf.get_selection_bounds()
+                self.find_entry.set_text(buf.get_text(start, end, False))
+
+        self.find_entry.grab_focus()
+        self.find_entry.select_region(0, -1)
+
+    def close(self) -> None:
+        self.set_visible(False)
+        # Devolve foco pro text view da aba ativa
+        tab = self.window._active_tab()
+        if tab is not None:
+            GLib.idle_add(_focus_view_once, tab.text_view)
+
+    # ---- search ops ----
+
+    def _current_buffer(self) -> Gtk.TextBuffer | None:
+        tab = self.window._active_tab()
+        return tab.buffer if tab is not None else None
+
+    def _search(self, forward: bool) -> bool:
+        """Find from cursor. Wraps around at the end."""
+        buf = self._current_buffer()
+        if buf is None:
+            return False
+        needle = self.find_entry.get_text()
+        if not needle:
+            return False
+
+        flags = Gtk.TextSearchFlags.CASE_INSENSITIVE | Gtk.TextSearchFlags.VISIBLE_ONLY
+        cursor_iter = buf.get_iter_at_mark(buf.get_insert())
+
+        if forward:
+            match = cursor_iter.forward_search(needle, flags, None)
+            if match is None:
+                # Wrap: search from start
+                match = buf.get_start_iter().forward_search(needle, flags, None)
+        else:
+            match = cursor_iter.backward_search(needle, flags, None)
+            if match is None:
+                # Wrap: search from end
+                match = buf.get_end_iter().backward_search(needle, flags, None)
+
+        if match is None:
+            return False
+        start, end = match
+        buf.select_range(start, end)
+        # Scroll viewport pra match ficar visível
+        tab = self.window._active_tab()
+        if tab is not None:
+            tab.text_view.scroll_to_iter(start, 0.1, False, 0.0, 0.5)
+        return True
+
+    def find_next(self) -> None:
+        if not self._search(forward=True):
+            self._flash_no_match()
+
+    def find_prev(self) -> None:
+        if not self._search(forward=False):
+            self._flash_no_match()
+
+    def _flash_no_match(self) -> None:
+        """Visual cue when nothing's found — error CSS class on the entry."""
+        self.find_entry.add_css_class("error")
+        GLib.timeout_add(400, lambda: (self.find_entry.remove_css_class("error"), False)[1])
+
+    def replace_one(self) -> None:
+        """If selection matches the find term, replace it. Then find next."""
+        buf = self._current_buffer()
+        if buf is None or not buf.get_has_selection():
+            # Sem seleção — só faz find
+            self.find_next()
+            return
+        needle = self.find_entry.get_text()
+        if not needle:
+            return
+        start, end = buf.get_selection_bounds()
+        selected = buf.get_text(start, end, False)
+        if selected.lower() == needle.lower():
+            buf.delete(start, end)
+            buf.insert_at_cursor(self.replace_entry.get_text())
+        # Avança pro próximo match
+        self.find_next()
+
+    def replace_all(self) -> None:
+        buf = self._current_buffer()
+        if buf is None:
+            return
+        needle = self.find_entry.get_text()
+        replacement = self.replace_entry.get_text()
+        if not needle:
+            return
+
+        flags = Gtk.TextSearchFlags.CASE_INSENSITIVE | Gtk.TextSearchFlags.VISIBLE_ONLY
+        count = 0
+
+        # Begin user action pra agrupar tudo num único undo
+        buf.begin_user_action()
+        try:
+            it = buf.get_start_iter()
+            while True:
+                match = it.forward_search(needle, flags, None)
+                if match is None:
+                    break
+                start, end = match
+                buf.delete(start, end)
+                buf.insert(start, replacement)
+                # `start` agora aponta pro fim do replacement; continue dali
+                it = start
+                count += 1
+        finally:
+            buf.end_user_action()
+
+
 class TMJPadWindow(Adw.ApplicationWindow):
     def __init__(self, application: Adw.Application, session: Session):
         super().__init__(application=application)
@@ -227,8 +449,12 @@ class TMJPadWindow(Adw.ApplicationWindow):
         self.status_label = Gtk.Label(xalign=0, label="Ln 1, Col 1  │  UTF-8")
         self.status_label.add_css_class("tmjpad-status")
 
+        # Find/Replace bar (inicia escondida, aparece com Ctrl+F ou Ctrl+H)
+        self.find_bar = _FindReplaceBar(self)
+
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.append(header)
+        box.append(self.find_bar)
         box.append(self.notebook)
         box.append(self.status_label)
         self.set_content(box)
@@ -242,6 +468,8 @@ class TMJPadWindow(Adw.ApplicationWindow):
             ("close-tab", "<Ctrl>w", lambda *_: self.close_active_tab()),
             ("next-tab", "<Ctrl>Tab", lambda *_: self.cycle_tab(1)),
             ("prev-tab", "<Ctrl><Shift>Tab", lambda *_: self.cycle_tab(-1)),
+            ("find", "<Ctrl>f", lambda *_: self.find_bar.open(replace=False)),
+            ("find-replace", "<Ctrl>h", lambda *_: self.find_bar.open(replace=True)),
         ]
         for name, accel, callback in actions:
             action = Gio.SimpleAction.new(name, None)

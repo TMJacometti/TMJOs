@@ -45,7 +45,8 @@ make install
 | `Ctrl+W` | Fechar aba atual |
 | `Ctrl+Tab` | Próxima aba |
 | `Ctrl+Shift+Tab` | Aba anterior |
-| `Ctrl+F` | Find |
+| `Ctrl+F` | Find (busca incremental, Enter avança, Shift+Enter volta, Esc fecha) |
+| `Ctrl+H` | Find & Replace (botões Replace e Replace All) |
 
 ## Persistência — como funciona
 

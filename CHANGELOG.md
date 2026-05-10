@@ -12,7 +12,6 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - GDM (login screen) com wallpaper e logo TMJOs
 - Ícone próprio do TMJPad (atualmente usa o logo geral do TMJOs)
 - Empacotamento `.deb` do TMJPad (atualmente roda via wrapper em /usr/local/bin)
-- TMJPad: Find & Replace (Ctrl+F, Ctrl+H)
 - Sounds de boot/shutdown customizados
 - ARM64 build
 
@@ -93,6 +92,8 @@ v1.1.0 é o primeiro build com TUDO funcional e documentado.
   - Atomic writes (tmp file + rename) pra todos os arquivos de estado
   - Dark theme único, paleta TMJOs, fonte JetBrains Mono
   - Atalhos: Ctrl+N/W/Tab/S, foco automático no text view ao abrir aba
+  - **Find & Replace:** Ctrl+F (busca), Ctrl+H (busca + replace), Esc fecha,
+    Enter/Shift+Enter navega entre matches, Replace All com undo único
   - Instalado em `/opt/tmjpad/` com wrapper em `/usr/local/bin/tmjpad`
   - Entry no menu de apps (`/usr/share/applications/tmjpad.desktop`)
 

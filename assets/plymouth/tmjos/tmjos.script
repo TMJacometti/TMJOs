@@ -11,6 +11,17 @@
 Window.SetBackgroundTopColor(0.039, 0.055, 0.165);    // #0a0e2a
 Window.SetBackgroundBottomColor(0.020, 0.027, 0.078); // #050714
 
+// === TMJSistemas watermark (centro, vermelho sangue com glow) ===============
+// Pré-renderizado em PNG porque Plymouth DSL não tem Image.Text.
+sistemas.image = Image("tmjsistemas.png");
+sistemas.sprite = Sprite(sistemas.image);
+sistemas_w = sistemas.image.GetWidth();
+sistemas_h = sistemas.image.GetHeight();
+sistemas.sprite.SetX(Window.GetWidth()  / 2 - sistemas_w / 2);
+sistemas.sprite.SetY(Window.GetHeight() / 2 - sistemas_h / 2);
+sistemas.sprite.SetOpacity(0.55);
+sistemas.sprite.SetZ(-1);  // atrás do logo
+
 // === Logo (rodapé central, pequeno) =========================================
 logo.image = Image("logo.png");
 logo.sprite = Sprite(logo.image);
