@@ -8,10 +8,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-branding/tmjos-branding_1.3.0-1_all.deb
-Size: 8987316
-SHA256: b073af02df4561b639c5cd78a5bc30512a32893289e4296891bfff938ca1ed39
-SHA1: f38440adad36a8d84284da2a419e85c7df0dbb53
-MD5sum: 541d813af024a891b6fc6fb38b2098cd
+Size: 8987314
+SHA256: 01f31aee35b1ea1d5904793ae5d82b616c628a26cf0a10573e216e7e7b9855e7
+SHA1: ab29d9741eb4505155e995dec71162f52ca5a5e8
+MD5sum: ab28bce20ace56c8dbb4f52af3c1332c
 Description: TMJOs branding assets (wallpapers, logos, Plymouth theme)
  Visual identity pieces of TMJOs:
   * Wallpapers: tmjos_wallpaper.png (1920x1080) + 4K variant in
@@ -28,6 +28,36 @@ Description: TMJOs branding assets (wallpapers, logos, Plymouth theme)
   * update-alternatives sets default.plymouth → tmjos
   * update-initramfs -u so the new theme is embedded in the initrd
 
+Package: tmjos-defaults
+Version: 1.3.0-1
+Architecture: all
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Installed-Size: 17
+Depends: dconf-cli, fonts-jetbrains-mono, fonts-cantarell, fonts-noto-color-emoji
+Homepage: https://github.com/TMJacometti/TMJOs
+Priority: optional
+Section: gnome
+Filename: pool/main/t/tmjos-defaults/tmjos-defaults_1.3.0-1_all.deb
+Size: 2334
+SHA256: e04591b80b11a8fb3c439ca1923c0d64a8a85a9f71fb934f75a87a08fa8d1fc9
+SHA1: 98e2574063a58bb779dd4b1b72aa145b3e923f00
+MD5sum: 0b6f2ddb3132bda008ac7f37ae99e596
+Description: TMJOs system-wide dconf defaults (dark mode, fonts, dock-off)
+ Sets system-wide dconf defaults for the TMJOs experience:
+  * Dark color scheme (color-scheme=prefer-dark, gtk-theme=Adwaita-dark)
+  * TMJOs wallpaper as the desktop background
+  * JetBrains Mono as the monospace font
+  * Disables Ubuntu Dock + appindicators + ding (desktop icons) so
+    Plank is the only dock and the desktop stays clean
+  * GNOME shell favorite-apps preset (TMJPad included)
+ .
+ The override file lives at /etc/dconf/db/local.d/00-tmjos-defaults.
+ Post-install runs dconf update so changes apply on next login.
+ .
+ Hard-depends on the three font packages referenced in the override
+ so installing this package is enough to make the defaults render
+ correctly without extra steps.
+
 Package: tmjos-dock
 Version: 1.3.0-1
 Architecture: all
@@ -38,10 +68,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: x11
 Filename: pool/main/t/tmjos-dock/tmjos-dock_1.3.0-1_all.deb
-Size: 4676
-SHA256: bb2c553e77ab243130e7e320c6c50f1468bc7df6061eda6de7a59c8384297740
-SHA1: 83ce50cd148359d2be78eb92304912a3a605bde7
-MD5sum: cb222aa993203a4ea37f72de02927b0c
+Size: 4674
+SHA256: da7d301db56e2abdbaa7403d9edee19810a4338ca89b59715940370a95b6907b
+SHA1: 50883152645cdd8762c7427b90e615f1f5225b1b
+MD5sum: 76b6070445a6b175eb159e8971735f1f
 Description: TMJOs Plank dock pre-configured with sticky launchers
  Pre-configured Plank dock for TMJOs:
   * /etc/skel/.config/plank/dock1/settings — bottom dock, transparent
@@ -99,9 +129,9 @@ Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-os-identity/tmjos-os-identity_1.3.0-1_all.deb
 Size: 2034
-SHA256: b586617831a977a41563752bd2d18c4c21b448ccfee5c970cb92f9a301bcc553
-SHA1: e2ec68eaa55d0e120cae442d8ce5490007fac3a7
-MD5sum: ecba335584168affaefe222384f90b7d
+SHA256: a5c05057c1b705297dfd4449e95d0845c86b577dac26c1543004226ad75cd2c0
+SHA1: 79bc1b0b5297a9430a78feaec37d1ad1374059fa
+MD5sum: 2f132f0ce48c31c6b947ace9fa1fdf94
 Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
  Replaces the Ubuntu identity files with TMJOs-branded versions:
   * /etc/os-release    — TMJOs 1.x (insano), shows in GNOME About
