@@ -375,20 +375,38 @@ if [ -f /etc/default/grub ]; then
         || echo -e "    ${YELLOW}(update-grub falhou no chroot, vai rodar no install)${NC}"
 fi
 
-# Plymouth — instala tema TMJOs custom (logo + breathing animation)
+# Plymouth — instala tema TMJOs custom (logo + breathing animation).
+# Precisa fazer 3 coisas separadamente porque `plymouth-set-default-theme -R`
+# falha silenciosamente no chroot do Cubic (a flag -R chama
+# update-initramfs que precisa de /proc, /sys mounts).
 echo -e "  ${GREEN}→${NC} Plymouth tema TMJOs (logo no boot splash)"
 $SUDO mkdir -p /usr/share/plymouth/themes/tmjos
 $SUDO cp -r "$TMJOS_SRC"/assets/plymouth/tmjos/. /usr/share/plymouth/themes/tmjos/
 
-if command -v plymouth-set-default-theme >/dev/null 2>&1; then
-    if plymouth-set-default-theme --list 2>/dev/null | grep -qx 'tmjos'; then
-        $SUDO plymouth-set-default-theme -R tmjos 2>/dev/null \
-            && echo -e "    ${GREEN}plymouth: TMJOs theme ativo${NC}" \
-            || echo -e "    ${YELLOW}(plymouth -R falhou no chroot, vai regenerar no install)${NC}"
-    else
-        echo -e "    ${YELLOW}(plymouth: tema 'tmjos' não foi reconhecido após copy)${NC}"
-    fi
+# 1) Set the theme via update-alternatives — funciona em chroot
+$SUDO update-alternatives --install \
+    /usr/share/plymouth/themes/default.plymouth default.plymouth \
+    /usr/share/plymouth/themes/tmjos/tmjos.plymouth 200 2>/dev/null || true
+$SUDO update-alternatives --set default.plymouth \
+    /usr/share/plymouth/themes/tmjos/tmjos.plymouth 2>/dev/null || true
+
+# Verifica que o symlink ficou apontando certo
+if [ -L /etc/alternatives/default.plymouth ]; then
+    target=$($SUDO readlink /etc/alternatives/default.plymouth)
+    echo -e "    default.plymouth → $target"
 fi
+
+# 2) Regenerate initramfs explicitly. Cubic mounts /proc /sys /dev no
+# chroot, então update-initramfs deve funcionar — mas se não funcionar,
+# o Cubic regenera o casper initrd na hora de gerar a ISO usando a
+# config atual de /etc/alternatives, então o tema ainda aparece.
+echo -e "    regenerating initramfs..."
+if $SUDO update-initramfs -u -k all 2>&1 | tail -3 | sed 's/^/    /'; then
+    echo -e "    ${GREEN}initramfs OK${NC}"
+else
+    echo -e "    ${YELLOW}(update-initramfs falhou — Cubic regenera no ISO build)${NC}"
+fi
+# update-grub já foi rodado na seção GRUB acima (linha ~373), não duplicar.
 
 # ===========================================
 # FASE 7 — TMJPAD (editor proprietário)
