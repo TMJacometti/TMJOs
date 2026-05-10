@@ -239,6 +239,10 @@ git push origin feature/sua-feature
 - [ ] **TMJOs Software Center** (GTK4 GUI) — store com branding TMJOs sobre apt
 - [ ] **TMJCode** v0.1 — VSCode customizado TMJOs (primeiro app via store)
 
+### 🎨 v1.4 (Ideias)
+- [ ] **TMJNotes** — sticky notes nativas estilo Microsoft Sticky Notes,
+  com persistência total, cores customizáveis, atalho global pra nova nota
+
 ### 🚀 v2.0 (Futuro)
 - [ ] TMJCode (VSCode customizado com tema TMJOs)
 - [ ] Repo APT oficial (`packages.tmjos.dev`)

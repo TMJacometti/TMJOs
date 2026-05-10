@@ -5,6 +5,21 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [Backlog v1.4] — ideias futuras
+
+- **TMJNotes** (sticky notes nativas, estilo Microsoft Sticky Notes):
+  - GTK4 + libadwaita (mesma stack do TMJPad)
+  - Notas pequenas flutuantes na tela, várias simultaneamente
+  - Cores customizáveis por nota (paleta TMJOs neon)
+  - **Persistência total** igual TMJPad: fechou e reabriu, todas as
+    notas voltam exatamente como estavam (posição, tamanho, cor, texto,
+    cursor)
+  - Atalho global pra criar nova nota (Super+N? Super+Shift+N?)
+  - Always-on-top opcional por nota
+  - Markdown leve no texto (negrito, itálico, listas)
+  - Comando: `tmjnotes` ou `tmjsticky`
+  - Distribuído via APT repo TMJOs (depende do repo estar de pé em v1.3)
+
 ## [Backlog v1.3] — em planejamento
 
 (Slim Aggressive foi promovido pra v1.2 — todos os cortes, disable de
