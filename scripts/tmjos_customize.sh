@@ -39,7 +39,9 @@ else
     SUDO="sudo"
 fi
 
-TMJOS_REPO_URL="https://packages.tmjos.com.br"
+# TODO(v1.3.x): trocar pra https://packages.tmjos.com.br quando
+# DNS propagar + Let's Encrypt provisionar HTTPS no custom domain.
+TMJOS_REPO_URL="https://tmjacometti.github.io/TMJOs"
 
 echo -e "${BLUE}╔═══════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║   TMJOs - Customização v1.3 (apt-based)   ║${NC}"
