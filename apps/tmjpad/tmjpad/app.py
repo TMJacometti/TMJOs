@@ -252,6 +252,9 @@ class TMJPadWindow(Adw.ApplicationWindow):
             self.notebook.set_current_page(target)
         finally:
             self._suppress_session_save = False
+        # Focus the active tab's text view at startup
+        if 0 <= target < len(self.tabs):
+            GLib.idle_add(self.tabs[target].text_view.grab_focus)
 
     def _add_tab(self, state: TabState) -> _Tab:
         tab = _Tab(state, self)
@@ -296,9 +299,12 @@ class TMJPadWindow(Adw.ApplicationWindow):
             return self.tabs[idx]
         return None
 
-    def _on_tab_switched(self, _nb, _page, _index) -> None:
+    def _on_tab_switched(self, _nb, _page, index) -> None:
         self.update_status_bar()
         self.save_session()
+        # Quando tu muda de aba (Ctrl+Tab), foca direto pro text view
+        if 0 <= index < len(self.tabs):
+            GLib.idle_add(self.tabs[index].text_view.grab_focus)
 
     def _on_tab_reordered(self, _nb, page_widget, new_index) -> None:
         # reorder self.tabs to match notebook order
@@ -323,6 +329,9 @@ class TMJPadWindow(Adw.ApplicationWindow):
         tab = self._add_tab(state)
         self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
         self.save_session()
+        # Foca o text view depois do widget realizar (precisa estar mapeado).
+        # idle_add garante que rode no próximo iddle do main loop.
+        GLib.idle_add(tab.text_view.grab_focus)
         return tab
 
     def open_file_dialog(self) -> None:
