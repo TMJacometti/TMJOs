@@ -296,6 +296,51 @@ X-GNOME-Autostart-enabled=true
 X-GNOME-Autostart-Phase=Initialization
 EOF
 
+# 6i) Suprimir popups de welcome / installer no live-CD
+#
+# O Ubuntu 24.04 dispara via autostart o ubuntu-desktop-provision
+# (Flutter UI do novo installer). Em ISOs feitas com Cubic, o snap do
+# installer fica num estado meio-quebrado — depende de hooks do casper
+# que não correspondem ao squashfs regenerado. Resultado: popup
+# "Something went wrong" toda vez que o desktop carrega.
+#
+# Solução: marcar Hidden=true nos autostarts dos welcome wizards.
+# Isso esconde o popup mas mantém os pacotes instalados, então o
+# ícone "Install TMJOS" no desktop (que vem via casper, não via
+# autostart) continua funcional.
+echo -e "  ${GREEN}→${NC} Suprimindo welcome popups (installer + initial-setup)"
+WELCOME_AUTOSTARTS=(
+    "/etc/xdg/autostart/ubuntu-desktop-installer.desktop"
+    "/etc/xdg/autostart/ubuntu-desktop-bootstrap.desktop"
+    "/etc/xdg/autostart/ubuntu-desktop-provision.desktop"
+    "/etc/xdg/autostart/ubuntu-bootstrap.desktop"
+    "/etc/xdg/autostart/gnome-initial-setup-first-login.desktop"
+    "/etc/xdg/autostart/gnome-initial-setup-copy-worker.desktop"
+    "/etc/xdg/autostart/snap-store-ubuntu-software.desktop"
+)
+
+for f in "${WELCOME_AUTOSTARTS[@]}"; do
+    if [ -f "$f" ]; then
+        if ! grep -q "^Hidden=true" "$f"; then
+            echo "Hidden=true" | $SUDO tee -a "$f" > /dev/null
+            echo -e "    ${GREEN}suppressed${NC}: $(basename "$f")"
+        fi
+    fi
+done
+
+# Também olha por entries com nomes inesperados que matchem padrões typical
+$SUDO find /etc/xdg/autostart/ -maxdepth 1 -type f -name '*.desktop' 2>/dev/null | while read -r f; do
+    name=$(basename "$f")
+    case "$name" in
+        *bootstrap*|*provision*|*installer*welcome*|*welcome*installer*)
+            if ! grep -q "^Hidden=true" "$f"; then
+                echo "Hidden=true" | $SUDO tee -a "$f" > /dev/null
+                echo -e "    ${GREEN}suppressed${NC}: $name (pattern match)"
+            fi
+            ;;
+    esac
+done
+
 # ===========================================
 # FASE 7 — TMJPAD (editor proprietário)
 # ===========================================

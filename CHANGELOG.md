@@ -14,11 +14,10 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - **Regenerar wallpaper + logo:** v1.0 tem ambiguidade visual (parece
   "TM T JOs" por causa do T grande central separando "TM" e "JOs").
   Refazer com tipografia "TMJOs" contínua. Em geração no Nano Banana.
-- **Investigar `ubuntu-desktop-bootstrap` popup:** o instalador novo
-  do Ubuntu 24.04 abre uma tela de erro "Something went wrong" ao
-  iniciar o live-CD do TMJOs. Não bloqueia (close → tudo funciona),
-  mas é cosmético ruim. Provável incompatibilidade com customizações
-  via Cubic.
+- **Validar fix do welcome popup:** v1.1 do customize.sh já suprime
+  ubuntu-desktop-installer / -provision / -bootstrap autostarts via
+  `Hidden=true`. Próximo build deve sair sem o popup. Manter no
+  backlog até confirmar visualmente que sumiu.
 - Ícone próprio do TMJPad
 - Empacotamento `.deb` do TMJPad
 - TMJPad: Find & Replace (Ctrl+F, Ctrl+H)
