@@ -17,8 +17,11 @@ em GitHub Pages.
 2. **APT repo público** em `packages.tmjos.dev` (ou fallback
    `tmjacometti.github.io/tmjos-packages`).
 3. **TMJOs Software Center** — GUI GTK4 sobre apt, branding TMJOs.
-4. **TMJCode** — primeiro app proprietário distribuído via store.
+4. **TMJPad re-empacotado** como `.deb` (primeiro app real no repo).
 5. **Polish residual:** GRUB visual theme, GDM customizado, sons.
+
+> **TMJCode foi movido pra v1.4** junto com TMJNotes — ambos são
+> apps novos que dependem da store estar madura.
 
 ---
 
@@ -123,16 +126,7 @@ GUI GTK4 sobre apt, listando apps com tag `tmjos-app`.
 - [ ] **Depends:** `python3-gi, gir1.2-gtk-4.0, packagekit`
 - [ ] Empacotado como `tmjos-store.deb` no APT repo
 
-### Fase 4 — TMJCode (primeiro app via store)
-
-VSCode customizado com extensões TMJOs default.
-
-- [ ] App em `apps/tmjcode/`
-- [ ] Wrapper que chama `code --extensions-dir ~/.tmjcode/...`
-- [ ] Instala extensões TMJOs default (theme, snippets, etc)
-- [ ] Empacotado como `tmjcode.deb` no APT repo
-
-### Fase 5 — Polish residual
+### Fase 4 — Polish residual
 
 - [ ] GRUB visual theme TMJOs (background + cores neon)
 - [ ] GDM (login screen) com wallpaper TMJOs

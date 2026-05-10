@@ -43,6 +43,18 @@ jobs:
           echo "$GPG_SIGNING_KEY" | gpg --batch --import
           gpg --list-secret-keys
 
+      - name: Vendor upstream files (apps/* → packages/sources/*/vendor/)
+        run: |
+          set -e
+          # Cada package que precisa de upstream tem um tools/vendor-<pkg>.sh
+          for vs in tools/vendor-*.sh; do
+              [ -f "$vs" ] || continue
+              echo "::group::Running $vs"
+              chmod +x "$vs"
+              "$vs"
+              echo "::endgroup::"
+          done
+
       - name: Build all packages in packages/sources/
         run: |
           set -e

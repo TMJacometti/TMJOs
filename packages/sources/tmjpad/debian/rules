@@ -1,0 +1,37 @@
+#!/usr/bin/make -f
+
+# TMJPad upstream lives in apps/tmjpad/ at the repo root. Pre-build
+# step (tools/vendor-tmjpad.sh, called by CI before dpkg-buildpackage)
+# copies the upstream files into ./vendor/. If the file isn't there,
+# fail with a clear message.
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	@if [ ! -d vendor/tmjpad ]; then \
+		echo ""; \
+		echo "ERROR: vendor/tmjpad/ missing."; \
+		echo "Run tools/vendor-tmjpad.sh from the repo root before building."; \
+		echo "(CI does this automatically via the build-deb workflow.)"; \
+		echo ""; \
+		exit 1; \
+	fi
+
+	# Python module → /opt/tmjpad/tmjpad/
+	mkdir -p debian/tmjpad/opt/tmjpad
+	cp -r vendor/tmjpad debian/tmjpad/opt/tmjpad/
+	chmod -R a+rX debian/tmjpad/opt/tmjpad
+
+	# Wrapper script → /usr/bin/tmjpad
+	mkdir -p debian/tmjpad/usr/bin
+	cp vendor/tmjpad-launcher.sh debian/tmjpad/usr/bin/tmjpad
+	chmod +x debian/tmjpad/usr/bin/tmjpad
+
+	# Desktop entry → /usr/share/applications/
+	mkdir -p debian/tmjpad/usr/share/applications
+	cp vendor/tmjpad.desktop debian/tmjpad/usr/share/applications/
+
+	# Icon → /usr/share/icons/hicolor/256x256/apps/tmjpad.png
+	mkdir -p debian/tmjpad/usr/share/icons/hicolor/256x256/apps
+	cp vendor/tmjpad.png debian/tmjpad/usr/share/icons/hicolor/256x256/apps/

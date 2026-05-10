@@ -5,7 +5,19 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [Backlog v1.4] — ideias futuras
+## [Backlog v1.4] — apps proprietários novos
+
+Versão centrada em apps. Depende da v1.3 ter shipado APT repo +
+TMJOs Software Center, porque ambos os apps abaixo são distribuídos
+via apt e listados na store.
+
+- **TMJCode** (VSCode customizado com tema/extensões TMJOs):
+  - Wrapper sobre VSCode upstream que injeta `--extensions-dir`
+    custom em `~/.tmjcode/extensions/`
+  - Tema dark TMJOs (paleta cyan/magenta neon)
+  - Extensões default pré-instaladas: prettier, eslint, tema TMJOs
+  - Comando: `tmjcode`
+  - Empacotado como `tmjcode.deb` no APT repo
 
 - **TMJNotes** (sticky notes nativas, estilo Microsoft Sticky Notes):
   - GTK4 + libadwaita (mesma stack do TMJPad)
@@ -18,7 +30,7 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Always-on-top opcional por nota
   - Markdown leve no texto (negrito, itálico, listas)
   - Comando: `tmjnotes` ou `tmjsticky`
-  - Distribuído via APT repo TMJOs (depende do repo estar de pé em v1.3)
+  - Empacotado como `tmjnotes.deb` no APT repo
 
 ## [1.2.x] — patches via apt (depende do APT repo da v1.3)
 

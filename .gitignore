@@ -76,3 +76,6 @@ packages/*.tar.*
 packages/db/
 packages/lists/
 packages/incoming/
+
+# Vendored upstream files (re-populados pelo tools/vendor-*.sh antes do build)
+packages/sources/*/vendor/
