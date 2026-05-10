@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=TMJOs Dock Sync
+Comment=Sincroniza GNOME favorite-apps com Plank dock-items
+Exec=/usr/bin/tmjos-dock-sync
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Phase=Applications

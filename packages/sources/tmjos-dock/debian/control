@@ -1,0 +1,37 @@
+Source: tmjos-dock
+Section: x11
+Priority: optional
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/TMJacometti/TMJOs
+
+Package: tmjos-dock
+Architecture: all
+Depends: ${misc:Depends},
+         plank,
+         xdotool,
+         desktop-file-utils
+Description: TMJOs Plank dock pre-configured with sticky launchers
+ Pre-configured Plank dock for TMJOs:
+  * /etc/skel/.config/plank/dock1/settings — bottom dock, transparent
+    theme, 48px icons, 4 pinned launchers (Todos os Apps + VSCode +
+    TMJPad + Terminal)
+  * /etc/skel/.config/plank/dock1/launchers/*.dockitem — INI files
+    Plank reads to render each launcher
+  * /etc/xdg/autostart/plank.desktop — starts Plank on every login
+    system-wide
+  * /etc/xdg/autostart/tmjos-first-run.desktop — copies the skel
+    config to the user's home if missing (needed for live-CD users
+    or users that predate the package)
+  * /etc/xdg/autostart/tmjos-dock-sync.desktop — runs the daemon
+    that mirrors GNOME favorite-apps into Plank dock-items
+  * /usr/bin/tmjos-show-apps — wrapper invoked by the All Apps
+    launcher; opens the GNOME Apps overview via xdotool Super+A
+    with toggle behavior (state file in $XDG_RUNTIME_DIR)
+  * /usr/bin/tmjos-first-run — every-login script: copies skel,
+    re-injects tmjos-show-apps as the first dock item if removed
+  * /usr/bin/tmjos-dock-sync — daemon: gsettings monitor on
+    org.gnome.shell.favorite-apps + writes to plank settings
+  * /usr/share/applications/tmjos-show-apps.desktop — Name="Todos
+    os Apps", Icon=view-app-grid-symbolic
