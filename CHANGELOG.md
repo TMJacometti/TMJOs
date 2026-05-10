@@ -229,6 +229,19 @@ v1.2.0 é o primeiro build com TUDO polido e Find/Replace funcional.
   - **Ícone próprio** (`apps/tmjpad/assets/logo/tmjpad.png`) instalado
     em `/usr/share/icons/hicolor/256x256/apps/tmjpad.png` — estilo
     macOS app icon com livro + letras T M J coloridas
+
+### Dock unificada — pin Activities ↔ Plank
+
+- **`tmjos-dock-sync` daemon** (`/usr/local/bin/tmjos-dock-sync`):
+  monitora `gsettings get org.gnome.shell favorite-apps` e replica as
+  mudanças em `~/.config/plank/dock1/settings`. Quando o usuário pina
+  um app pelo Activities Overview (right-click → Pin to Dash), o
+  launcher aparece automaticamente na Plank. Cria os `.dockitem`
+  faltantes em `launchers/` no caminho.
+- **Sticky:** `tmjos-show-apps.dockitem` permanece SEMPRE no início.
+- **Unidirecional** (Activities → Plank). A direção contrária
+  (Plank → Activities) precisa de lock anti-loop e fica pra v1.3.
+- Autostart entry em `/etc/xdg/autostart/tmjos-dock-sync.desktop`.
   - Instalado em `/opt/tmjpad/` com wrapper em `/usr/local/bin/tmjpad`
   - Entry no menu de apps (`/usr/share/applications/tmjpad.desktop`)
 

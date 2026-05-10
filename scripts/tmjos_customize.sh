@@ -478,6 +478,81 @@ Categories=Utility;
 Keywords=apps;launcher;launchpad;overview;
 EOF
 
+# 6h.5) Dock sync daemon — sincroniza GNOME favorite-apps → Plank dock-items
+# (unidirecional). Quando user pina app pelo Activities Overview, o launcher
+# aparece automaticamente na Plank. Bidirecional fica pra v1.3 com lock
+# anti-loop. tmjos-show-apps fica fixo no início.
+echo -e "  ${GREEN}→${NC} Dock sync daemon (Activities → Plank)"
+
+$SUDO tee /usr/local/bin/tmjos-dock-sync > /dev/null << 'EOF'
+#!/bin/sh
+# TMJOs Dock Sync: GNOME favorite-apps → Plank dock-items (unidirecional).
+# Cada vez que user pina/unpina via Activities, propaga pra Plank.
+PLANK_DIR="$HOME/.config/plank/dock1"
+PLANK_SETTINGS="$PLANK_DIR/settings"
+LAUNCHERS_DIR="$PLANK_DIR/launchers"
+
+sync_now() {
+    [ -f "$PLANK_SETTINGS" ] || return 0
+    mkdir -p "$LAUNCHERS_DIR"
+
+    # Pega lista de favorites: ['code.desktop', 'org.gnome.Nautilus.desktop']
+    favs=$(gsettings get org.gnome.shell favorite-apps 2>/dev/null || echo "[]")
+
+    # Build dock-items: tmjos-show-apps SEMPRE primeiro, depois favorites
+    items="'tmjos-show-apps.dockitem'"
+
+    # Parse a lista — split por vírgula, remove aspas/colchetes/espaços
+    apps=$(echo "$favs" | tr -d "[]" | tr ',' '\n' | tr -d "' " | sed 's|\.desktop$||')
+
+    for app in $apps; do
+        [ -n "$app" ] || continue
+        # Pula tmjos-show-apps (já tá no início)
+        [ "$app" = "tmjos-show-apps" ] && continue
+        # Pula apps cujo .desktop não existe (evita lixo)
+        [ -f "/usr/share/applications/$app.desktop" ] || continue
+
+        # Cria .dockitem se não existe
+        item_file="$LAUNCHERS_DIR/$app.dockitem"
+        if [ ! -f "$item_file" ]; then
+            cat > "$item_file" << DOCK
+[PlankDockItemPreferences]
+Launcher=file:///usr/share/applications/$app.desktop
+DOCK
+        fi
+
+        items="$items, '$app.dockitem'"
+    done
+
+    # Atualiza dock-items na settings (atomic via tmp)
+    if grep -q "^dock-items=" "$PLANK_SETTINGS"; then
+        sed -i "s|^dock-items=.*|dock-items=[$items]|" "$PLANK_SETTINGS"
+    fi
+}
+
+# Sync inicial
+sync_now
+
+# Loop: monitora mudanças em favorite-apps e re-sincroniza
+gsettings monitor org.gnome.shell favorite-apps 2>/dev/null | while read -r _; do
+    sync_now
+done
+EOF
+$SUDO chmod +x /usr/local/bin/tmjos-dock-sync
+
+# Autostart entry — roda no login junto com a sessão
+$SUDO tee /etc/xdg/autostart/tmjos-dock-sync.desktop > /dev/null << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=TMJOs Dock Sync
+Comment=Sincroniza GNOME favorite-apps com Plank dock-items
+Exec=/usr/local/bin/tmjos-dock-sync
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Phase=Applications
+EOF
+
 # 6h) First-run setup: copia config do Plank pro user atual se ainda não tem.
 # Isso resolve o caso do live-CD (user 'ubuntu' já existe, /etc/skel não foi
 # aplicado) e também usuários antigos que tinham a distro sem essa config.
