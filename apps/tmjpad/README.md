@@ -65,7 +65,7 @@ os buffers preservam o conteúdo mais recente.
 
 ## Status
 
-🚧 v0.1 — MVP em desenvolvimento. Parte do TMJOs v1.0.
+🚧 v0.1 — MVP em desenvolvimento. Parte do TMJOs v1.1.
 
 ## Licença
 

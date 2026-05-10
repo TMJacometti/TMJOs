@@ -5,9 +5,9 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [Backlog v1.1] — em planejamento
+## [Backlog v1.2] — em planejamento
 
-- GRUB theme com visual TMJOs (v1.0 só renomeia distributor para "TMJOs")
+- GRUB theme com visual TMJOs (v1.1 só renomeia distributor para "TMJOs")
 - Plymouth: progress bar animada além do breathing glow do logo
 - GDM (login screen) com wallpaper e logo TMJOs
 - Ícone próprio do TMJPad (atualmente usa o logo geral do TMJOs)
@@ -16,9 +16,16 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - Sounds de boot/shutdown customizados
 - ARM64 build
 
-## [1.0.0] - 2026-05-10
+## [1.1.0] - 2026-05-10
 
-Primeira release pública. **TMJOs 1.0 (codename: insano).**
+Primeira release pública. **TMJOs 1.1 (codename: insano).**
+
+### Nota sobre versionamento
+
+Pulamos v1.0.x pública. As primeiras builds internas (numeradas 1.0
+durante o desenvolvimento) eram smoke tests — saíram sem branding,
+sem Plymouth custom, com Ubuntu Dock duplicado e popups de instalador.
+v1.1.0 é o primeiro build com TUDO funcional e documentado.
 
 ### Adicionado — Sistema base
 - Distribuição base Ubuntu 24.04 LTS Desktop (kernel 6.8 GA)
@@ -101,5 +108,5 @@ Primeira release pública. **TMJOs 1.0 (codename: insano).**
   pacotes ficam instalados — o ícone "Install TMJOs" no desktop continua
   funcional, só os autostart popups são marcados `Hidden=true`.
 
-[Backlog v1.1]: https://github.com/TMJacometti/TMJOs/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/TMJacometti/TMJOs/releases/tag/v1.0.0
+[Backlog v1.2]: https://github.com/TMJacometti/TMJOs/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/TMJacometti/TMJOs/releases/tag/v1.1.0

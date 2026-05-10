@@ -175,10 +175,10 @@ $SUDO gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
 # 6c) /etc/os-release  e  /etc/lsb-release  (identidade do sistema)
 echo -e "  ${GREEN}→${NC} /etc/os-release identidade TMJOs"
 $SUDO tee /etc/os-release > /dev/null << 'EOF'
-PRETTY_NAME="TMJOs 1.0"
+PRETTY_NAME="TMJOs 1.1"
 NAME="TMJOs"
-VERSION_ID="1.0"
-VERSION="1.0 (insano)"
+VERSION_ID="1.1"
+VERSION="1.1 (insano)"
 VERSION_CODENAME=insano
 ID=tmjos
 ID_LIKE="ubuntu debian"
@@ -191,14 +191,14 @@ EOF
 
 $SUDO tee /etc/lsb-release > /dev/null << 'EOF'
 DISTRIB_ID=TMJOs
-DISTRIB_RELEASE=1.0
+DISTRIB_RELEASE=1.1
 DISTRIB_CODENAME=insano
-DISTRIB_DESCRIPTION="TMJOs 1.0"
+DISTRIB_DESCRIPTION="TMJOs 1.1"
 EOF
 
 # 6d) /etc/issue + /etc/issue.net  (texto exibido no login TTY)
 $SUDO tee /etc/issue > /dev/null << 'EOF'
-TMJOs 1.0 \n \l
+TMJOs 1.1 \n \l
 
 EOF
 $SUDO cp /etc/issue /etc/issue.net
@@ -571,7 +571,7 @@ $SUDO rm -rf /tmp/* /var/tmp/* 2>/dev/null || true
 $SUDO rm -rf /var/lib/apt/lists/* 2>/dev/null || true
 
 echo -e "\n${BLUE}╔═══════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║      ✓ TMJOs v1.0 customização completa!  ║${NC}"
+echo -e "${BLUE}║      ✓ TMJOs v1.1 customização completa!  ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════════╝${NC}\n"
 
 echo -e "${YELLOW}Próximos passos:${NC}"
