@@ -7,12 +7,25 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [Backlog v1.4] — apps proprietários novos + tweaks pendentes
 
-- **Activities button hide** (movido de v1.3): decidir entre:
-  - Extension GNOME Shell própria (GJS sandboxed, 4 linhas — robusto
-    cross-GNOME-version mas é código JS) ou
-  - Pesquisar selectors CSS do GNOME 46+ panel e atualizar o hack
-    via dpkg-divert (frágil entre releases mas zero código)
-  Decisão fica registrada quando v1.4 começar.
+- **Activities button hide** (movido de v1.3): decisão é **fazer sem
+  JavaScript** (user preferiu evitar até extensions GJS sandboxed).
+  Opções a explorar em ordem de preferência:
+  1. **CSS positioning off-screen** via dpkg-divert:
+     ```css
+     #panelLeft .panel-button:first-child {
+         position: absolute;
+         left: -99999px;
+     }
+     ```
+     Não depende de class names que mudam entre GNOME versions —
+     só posiciona o primeiro filho do panel esquerdo fora da tela.
+  2. **Tema GNOME Shell TMJOs** dedicado em `/usr/share/gnome-shell/
+     theme/TMJOs/` que `@import "../Yaru-dark/gnome-shell.css"`
+     no início e sobrescreve o que precisa. Setado via dconf
+     system-db `name="TMJOs"`. Mais robusto que dpkg-divert pra
+     manter customizações de longo prazo.
+  3. **Selectors CSS novos pra GNOME 46+** (último recurso — frágil
+     entre releases).
 
 
 Versão centrada em apps. Depende da v1.3 ter shipado APT repo +
