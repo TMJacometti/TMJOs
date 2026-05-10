@@ -329,9 +329,31 @@ X-GNOME-Autostart-Phase=Applications
 EOF
 
 # 6g) Plank user-level skel (pra users criados na instalação)
-echo -e "  ${GREEN}→${NC} Plank config em /etc/skel"
+# IMPORTANTE: dock-items na settings só lista nomes de .dockitem files —
+# os arquivos .dockitem PRECISAM existir em launchers/. Sem eles, Plank
+# ignora a entry silenciosamente e o dock fica vazio.
+echo -e "  ${GREEN}→${NC} Plank config em /etc/skel + .dockitem files"
 SKEL_PLANK_DIR="/etc/skel/.config/plank/dock1"
 $SUDO mkdir -p "$SKEL_PLANK_DIR/launchers"
+
+# Cria os 4 .dockitem que apontam pros .desktop instalados
+$SUDO tee "$SKEL_PLANK_DIR/launchers/tmjos-show-apps.dockitem" > /dev/null << 'DOCK'
+[PlankDockItemPreferences]
+Launcher=file:///usr/share/applications/tmjos-show-apps.desktop
+DOCK
+$SUDO tee "$SKEL_PLANK_DIR/launchers/code.dockitem" > /dev/null << 'DOCK'
+[PlankDockItemPreferences]
+Launcher=file:///usr/share/applications/code.desktop
+DOCK
+$SUDO tee "$SKEL_PLANK_DIR/launchers/tmjpad.dockitem" > /dev/null << 'DOCK'
+[PlankDockItemPreferences]
+Launcher=file:///usr/share/applications/tmjpad.desktop
+DOCK
+$SUDO tee "$SKEL_PLANK_DIR/launchers/org.gnome.Terminal.dockitem" > /dev/null << 'DOCK'
+[PlankDockItemPreferences]
+Launcher=file:///usr/share/applications/org.gnome.Terminal.desktop
+DOCK
+
 $SUDO tee "$SKEL_PLANK_DIR/settings" > /dev/null << 'EOF'
 [dock1]
 alignment='center'
@@ -399,7 +421,7 @@ $SUDO tee /usr/local/bin/tmjos-first-run > /dev/null << 'EOF'
 PLANK_DIR="$HOME/.config/plank/dock1"
 PLANK_SETTINGS="$PLANK_DIR/settings"
 
-# 1) First-time copy do Plank config do /etc/skel
+# 1) First-time copy do Plank config do /etc/skel (+ launchers/.dockitem)
 if [ ! -d "$HOME/.config/plank" ] && [ -d /etc/skel/.config/plank ]; then
     mkdir -p "$HOME/.config"
     cp -r /etc/skel/.config/plank "$HOME/.config/"
@@ -411,6 +433,18 @@ if [ -f "$PLANK_SETTINGS" ]; then
         sed -i "s|^dock-items=\[|dock-items=['tmjos-show-apps.dockitem', |" \
             "$PLANK_SETTINGS"
     fi
+fi
+
+# 2b) Garante que TODOS os .dockitem necessários existem em launchers/.
+# Se algum estiver faltando (config inconsistente entre versões), copia
+# do /etc/skel pra evitar Plank vazio.
+LAUNCHERS_DIR="$PLANK_DIR/launchers"
+if [ -d "$LAUNCHERS_DIR" ] && [ -d /etc/skel/.config/plank/dock1/launchers ]; then
+    for src in /etc/skel/.config/plank/dock1/launchers/*.dockitem; do
+        [ -f "$src" ] || continue
+        dest="$LAUNCHERS_DIR/$(basename "$src")"
+        [ ! -f "$dest" ] && cp "$src" "$dest"
+    done
 fi
 
 # 3) SLIM PLUS — Disable tracker3 (indexação de arquivos pesa ~300MB RAM
