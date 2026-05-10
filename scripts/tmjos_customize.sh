@@ -435,6 +435,35 @@ $SUDO find /etc/xdg/autostart/ -maxdepth 1 -type f -name '*.desktop' 2>/dev/null
     esac
 done
 
+# 6i.2) Release notes URL — Ubuntu hardcoda
+# http://www.ubuntu.com/getubuntu/releasenotes?os=ubuntu&ver=24.04.4&lang=${LANG}
+# em vários arquivos (boot menus, GRUB cfg, casper, .disk/release_notes_url).
+# Substitui por URL pública do CHANGELOG/Release do TMJOs.
+echo -e "  ${GREEN}→${NC} Release notes URL → CHANGELOG TMJOs"
+TMJOS_RELEASE_URL="https://github.com/TMJacometti/TMJOs/blob/main/CHANGELOG.md"
+
+# Procura em /etc, /usr/share, /usr/lib, /cdrom, /isolinux, /boot
+# por strings tipo 'ubuntu.com/getubuntu/releasenotes' e troca pela URL TMJOs.
+# Inclui GRUB cfg, casper script, .disk metadata, update-manager configs.
+SEARCH_DIRS=(/etc /usr/share /usr/lib /cdrom /isolinux /boot)
+for d in "${SEARCH_DIRS[@]}"; do
+    [ -d "$d" ] || continue
+    $SUDO grep -rlI "ubuntu.com/getubuntu/releasenotes" "$d" 2>/dev/null | while read -r f; do
+        $SUDO sed -i \
+            "s|http[s]\?://www\.ubuntu\.com/getubuntu/releasenotes[^\"' )]*|$TMJOS_RELEASE_URL|g" \
+            "$f" 2>/dev/null && echo "    rewrote $f"
+    done
+done
+
+# .disk/release_notes_url (texto puro com URL) — algumas vezes o Cubic
+# regenera, mas se existir no chroot, atualizamos.
+for f in /cdrom/.disk/release_notes_url /.disk/release_notes_url; do
+    if [ -f "$f" ]; then
+        echo "$TMJOS_RELEASE_URL" | $SUDO tee "$f" > /dev/null
+        echo "    rewrote $f"
+    fi
+done
+
 # 6j) Boot identity: GRUB menu + Plymouth splash sem "Ubuntu"
 echo -e "  ${GREEN}→${NC} Boot identity (GRUB distributor + Plymouth tema)"
 
