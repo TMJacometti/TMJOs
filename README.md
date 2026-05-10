@@ -2,7 +2,7 @@
 
 > **Clean • Minimal • Beautiful** — A customized Ubuntu-based Linux distribution designed for developers.
 
-![TMJOs](https://img.shields.io/badge/version-1.1-blue)
+![TMJOs](https://img.shields.io/badge/version-1.2-blue)
 ![License](https://img.shields.io/badge/license-GPLv3-green)
 ![Ubuntu](https://img.shields.io/badge/based%20on-Ubuntu%2024.04%20LTS-orange)
 ![GNOME](https://img.shields.io/badge/desktop-GNOME-blue)
@@ -32,10 +32,10 @@ TMJOs é uma distribuição Linux customizada baseada em **Ubuntu 24.04 LTS**, c
 
 ```bash
 # 1. Baixar ISO
-wget https://github.com/tmjacometti/tmjos/releases/download/v1.1/tmjos-1.1-amd64.iso
+wget https://github.com/tmjacometti/tmjos/releases/download/v1.2/tmjos-1.2-amd64.iso
 
 # 2. Criar LiveUSB
-sudo dd if=tmjos-1.1-amd64.iso of=/dev/sdX bs=4M status=progress && sync
+sudo dd if=tmjos-1.2-amd64.iso of=/dev/sdX bs=4M status=progress && sync
 
 # 3. Botar pela pen e instalar
 # Seguir o installer padrão do Ubuntu
@@ -206,7 +206,7 @@ git push origin feature/sua-feature
 
 ## 📋 Roadmap
 
-### ✅ v1.1 (Current — codename: insano)
+### ✅ v1.2 (Current — codename: insano)
 - [x] Base GNOME limpa
 - [x] Plank dock (tipo Mac) na base + autostart system-wide
 - [x] Launcher "Todos os Apps" no Plank (estilo macOS Launchpad)
@@ -217,19 +217,21 @@ git push origin feature/sua-feature
 - [x] Logo TMJOs PNG (3 variantes: Circular, Rounded, Square)
 - [x] Dark mode default + dconf system-wide
 - [x] Fonts: JetBrains Mono, Cantarell, Noto Color Emoji
-- [x] **Plymouth boot splash com logo TMJOs** (breathing glow)
+- [x] **Plymouth boot splash** com logo TMJOs (breathing glow) + watermark TMJSistemas em vermelho sangue
 - [x] **GRUB rebrand** (`GRUB_DISTRIBUTOR=TMJOs`)
 - [x] Identidade própria (`/etc/os-release`, `/etc/lsb-release`)
 - [x] Welcome popups do Ubuntu installer suprimidos
+- [x] **TMJPad Find & Replace** (Ctrl+F, Ctrl+H)
+- [x] Activities button escondido (Just Perfection)
+- [x] **VM integration**: spice-vdagent + qemu-guest-agent (clipboard, drag-drop)
 - [x] ISO ~3GB
 - [x] Documentação completa
 
-### 🔄 v1.2 (Próxima)
+### 🔄 v1.3 (Próxima)
 - [ ] GRUB **visual theme** TMJOs (não só nome)
 - [ ] Plymouth: progress bar animada além do breathing glow
 - [ ] GDM (login screen) com wallpaper TMJOs
 - [ ] Empacotamento `.deb` do TMJPad
-- [ ] TMJPad: Find & Replace (Ctrl+F, Ctrl+H)
 - [ ] TMJPad: ícone próprio
 - [ ] Sons custom de boot/shutdown
 - [ ] **APT repo próprio** (`packages.tmjos.dev`) — distribuir apps TMJOs via apt
@@ -265,7 +267,7 @@ Se aplicável, adicione prints
 
 **Ambiente:**
 - Hardware: [ex: Notebook Dell XPS]
-- ISO version: [ex: v1.1]
+- ISO version: [ex: v1.2]
 - Testem em: [ex: VM/Hardware real]
 ```
 

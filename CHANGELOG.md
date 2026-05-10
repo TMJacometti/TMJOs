@@ -5,9 +5,9 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [Backlog v1.2] — em planejamento
+## [Backlog v1.3] — em planejamento
 
-- GRUB theme com visual TMJOs (v1.1 só renomeia distributor para "TMJOs")
+- GRUB theme com visual TMJOs (v1.2 só renomeia distributor para "TMJOs")
 - Plymouth: progress bar animada além do breathing glow do logo
 - GDM (login screen) com wallpaper e logo TMJOs
 - Ícone próprio do TMJPad (atualmente usa o logo geral do TMJOs)
@@ -27,18 +27,45 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
   TMJOs completo. Depende do APT repo estar de pé primeiro.
 - **Apps proprietários previstos** (atualmente em ideação, não implementados):
   - **TMJCode** — VSCode customizado com tema/extensões TMJOs
-  - **TMJPad** já lançado em v1.1, será reembalado como `.deb` no repo
+  - **TMJPad** já lançado em v1.2, será reembalado como `.deb` no repo
 
-## [1.1.0] - 2026-05-10
+## [1.2.0] - 2026-05-10
 
-Primeira release pública. **TMJOs 1.1 (codename: insano).**
+Primeira release pública. **TMJOs 1.2 (codename: insano).**
 
 ### Nota sobre versionamento
 
-Pulamos v1.0.x pública. As primeiras builds internas (numeradas 1.0
-durante o desenvolvimento) eram smoke tests — saíram sem branding,
-sem Plymouth custom, com Ubuntu Dock duplicado e popups de instalador.
-v1.1.0 é o primeiro build com TUDO funcional e documentado.
+Pulamos v1.0.x e v1.1.x públicas. As primeiras builds internas
+(numeradas 1.0 e 1.1 durante o desenvolvimento) eram smoke tests:
+- v1.0 saía sem branding, Plymouth custom, com Ubuntu Dock duplicado
+  e popups de instalador.
+- v1.1 chegou a mostrar Plymouth TMJOs sob KVM e branding visual,
+  mas ainda tinha Activities button visível, Plank com 6 ícones em
+  vez de 4, sem Find/Replace no TMJPad e sem watermark TMJSistemas.
+
+v1.2.0 é o primeiro build com TUDO polido e Find/Replace funcional.
+
+### Novidades em v1.2 (não estavam em v1.0/v1.1)
+
+- **TMJPad ganhou Find & Replace** — Ctrl+F (busca), Ctrl+H (busca +
+  replace), Esc fecha, Enter/Shift+Enter navega entre matches, Replace
+  All com undo único.
+- **Plymouth watermark "TMJSistemas"** em vermelho sangue com glow no
+  centro do splash.
+- **Plymouth layout reorganizado** — logo TMJOs pequeno (80x80) +
+  "Loading..." no rodapé, em vez do logo grande no centro.
+- **Activities button escondido** via Just Perfection extension.
+- **Plank trim:** 4 launchers default (Todos os Apps + VSCode + TMJPad
+  + Terminal) em vez dos 6 anteriores.
+- **"Todos os Apps" sticky:** o launcher é re-injetado no dock se o
+  usuário tentar remover.
+- **Welcome popup do Ubuntu installer:** suprimido via Hidden=true.
+- **Wallpaper upscaled:** 1920x1080 (e variante 4K em
+  tmjos_wallpaper_4k.png) com Lanczos.
+- **VM/host integration:** spice-vdagent + qemu-guest-agent permitem
+  clipboard QEMU↔Host, drag-drop, dynamic resize.
+- **Fonts:** fonts-jetbrains-mono explicitamente instalado (referenciado
+  no dconf default monospace).
 
 ### Adicionado — Sistema base
 - Distribuição base Ubuntu 24.04 LTS Desktop (kernel 6.8 GA)
@@ -123,5 +150,5 @@ v1.1.0 é o primeiro build com TUDO funcional e documentado.
   pacotes ficam instalados — o ícone "Install TMJOs" no desktop continua
   funcional, só os autostart popups são marcados `Hidden=true`.
 
-[Backlog v1.2]: https://github.com/TMJacometti/TMJOs/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/TMJacometti/TMJOs/releases/tag/v1.1.0
+[Backlog v1.3]: https://github.com/TMJacometti/TMJOs/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/TMJacometti/TMJOs/releases/tag/v1.2.0
