@@ -8,10 +8,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-branding/tmjos-branding_1.3.0-1_all.deb
-Size: 8987314
-SHA256: 01f31aee35b1ea1d5904793ae5d82b616c628a26cf0a10573e216e7e7b9855e7
-SHA1: ab29d9741eb4505155e995dec71162f52ca5a5e8
-MD5sum: ab28bce20ace56c8dbb4f52af3c1332c
+Size: 8987300
+SHA256: 3023ab6d54bb1cf09d0f4058026739a5d3153c40ffac0211862abc080659028b
+SHA1: b8bd20ad585c2723be878a653164f96673e0e5c0
+MD5sum: c51eed41dbefb67627e86bb467a89463
 Description: TMJOs branding assets (wallpapers, logos, Plymouth theme)
  Visual identity pieces of TMJOs:
   * Wallpapers: tmjos_wallpaper.png (1920x1080) + 4K variant in
@@ -39,9 +39,9 @@ Priority: optional
 Section: gnome
 Filename: pool/main/t/tmjos-defaults/tmjos-defaults_1.3.0-1_all.deb
 Size: 2334
-SHA256: e04591b80b11a8fb3c439ca1923c0d64a8a85a9f71fb934f75a87a08fa8d1fc9
-SHA1: 98e2574063a58bb779dd4b1b72aa145b3e923f00
-MD5sum: 0b6f2ddb3132bda008ac7f37ae99e596
+SHA256: 02f17059558e02da918b6cdb5cd443d507bc3861980f6c8f3d57066273ace9ef
+SHA1: 768eb55d6b44164f87fff827e08401e96e77794f
+MD5sum: 5ed8d727d1561c6305edcb1f62a38ce5
 Description: TMJOs system-wide dconf defaults (dark mode, fonts, dock-off)
  Sets system-wide dconf defaults for the TMJOs experience:
   * Dark color scheme (color-scheme=prefer-dark, gtk-theme=Adwaita-dark)
@@ -68,10 +68,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: x11
 Filename: pool/main/t/tmjos-dock/tmjos-dock_1.3.0-1_all.deb
-Size: 4674
-SHA256: da7d301db56e2abdbaa7403d9edee19810a4338ca89b59715940370a95b6907b
-SHA1: 50883152645cdd8762c7427b90e615f1f5225b1b
-MD5sum: 76b6070445a6b175eb159e8971735f1f
+Size: 4678
+SHA256: e1fb9be56ff4e00f36b3ce1b3cb845db99d741b8cc8b458deb9119a360cdcd26
+SHA1: a96de5965a485e11907160edbaa0e814af708354
+MD5sum: 1f9c63db8a7a7e4e4f4c26e8bf58fced
 Description: TMJOs Plank dock pre-configured with sticky launchers
  Pre-configured Plank dock for TMJOs:
   * /etc/skel/.config/plank/dock1/settings — bottom dock, transparent
@@ -128,10 +128,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-os-identity/tmjos-os-identity_1.3.0-1_all.deb
-Size: 2034
-SHA256: a5c05057c1b705297dfd4449e95d0845c86b577dac26c1543004226ad75cd2c0
-SHA1: 79bc1b0b5297a9430a78feaec37d1ad1374059fa
-MD5sum: 2f132f0ce48c31c6b947ace9fa1fdf94
+Size: 2040
+SHA256: 340e64fbfc6cbe8bedc28fb0e6d3c68d7d3b30b821d9ba1d2a4cf419c0810bcc
+SHA1: 137bd8c62d314674c73b01bd61ac9e8b6d4bead7
+MD5sum: a54887a2fb40cf645214715247e734f1
 Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
  Replaces the Ubuntu identity files with TMJOs-branded versions:
   * /etc/os-release    — TMJOs 1.x (insano), shows in GNOME About
@@ -149,6 +149,37 @@ Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
  .
  Conflicts with base-files (the package that normally owns these
  files in Ubuntu) so dpkg knows to take over the slots cleanly.
+
+Package: tmjos-shell-tweaks
+Version: 1.3.0-1
+Architecture: all
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Installed-Size: 11
+Depends: dpkg
+Homepage: https://github.com/TMJacometti/TMJOs
+Priority: optional
+Section: gnome
+Filename: pool/main/t/tmjos-shell-tweaks/tmjos-shell-tweaks_1.3.0-1_all.deb
+Size: 2342
+SHA256: 21884f92a25b0c7883dd90909b111956f7d1fa0997cb4f817837493ee96eeb6d
+SHA1: a23b7bb6a4fda2989e9ce80baf0ba12b66d06cdc
+MD5sum: a8d76a174da26f3a4b7c320fb1983d5a
+Description: TMJOs GNOME Shell tweaks (hide Activities button)
+ Hides the GNOME Activities button in the top-left corner of the
+ panel — TMJOs uses Plank's "Todos os Apps" launcher as the entry
+ point to the apps overview, so the Activities button is redundant
+ and visually clutters the top bar.
+ .
+ Implementation:
+  - Uses dpkg-divert to take ownership of /usr/share/gnome-shell/
+    theme/Yaru/gnome-shell.css and Yaru-dark variant. The original
+    files are renamed with .tmjos-orig suffix so removing this
+    package restores them cleanly.
+  - Appends a small CSS rule to the diverted files that sets
+    visibility:hidden + width:0 on the activities button.
+ .
+ Reversible: removing the package undoes the divert and restores
+ the upstream Yaru theme bytes for byte.
 
 Package: tmjpad
 Version: 0.1.1-1
