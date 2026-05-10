@@ -115,7 +115,8 @@ $SUDO apt install -y code git git-flow docker.io docker-compose
 
 # Dock + customização GNOME
 $SUDO apt install -y plank gnome-tweaks dconf-editor \
-    gnome-shell-extensions gnome-shell-extension-manager
+    gnome-shell-extensions gnome-shell-extension-manager \
+    gnome-shell-extension-just-perfection
 
 # CLI essenciais
 $SUDO apt install -y curl wget htop neofetch vim nano build-essential \
@@ -235,10 +236,20 @@ clock-show-weekday=false
 
 [org/gnome/shell]
 favorite-apps=['code.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'tmjpad.desktop', 'gnome-control-center.desktop']
-# Desabilita Ubuntu Dock (barra vertical lateral) e ícones do desktop —
-# TMJOs usa Plank na base, sem ícones flutuando no desktop. Sem essas
-# duas linhas, fica dois docks competindo + ícones de Home/Trash visíveis.
+# Desabilita Ubuntu Dock (barra vertical lateral) e ícones do desktop.
+# Habilita Just Perfection pra esconder Activities button + outros polish.
 disabled-extensions=['ubuntu-dock@ubuntu.com', 'ubuntu-appindicators@ubuntu.com', 'ding@rastersoft.com']
+enabled-extensions=['just-perfection-desktop@just-perfection']
+
+# Just Perfection: esconde Activities button no top bar e o app picker
+# que aparece no overview (TMJOs usa Plank + "Todos os Apps" launcher).
+[org/gnome/shell/extensions/just-perfection]
+activities-button=false
+app-menu=false
+panel-arrow=false
+search=true
+workspace=true
+window-picker-icon=true
 EOF
 
 $SUDO dconf update
