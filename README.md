@@ -232,6 +232,9 @@ git push origin feature/sua-feature
 - [ ] TMJPad: Find & Replace (Ctrl+F, Ctrl+H)
 - [ ] TMJPad: ícone próprio
 - [ ] Sons custom de boot/shutdown
+- [ ] **APT repo próprio** (`packages.tmjos.dev`) — distribuir apps TMJOs via apt
+- [ ] **TMJOs Software Center** (GTK4 GUI) — store com branding TMJOs sobre apt
+- [ ] **TMJCode** v0.1 — VSCode customizado TMJOs (primeiro app via store)
 
 ### 🚀 v2.0 (Futuro)
 - [ ] TMJCode (VSCode customizado com tema TMJOs)

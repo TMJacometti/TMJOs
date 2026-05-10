@@ -16,6 +16,20 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - Sounds de boot/shutdown customizados
 - ARM64 build
 
+### Loja própria de apps TMJOs
+
+- **APT repo próprio** (`packages.tmjos.dev` ou `tmjacometti.github.io/tmjos-packages`):
+  hospedado em GitHub Pages, GPG key pra assinatura, GitHub Action que
+  empacota cada app em `.deb` a cada push. Usuário roda `apt install
+  tmjpad` / `tmjcode` / `tmj*` e `apt upgrade` cuida das atualizações.
+  ISO já vem com o repo pré-configurado em `/etc/apt/sources.list.d/tmjos.list`.
+- **TMJOs Software Center** (GTK4 GUI): wrapper visual sobre o APT repo
+  acima — lista apps TMJOs, busca, instala/atualiza com 1 click. Branding
+  TMJOs completo. Depende do APT repo estar de pé primeiro.
+- **Apps proprietários previstos** (atualmente em ideação, não implementados):
+  - **TMJCode** — VSCode customizado com tema/extensões TMJOs
+  - **TMJPad** já lançado em v1.1, será reembalado como `.deb` no repo
+
 ## [1.1.0] - 2026-05-10
 
 Primeira release pública. **TMJOs 1.1 (codename: insano).**
