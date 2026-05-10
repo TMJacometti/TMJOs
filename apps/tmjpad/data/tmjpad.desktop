@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=TMJPad
+GenericName=Text Editor
+Comment=Editor de texto sem frescura, com persistência total
+Comment[en]=No-frills text editor with full session persistence
+Exec=tmjpad %F
+Terminal=false
+Categories=Utility;TextEditor;Development;
+Keywords=text;editor;notepad;
+Icon=accessories-text-editor
+StartupNotify=true
+MimeType=text/plain;text/markdown;application/x-shellscript;text/x-python;
