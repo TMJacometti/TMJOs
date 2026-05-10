@@ -73,6 +73,15 @@ v1.2.0 é o primeiro build com TUDO polido e Find/Replace funcional.
 - **Fonts:** fonts-jetbrains-mono explicitamente instalado (referenciado
   no dconf default monospace).
 - **Release notes URL** rebranded para o CHANGELOG do TMJOs.
+- **Esquema "branding visual + compat scripts" pra identidade do sistema:**
+  - `/etc/os-release` → TMJOs 1.2 (insano), visível no GNOME About e
+    ferramentas modernas que leem esse arquivo.
+  - `/etc/lsb-release` → 100% Ubuntu noble. Crítico pra `add-apt-repository`,
+    scripts de install (NodeJS, Docker, k8s) que usam `$(lsb_release -cs)`.
+    Sem isso, todo PPA install retorna 404 ("suite insano not found").
+  - Trade-off: `lsb_release -a` no terminal mostra "Ubuntu 24.04 LTS" em
+    vez de TMJOs. Decisão consciente — compat de scripts > vaidade do
+    terminal output. GNOME About mostra TMJOs corretamente.
 
 ### Slim Aggressive — RAM idle ~700MB, ISO ~2GB (target: notebooks 4GB)
 

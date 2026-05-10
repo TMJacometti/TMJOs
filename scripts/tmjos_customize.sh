@@ -200,8 +200,21 @@ $SUDO cp "$TMJOS_SRC"/assets/logos/TMJOs_Logo_Square.png   /usr/share/icons/tmjo
 # Refresh icon cache (silencia warnings se hicolor não tiver index)
 $SUDO gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
 
-# 6c) /etc/os-release  e  /etc/lsb-release  (identidade do sistema)
-echo -e "  ${GREEN}→${NC} /etc/os-release identidade TMJOs"
+# 6c) /etc/os-release e /etc/lsb-release — esquema "branding + compat":
+#
+#   /etc/os-release  → identidade TMJOs (codename "insano"). Visível no
+#                      GNOME "About this computer" e ferramentas modernas.
+#                      Mantém UBUNTU_CODENAME=noble pra ferramentas que
+#                      sabem buscar essa key específica.
+#   /etc/lsb-release → 100% Ubuntu vanilla (DISTRIB_CODENAME=noble).
+#                      Crítico pra:
+#                        - add-apt-repository ppa:foo/bar (usa lsb_release -cs)
+#                        - scripts de install (NodeJS NodeSource, Docker
+#                          install.sh, k8s, etc.) que fazem
+#                          $(lsb_release -cs) e esperam um codename Ubuntu
+#                          válido.
+#                      Sem isso, todo PPA install retorna 404.
+echo -e "  ${GREEN}→${NC} /etc/os-release identidade TMJOs (visual)"
 $SUDO tee /etc/os-release > /dev/null << 'EOF'
 PRETTY_NAME="TMJOs 1.2"
 NAME="TMJOs"
@@ -217,11 +230,12 @@ UBUNTU_CODENAME=noble
 LOGO=tmjos
 EOF
 
+echo -e "  ${GREEN}→${NC} /etc/lsb-release Ubuntu noble (compat scripts/PPAs)"
 $SUDO tee /etc/lsb-release > /dev/null << 'EOF'
-DISTRIB_ID=TMJOs
-DISTRIB_RELEASE=1.2
-DISTRIB_CODENAME=insano
-DISTRIB_DESCRIPTION="TMJOs 1.2"
+DISTRIB_ID=Ubuntu
+DISTRIB_RELEASE=24.04
+DISTRIB_CODENAME=noble
+DISTRIB_DESCRIPTION="Ubuntu 24.04 LTS"
 EOF
 
 # 6d) /etc/issue + /etc/issue.net  (texto exibido no login TTY)
@@ -652,11 +666,17 @@ check_file "TMJPad code" "/opt/tmjpad/tmjpad/app.py"
 check_file "TMJPad wrapper" "/usr/local/bin/tmjpad"
 check_file "TMJPad .desktop" "/usr/share/applications/tmjpad.desktop"
 
-# Confirma que /etc/os-release foi sobrescrito
+# Confirma identidade TMJOs em os-release
 if grep -q '^NAME="TMJOs"' /etc/os-release; then
-    echo -e "  ${GREEN}✓${NC} /etc/os-release identidade: TMJOs"
+    echo -e "  ${GREEN}✓${NC} /etc/os-release identidade: TMJOs (visual)"
 else
     echo -e "  ${RED}✗${NC} /etc/os-release identidade: ainda Ubuntu (algo deu errado)"
+fi
+# Confirma que lsb-release ficou Ubuntu (compat scripts)
+if grep -q '^DISTRIB_CODENAME=noble' /etc/lsb-release; then
+    echo -e "  ${GREEN}✓${NC} /etc/lsb-release codename: noble (compat scripts/PPAs)"
+else
+    echo -e "  ${RED}✗${NC} /etc/lsb-release codename: NÃO é noble — PPAs vão quebrar"
 fi
 
 # Limpeza
