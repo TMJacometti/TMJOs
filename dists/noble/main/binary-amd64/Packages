@@ -8,10 +8,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-branding/tmjos-branding_1.3.0-1_all.deb
-Size: 8987318
-SHA256: 12fdb1cae102ac36717df2b31d6470be885dc04c49af58bc08da08b36ed62281
-SHA1: bec551b68d5d904b844cb4327852748013d761e4
-MD5sum: 64e7d5c6f7e4162605eac9d5b914b218
+Size: 8987294
+SHA256: 16312089f3a0eee971d2379fc1ff2d37f60a6a7cf4f1557286ac5e55acd3f2bb
+SHA1: dc0f9cb72f90bbf2e18e1b8d3daf16c1be6b6f3e
+MD5sum: 442590f9176efe33079408a861f73b17
 Description: TMJOs branding assets (wallpapers, logos, Plymouth theme)
  Visual identity pieces of TMJOs:
   * Wallpapers: tmjos_wallpaper.png (1920x1080) + 4K variant in
@@ -48,6 +48,39 @@ Description: TMJOs pipeline smoke test package
  .
  Provides a single command `tmjos-hello` that prints a banner.
  Safe to keep installed; safe to remove.
+
+Package: tmjos-os-identity
+Version: 1.3.0-1
+Architecture: all
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Installed-Size: 13
+Conflicts: base-files (<< 999~)
+Replaces: base-files (<< 999~)
+Homepage: https://github.com/TMJacometti/TMJOs
+Priority: optional
+Section: misc
+Filename: pool/main/t/tmjos-os-identity/tmjos-os-identity_1.3.0-1_all.deb
+Size: 2034
+SHA256: 403d08743d2d4013b9bcd3a75e2e662566c67dabfa965e812bcfe7ced869a905
+SHA1: ecd34113121b89cd7d9e540e0aed0c1964042389
+MD5sum: cda2bd8eba999a41578d7f090ab8acfa
+Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
+ Replaces the Ubuntu identity files with TMJOs-branded versions:
+  * /etc/os-release    — TMJOs 1.x (insano), shows in GNOME About
+                         and modern tools that read PRETTY_NAME / ID
+  * /etc/lsb-release   — KEPT AS UBUNTU NOBLE intentionally so that
+                         add-apt-repository, NodeJS install scripts,
+                         Docker get.docker.com, k8s setup and every
+                         other "lsb_release -cs"-based script
+                         continues to find a valid Ubuntu codename.
+                         Identity is shown via /etc/os-release; lsb
+                         is for compat.
+  * /etc/issue         — "TMJOs <ver> \n \l" banner shown at TTY login
+  * /etc/issue.net     — same content for telnet/ssh banner
+  * /etc/lsb-release   keeps DISTRIB_ID=Ubuntu (script compatibility)
+ .
+ Conflicts with base-files (the package that normally owns these
+ files in Ubuntu) so dpkg knows to take over the slots cleanly.
 
 Package: tmjpad
 Version: 0.1.1-1
