@@ -129,6 +129,12 @@ $SUDO apt install -y python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
 # GNOME cai pra fallback feio. Cantarell já vem mas garantimos.
 $SUDO apt install -y fonts-jetbrains-mono fonts-cantarell fonts-noto-color-emoji
 
+# VM/hypervisor integration — spice-vdagent dá clipboard, drag-drop e
+# resize automático com host quando rodando em QEMU/KVM/GNOME Boxes/
+# virt-manager. qemu-guest-agent permite host enviar comandos ao guest.
+# Inofensivos em hardware real (services não iniciam sem host suportar).
+$SUDO apt install -y spice-vdagent qemu-guest-agent
+
 # ===========================================
 # FASE 5 — Clonar repo TMJOs (pra pegar assets)
 # ===========================================
