@@ -5,7 +5,15 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [Backlog v1.4] — apps proprietários novos
+## [Backlog v1.4] — apps proprietários novos + tweaks pendentes
+
+- **Activities button hide** (movido de v1.3): decidir entre:
+  - Extension GNOME Shell própria (GJS sandboxed, 4 linhas — robusto
+    cross-GNOME-version mas é código JS) ou
+  - Pesquisar selectors CSS do GNOME 46+ panel e atualizar o hack
+    via dpkg-divert (frágil entre releases mas zero código)
+  Decisão fica registrada quando v1.4 começar.
+
 
 Versão centrada em apps. Depende da v1.3 ter shipado APT repo +
 TMJOs Software Center, porque ambos os apps abaixo são distribuídos
@@ -47,6 +55,15 @@ via apt e listados na store.
   `--no-rename` em postinst/postrm. dpkg loga warning sobre
   rename de Essential package — funciona OK mas é boa prática
   evitar. Patch via apt upgrade quando alguém abrir.
+
+- **Activities button visível no GNOME 46:** v1.3 mantém
+  `tmjos-shell-tweaks 1.3.0-1` com CSS hack via dpkg-divert. O
+  selector `.panel-button.activities-button` deixou de matchar
+  em GNOME 46, então o hack é no-op mas continua instalado
+  sem dano. O Activities button aparece no top-left. Decisão:
+  resolver em v1.4 — escolher entre extension GNOME Shell própria
+  (4 linhas de GJS sandboxed) ou pesquisar novos selectors do
+  panel pra cada major GNOME release.
 
 ## [Backlog v1.3] — em planejamento
 
