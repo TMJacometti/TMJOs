@@ -22,6 +22,19 @@ tmjos-build/
 *.swo
 *~
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+.venv/
+venv/
+
 # OS
 .DS_Store
 Thumbs.db
