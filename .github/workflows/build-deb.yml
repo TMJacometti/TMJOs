@@ -80,6 +80,8 @@ jobs:
           set -e
           mkdir -p apt-repo
           cp -r packages/conf apt-repo/
+          # Custom domain pra GitHub Pages (persistido todo deploy)
+          echo 'packages.tmjos.com.br' > apt-repo/CNAME
           # Importa as .debs no reprepro
           for deb in packages/dist/*.deb; do
               echo "Adding $deb to reprepro..."
@@ -103,12 +105,13 @@ jobs:
           <h1>🐉 TMJOs APT Repo</h1>
           <p>Pacotes oficiais TMJOs assinados com GPG.</p>
           <h2>Setup</h2>
-          <pre><code>curl -fsSL https://tmjacometti.github.io/TMJOs/keys/tmjos-archive-keyring.gpg \
+          <pre><code>curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg \
             | sudo tee /usr/share/keyrings/tmjos-archive-keyring.gpg > /dev/null
           echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] \
-            https://tmjacometti.github.io/TMJOs/ noble main' \
+            https://packages.tmjos.com.br/ noble main' \
             | sudo tee /etc/apt/sources.list.d/tmjos.list
-          sudo apt update</code></pre>
+          sudo apt update
+          sudo apt install tmjos</code></pre>
           <h2>Pacotes disponíveis</h2>
           <p>Veja <a href="dists/noble/main/binary-amd64/Packages">Packages</a></p>
           </body></html>
