@@ -20,6 +20,15 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Comando: `tmjnotes` ou `tmjsticky`
   - Distribuído via APT repo TMJOs (depende do repo estar de pé em v1.3)
 
+## [1.2.x] — patches via apt (depende do APT repo da v1.3)
+
+- **TMJPad usa o logo geral do TMJOs em vez do ícone próprio**
+  (livro azul). PNG foi copiado pra
+  `/usr/share/icons/hicolor/256x256/apps/tmjpad.png` mas GTK icon
+  cache não pegou ou conflitou. Será o **primeiro caso de teste do
+  sistema de updates v1.3**: empacota `tmjpad_0.1.1_all.deb` com o
+  fix do cache e users instalados rodam `apt upgrade tmjpad`.
+
 ## [Backlog v1.3] — em planejamento
 
 (Slim Aggressive foi promovido pra v1.2 — todos os cortes, disable de
