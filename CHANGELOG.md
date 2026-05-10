@@ -48,6 +48,71 @@ tracker3 e adição de zram/preload já entram na release pública.)
   - **TMJCode** — VSCode customizado com tema/extensões TMJOs
   - **TMJPad** já lançado em v1.2, será reembalado como `.deb` no repo
 
+### Sistema de updates do core do TMJOs (CRÍTICO)
+
+Hoje as customizações TMJOs (branding, dconf, plymouth, plank skel,
+os-release, scripts) são aplicadas **só durante o build da ISO** via
+customize.sh. Sistemas já instalados ficam congelados — não recebem
+fixes nem features novas sem reinstalar tudo. v1.3 tem que mudar isso.
+
+**Estratégia: empacotar o core em .deb instaláveis/atualizáveis via apt.**
+
+Refatorar customize.sh em pacotes:
+
+  - `tmjos-branding_X.deb`
+      /usr/share/backgrounds/tmjos/*
+      /usr/share/icons/tmjos/*
+      /usr/share/icons/hicolor/*/apps/tmjos.png
+      /usr/share/plymouth/themes/tmjos/*
+      postinst: dconf update + gtk-update-icon-cache + update-initramfs -u
+
+  - `tmjos-os-identity_X.deb`
+      /etc/os-release, /etc/lsb-release, /etc/issue, /etc/issue.net
+      conffile: marcado como "config-file" (apt não sobrescreve sem
+      perguntar)
+
+  - `tmjos-dock_X.deb`
+      /etc/skel/.config/plank/dock1/*
+      /etc/xdg/autostart/plank.desktop
+      /etc/xdg/autostart/tmjos-first-run.desktop
+      /usr/local/bin/tmjos-first-run
+      /usr/local/bin/tmjos-show-apps
+      /usr/share/applications/tmjos-show-apps.desktop
+
+  - `tmjos-defaults_X.deb`
+      /etc/dconf/db/local.d/00-tmjos-defaults
+      /etc/dconf/profile/user
+      postinst: dconf update
+
+  - `tmjos-meta_X.deb` — meta-pacote que puxa TODOS os tmjos-*
+      Depends: tmjos-branding (= X), tmjos-os-identity (= X),
+               tmjos-dock (= X), tmjos-defaults (= X),
+               tmjpad, plank, gnome-tweaks, ...
+
+Fluxo de update do user instalado:
+
+```
+sudo apt update          # ← lê packages.tmjos.dev
+sudo apt upgrade tmjos   # ← puxa nova versão de todo o core
+```
+
+Componentes adicionais:
+
+- **GitHub Action `release.yml`** dispara em `git tag v1.X` e
+  builda todos os `.deb`, assina com GPG key, sobe pra branch
+  `gh-pages` que vira o APT repo público.
+- **Postinst hooks bem feitos** que aplicam delta sem reboot quando
+  possível (dconf update, gtk-update-icon-cache, fc-cache, etc.).
+  Quando precisa de reboot (Plymouth, GRUB, initramfs), avisa.
+- **Notificação de update** (sutil, no top bar quando tem release nova).
+  Pode ser via update-notifier custom ou TMJOs Software Center.
+- **`/etc/tmjos-release`** — arquivo simples com a versão atual,
+  separado de `/etc/os-release` que é mais identidade que versão.
+
+Refatoração dolorosa mas paga **muito** dividendo: cada fix vira
+`apt upgrade` em vez de re-formatação. Releases mais frequentes
+viram viáveis (v1.2.1, v1.2.2 patches sem ISO nova).
+
 ## [1.2.0] - 2026-05-10
 
 Primeira release pública. **TMJOs 1.2 (codename: insano).**
