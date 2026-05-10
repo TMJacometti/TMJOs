@@ -15,7 +15,7 @@
 ### Passo 1.1: Instalar Cubic (ferramenta de customização)
 ```bash
 # Adicionar repositório
-sudo add-apt-repository ppa:cubic-wizard/cubic
+sudo add-apt-repository ppa:cubic-wizard/release
 sudo apt update
 
 # Instalar Cubic

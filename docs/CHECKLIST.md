@@ -30,7 +30,7 @@
 
 ```bash
 # [1] Adicionar PPA do Cubic
-sudo add-apt-repository ppa:cubic-wizard/cubic
+sudo add-apt-repository ppa:cubic-wizard/release
 
 # [2] Atualizar repositórios
 sudo apt update

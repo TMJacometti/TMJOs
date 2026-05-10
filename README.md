@@ -113,7 +113,7 @@ docker --version   # Docker
 - Ubuntu 24.04 LTS instalado
 
 # Software
-sudo add-apt-repository ppa:cubic-wizard/cubic
+sudo add-apt-repository ppa:cubic-wizard/release
 sudo apt update && sudo apt install cubic
 ```
 
