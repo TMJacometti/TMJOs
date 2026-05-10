@@ -1,0 +1,10 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	# Drop a snippet of CSS that postinst appends to the Yaru theme(s)
+	mkdir -p debian/tmjos-shell-tweaks/usr/share/tmjos-shell-tweaks
+	install -m644 files/hide-activities.css \
+		debian/tmjos-shell-tweaks/usr/share/tmjos-shell-tweaks/hide-activities.css

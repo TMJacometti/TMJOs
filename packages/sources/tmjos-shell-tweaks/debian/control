@@ -1,0 +1,28 @@
+Source: tmjos-shell-tweaks
+Section: gnome
+Priority: optional
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/TMJacometti/TMJOs
+
+Package: tmjos-shell-tweaks
+Architecture: all
+Depends: ${misc:Depends},
+         dpkg
+Description: TMJOs GNOME Shell tweaks (hide Activities button)
+ Hides the GNOME Activities button in the top-left corner of the
+ panel — TMJOs uses Plank's "Todos os Apps" launcher as the entry
+ point to the apps overview, so the Activities button is redundant
+ and visually clutters the top bar.
+ .
+ Implementation:
+  - Uses dpkg-divert to take ownership of /usr/share/gnome-shell/
+    theme/Yaru/gnome-shell.css and Yaru-dark variant. The original
+    files are renamed with .tmjos-orig suffix so removing this
+    package restores them cleanly.
+  - Appends a small CSS rule to the diverted files that sets
+    visibility:hidden + width:0 on the activities button.
+ .
+ Reversible: removing the package undoes the divert and restores
+ the upstream Yaru theme bytes for byte.

@@ -1,0 +1,12 @@
+
+/* TMJOs hide activities — esconde Activities button do top bar.
+   TMJOs usa Plank "Todos os Apps" como entry point pro app drawer. */
+#panel .panel-button.activities-button,
+#panel .panel-button:first-child {
+    visibility: hidden;
+    width: 0;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
