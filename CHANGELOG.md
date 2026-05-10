@@ -41,6 +41,13 @@ via apt e listados na store.
   sistema de updates v1.3**: empacota `tmjpad_0.1.1_all.deb` com o
   fix do cache e users instalados rodam `apt upgrade tmjpad`.
 
+## [Backlog v1.3.x] — patches via apt
+
+- `tmjos-os-identity 1.3.0-3`: trocar `dpkg-divert --rename` por
+  `--no-rename` em postinst/postrm. dpkg loga warning sobre
+  rename de Essential package — funciona OK mas é boa prática
+  evitar. Patch via apt upgrade quando alguém abrir.
+
 ## [Backlog v1.3] — em planejamento
 
 (Slim Aggressive foi promovido pra v1.2 — todos os cortes, disable de
