@@ -34,10 +34,13 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ### Removido (slim)
 - LibreOffice (suite completa)
-- Firefox / Thunderbird
 - Apps GNOME pouco usados: Maps, Music, Videos, Todo
 - Totem, Rhythmbox, Shotwell, Remmina, Transmission
 - Telemetria: ubuntu-report, apport, popularity-contest
+
+### Mantido (decisão de produto)
+- Firefox: browser padrão de fato dos usuários Ubuntu
+- Thunderbird: cliente de email útil para muitos casos de uso
 
 [Unreleased]: https://github.com/tmjacometti/tmjos/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/tmjacometti/tmjos/releases/tag/v1.0.0

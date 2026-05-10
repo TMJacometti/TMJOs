@@ -48,7 +48,6 @@ APPS_TO_REMOVE=(
     "ubuntu-report"
     "apport"
     "popularity-contest"
-    "thunderbird"
     "libreoffice-calc"
     "libreoffice-impress"
     "libreoffice-writer"
