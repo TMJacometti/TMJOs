@@ -10,9 +10,9 @@ Priority: optional
 Section: metapackages
 Filename: pool/main/t/tmjos/tmjos_1.3.0-1_all.deb
 Size: 1754
-SHA256: 40192944aa4825dc169c70e45ccee42d8a57f3dbcbcf9405a2439d19eb59fa80
-SHA1: 35131140b6eb8770b9a1eb232f399209a8db428f
-MD5sum: 930f52e2b58d981f837159299137de0d
+SHA256: 58f67ad93b43295008c671f45ef8cb87b55e54f092cfcce9ee5266f0abaa4817
+SHA1: 2f26d09cfcd079c4d0e4813be80281dbcdeeaf83
+MD5sum: d4ae930e179b08157eb26356f5af876f
 Description: TMJOs metapackage — pulls in the entire TMJOs experience
  Installing this package on a base Ubuntu 24.04 noble system gives
  you the complete TMJOs setup:
@@ -40,10 +40,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-branding/tmjos-branding_1.3.0-1_all.deb
-Size: 8987296
-SHA256: 9e03ef54be2d7412d0c6758731a74e23739775c47c1644870c12ad7c9fa72ccc
-SHA1: 2f882706ff86b3ace91da84b378137531e567878
-MD5sum: 664fabdecea5a21ea25d1f98d2eeecaf
+Size: 8987298
+SHA256: 0e72ec91311f0dfb6865174c8f4426dac3cfc5ef0a2e5a8f1b9e62c1ad51f58a
+SHA1: ed9e864d72c13228d0303e28593720f1463c9e08
+MD5sum: 7fc8ea3268e6b41b1eaf85c743b0e360
 Description: TMJOs branding assets (wallpapers, logos, Plymouth theme)
  Visual identity pieces of TMJOs:
   * Wallpapers: tmjos_wallpaper.png (1920x1080) + 4K variant in
@@ -70,10 +70,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: gnome
 Filename: pool/main/t/tmjos-defaults/tmjos-defaults_1.3.0-1_all.deb
-Size: 2334
-SHA256: bcf67b721342fea2e0596640a51b8698cbb1ed186a592153e8447e58becfacdf
-SHA1: 87283f4be88bd80f443976c1004929a7cdd37b66
-MD5sum: 828beb90bda62b87f4fb60292067d0d3
+Size: 2328
+SHA256: 3512a9d10ae359669d2a87bbaf5867e7fffd6afd047fcc48dde3a6f9cf76cc92
+SHA1: 0a7dd9b59c65bdbe7c52b73950dd8e7048d536a3
+MD5sum: 8a387bd4ebc28cbc5849815cd58b9840
 Description: TMJOs system-wide dconf defaults (dark mode, fonts, dock-off)
  Sets system-wide dconf defaults for the TMJOs experience:
   * Dark color scheme (color-scheme=prefer-dark, gtk-theme=Adwaita-dark)
@@ -100,10 +100,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: x11
 Filename: pool/main/t/tmjos-dock/tmjos-dock_1.3.0-1_all.deb
-Size: 4678
-SHA256: 184f22cb92c7a1fe30069cba68ee269eb927257ede9a0787f64dbfd4514e2e52
-SHA1: b3090c59ad419f4a60df0493ef3f36b6ab20ffb4
-MD5sum: 305c53c6623e7d63b4155e8dec7d2165
+Size: 4676
+SHA256: d4da7402f48a20a4f93f3abd4e08ded813b9f0f2d6b64d4841f5cd6016d1f9ac
+SHA1: 44c0d8d6dfe9a7e6a400102030737d0cfb837e10
+MD5sum: 337029d912642e3708b52b242fe4cb53
 Description: TMJOs Plank dock pre-configured with sticky launchers
  Pre-configured Plank dock for TMJOs:
   * /etc/skel/.config/plank/dock1/settings — bottom dock, transparent
@@ -150,20 +150,19 @@ Description: TMJOs pipeline smoke test package
  Safe to keep installed; safe to remove.
 
 Package: tmjos-os-identity
-Version: 1.3.0-1
+Version: 1.3.0-2
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Installed-Size: 13
-Conflicts: base-files (<< 999~)
-Replaces: base-files (<< 999~)
+Installed-Size: 14
+Depends: dpkg
 Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
-Filename: pool/main/t/tmjos-os-identity/tmjos-os-identity_1.3.0-1_all.deb
-Size: 2040
-SHA256: 51ae802a7e77685c9f9224ca48718e57debd17046f1343c88df4fd818eaae2ad
-SHA1: a2639350b2110fd1be7396846d7651f8dcbde921
-MD5sum: 2a7dcee168b368fe828790d54c898cfa
+Filename: pool/main/t/tmjos-os-identity/tmjos-os-identity_1.3.0-2_all.deb
+Size: 2996
+SHA256: 2468df84fc2750749bf1a07919f6d70cfac1bd6bba8534d49d9a3ff8c1ab2cce
+SHA1: f60cfa717600f968ed981a712553c77449700daf
+MD5sum: bdf8ce6dd78a9e366a82f5dbf1dfe5a1
 Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
  Replaces the Ubuntu identity files with TMJOs-branded versions:
   * /etc/os-release    — TMJOs 1.x (insano), shows in GNOME About
@@ -177,10 +176,12 @@ Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
                          is for compat.
   * /etc/issue         — "TMJOs <ver> \n \l" banner shown at TTY login
   * /etc/issue.net     — same content for telnet/ssh banner
-  * /etc/lsb-release   keeps DISTRIB_ID=Ubuntu (script compatibility)
  .
- Conflicts with base-files (the package that normally owns these
- files in Ubuntu) so dpkg knows to take over the slots cleanly.
+ Implementation: uses dpkg-divert to take ownership of the four
+ files from the upstream base-files package. Originals are renamed
+ with .tmjos-orig suffix and restored cleanly on package removal.
+ base-files is "essential" so we can't Conflicts/Replaces it; divert
+ is the policy-friendly way.
 
 Package: tmjos-shell-tweaks
 Version: 1.3.0-1
@@ -193,9 +194,9 @@ Priority: optional
 Section: gnome
 Filename: pool/main/t/tmjos-shell-tweaks/tmjos-shell-tweaks_1.3.0-1_all.deb
 Size: 2348
-SHA256: 9d46b77f5321bf76f51ce34aee3e9bbc8b80c7bca0ca7e303ebd7ac8fe56c468
-SHA1: 5f3ae99181b84f63c2533e0185f71a5608bed43e
-MD5sum: bd0a85c5cc99cf253d7e68197b1667fb
+SHA256: 33875e371ada1325cf9c65ea0090893d9466e9baff154696e46e6fc500657a14
+SHA1: 150a8b8e6d79106c7c604a3e2e3ba14800c226d4
+MD5sum: 77c3b057fb4689549ae033ec41ae439a
 Description: TMJOs GNOME Shell tweaks (hide Activities button)
  Hides the GNOME Activities button in the top-left corner of the
  panel — TMJOs uses Plank's "Todos os Apps" launcher as the entry
