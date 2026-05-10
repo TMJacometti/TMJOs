@@ -174,23 +174,26 @@ echo -e "${YELLOW}[6/6] Verificando instalações...${NC}"
 
 echo -e "\n${BLUE}═══ VERIFICAÇÃO DE PACOTES ═══${NC}\n"
 
-check_cmd() {
+# Checa pacote via dpkg-query (banco de pacotes), sem invocar binário.
+# Importante: invocar 'code --version' em chroot sem display X11 trava
+# o script. dpkg-query é instantâneo e funciona em qualquer ambiente.
+check_pkg() {
     local name="$1"
-    local cmd="$2"
-    if command -v "$cmd" &> /dev/null; then
+    local pkg="$2"
+    if dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null | grep -q "^install ok installed$"; then
         local version
-        version=$("$cmd" --version 2>&1 | head -n1)
+        version=$(dpkg-query -W -f='${Version}' "$pkg" 2>/dev/null)
         echo -e "  ${GREEN}✓${NC} $name: $version"
     else
         echo -e "  ${RED}✗${NC} $name: NÃO INSTALADO"
     fi
 }
 
-check_cmd "VSCode" "code"
-check_cmd "Git" "git"
-check_cmd "Docker" "docker"
-check_cmd "Plank" "plank"
-check_cmd "GNOME Tweaks" "gnome-tweaks"
+check_pkg "VSCode" "code"
+check_pkg "Git" "git"
+check_pkg "Docker" "docker.io"
+check_pkg "Plank" "plank"
+check_pkg "GNOME Tweaks" "gnome-tweaks"
 
 # Limpeza final
 echo -e "\n${YELLOW}Limpeza final...${NC}"
