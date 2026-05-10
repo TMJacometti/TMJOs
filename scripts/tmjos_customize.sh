@@ -400,10 +400,11 @@ SESSION_TYPE="${XDG_SESSION_TYPE:-x11}"
 
 # Método 1+2: simular tecla Super (mostra Activities + abre App grid após)
 if [ "$SESSION_TYPE" = "x11" ] && command -v xdotool >/dev/null 2>&1; then
-    xdotool key Super 2>/dev/null && exit 0
+    xdotool key super+a 2>/dev/null && exit 0
 fi
 if [ "$SESSION_TYPE" = "wayland" ] && command -v ydotool >/dev/null 2>&1; then
-    ydotool key 125:1 125:0 2>/dev/null && exit 0  # 125 = Super_L
+    # Super_L (125) + A (30): GNOME 46 mapeia esse atalho direto pra Apps view
+    ydotool key 125:1 30:1 30:0 125:0 2>/dev/null && exit 0
 fi
 
 # Método 3: GNOME Shell Eval (legacy, mas tenta)
