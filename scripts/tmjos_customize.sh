@@ -342,6 +342,37 @@ $SUDO find /etc/xdg/autostart/ -maxdepth 1 -type f -name '*.desktop' 2>/dev/null
     esac
 done
 
+# 6j) Boot identity: GRUB menu + Plymouth splash sem "Ubuntu"
+echo -e "  ${GREEN}→${NC} Boot identity (GRUB distributor + Plymouth tema)"
+
+# GRUB — força o distributor explicitamente. Mesmo que /etc/lsb-release já
+# diga TMJOs, alguns hooks do GRUB amostram do default config primeiro.
+if [ -f /etc/default/grub ]; then
+    if grep -q '^GRUB_DISTRIBUTOR=' /etc/default/grub; then
+        $SUDO sed -i 's|^GRUB_DISTRIBUTOR=.*|GRUB_DISTRIBUTOR="TMJOs"|' /etc/default/grub
+    else
+        echo 'GRUB_DISTRIBUTOR="TMJOs"' | $SUDO tee -a /etc/default/grub > /dev/null
+    fi
+    # update-grub regenera /boot/grub/grub.cfg com as entries renomeadas.
+    # Em chroot do Cubic, /proc e /sys estão montados pelo Cubic, então
+    # roda sem problema. No fallback, instala-no-target funciona.
+    $SUDO update-grub 2>/dev/null \
+        && echo -e "    ${GREEN}grub.cfg regenerated${NC}" \
+        || echo -e "    ${YELLOW}(update-grub falhou no chroot, vai rodar no install)${NC}"
+fi
+
+# Plymouth — troca pro tema 'spinner' (neutro, sem branding Ubuntu).
+# Pra v1.1 a ideia é fazer um tema TMJOs custom com logo + animação.
+if command -v plymouth-set-default-theme >/dev/null 2>&1; then
+    if plymouth-set-default-theme --list 2>/dev/null | grep -qx 'spinner'; then
+        $SUDO plymouth-set-default-theme -R spinner 2>/dev/null \
+            && echo -e "    ${GREEN}plymouth: spinner (neutro)${NC}" \
+            || echo -e "    ${YELLOW}(plymouth -R falhou no chroot, vai aplicar no install)${NC}"
+    else
+        echo -e "    ${YELLOW}(plymouth: tema 'spinner' não disponível)${NC}"
+    fi
+fi
+
 # ===========================================
 # FASE 7 — TMJPAD (editor proprietário)
 # ===========================================
