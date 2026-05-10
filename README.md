@@ -227,7 +227,11 @@ git push origin feature/sua-feature
 - [x] ISO ~3GB
 - [x] Documentação completa
 
-### 🔄 v1.3 (Próxima)
+### 🔄 v1.3 (Próxima) — **Slim Plus**: rodar em 4GB RAM
+- [ ] **Remover** gnome-software, snapd, evolution-data-server, gnome-calendar/contacts/characters, yelp, file-roller, gnome-system-monitor
+- [ ] **Disable** tracker3 (indexação) + update-notifier autostart
+- [ ] **Adicionar** zram-config + preload (RAM virtual + cache)
+- [ ] Meta: ISO ~2.5GB, RAM idle ~900MB
 - [ ] GRUB **visual theme** TMJOs (não só nome)
 - [ ] Plymouth: progress bar animada além do breathing glow
 - [ ] GDM (login screen) com wallpaper TMJOs

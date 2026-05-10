@@ -7,6 +7,30 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [Backlog v1.3] — em planejamento
 
+### Slim Plus — alvo: rodar em 4GB RAM (estilo elementaryOS)
+
+Meta: ISO ~2.5GB, RAM idle ~900MB (de ~1.4GB hoje), sem perda visível
+de UX pro usuário típico.
+
+- **Remover:**
+  - `gnome-software` (~200MB RAM) — TMJOs Software Center vai substituir
+  - `snapd` + snaps default (~200MB RAM, ~100MB disco) — não usamos snap
+  - `evolution-data-server` (~150MB) — cache de email/contatos
+  - `gnome-calendar`, `gnome-contacts`, `gnome-characters`, `yelp`
+  - `file-roller` (Nautilus tem archive plugin nativo)
+  - `gnome-system-monitor` (htop substitui)
+- **Disable (não remove, só desativa serviços):**
+  - `tracker3` extract/miner — indexação de arquivos pesa ~300MB RAM e
+    queima disco. `systemctl --user mask tracker-extract-3.service
+    tracker-miner-fs-3.service`
+  - `update-notifier` autostart — quem quer update roda apt
+- **Adicionar:**
+  - `zram-config` — comprime RAM em swap virtual, ganha ~30% RAM
+    efetiva grátis em sistemas low-mem
+  - `preload` — daemon que pré-carrega apps mais usados em RAM ociosa
+
+### Boot & visuais
+
 - GRUB theme com visual TMJOs (v1.2 só renomeia distributor para "TMJOs")
 - Plymouth: progress bar animada além do breathing glow do logo
 - GDM (login screen) com wallpaper e logo TMJOs
