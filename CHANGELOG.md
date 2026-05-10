@@ -5,27 +5,7 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [Backlog v1.4] — apps proprietários novos + tweaks pendentes
-
-- **Activities button hide** (movido de v1.3): decisão é **fazer sem
-  JavaScript** (user preferiu evitar até extensions GJS sandboxed).
-  Opções a explorar em ordem de preferência:
-  1. **CSS positioning off-screen** via dpkg-divert:
-     ```css
-     #panelLeft .panel-button:first-child {
-         position: absolute;
-         left: -99999px;
-     }
-     ```
-     Não depende de class names que mudam entre GNOME versions —
-     só posiciona o primeiro filho do panel esquerdo fora da tela.
-  2. **Tema GNOME Shell TMJOs** dedicado em `/usr/share/gnome-shell/
-     theme/TMJOs/` que `@import "../Yaru-dark/gnome-shell.css"`
-     no início e sobrescreve o que precisa. Setado via dconf
-     system-db `name="TMJOs"`. Mais robusto que dpkg-divert pra
-     manter customizações de longo prazo.
-  3. **Selectors CSS novos pra GNOME 46+** (último recurso — frágil
-     entre releases).
+## [Backlog v1.4] — apps proprietários novos
 
 
 Versão centrada em apps. Depende da v1.3 ter shipado APT repo +
@@ -69,14 +49,10 @@ via apt e listados na store.
   rename de Essential package — funciona OK mas é boa prática
   evitar. Patch via apt upgrade quando alguém abrir.
 
-- **Activities button visível no GNOME 46:** v1.3 mantém
-  `tmjos-shell-tweaks 1.3.0-1` com CSS hack via dpkg-divert. O
-  selector `.panel-button.activities-button` deixou de matchar
-  em GNOME 46, então o hack é no-op mas continua instalado
-  sem dano. O Activities button aparece no top-left. Decisão:
-  resolver em v1.4 — escolher entre extension GNOME Shell própria
-  (4 linhas de GJS sandboxed) ou pesquisar novos selectors do
-  panel pra cada major GNOME release.
+- **Activities button hide via GJS extension** já está incluído em
+  `tmjos-shell-tweaks 1.3.0-3` + `tmjos-defaults 1.3.0-2`. Quem upgrade
+  da 1.3.0-1 (CSS hack quebrado) recebe o cleanup do divert via
+  apt upgrade automaticamente.
 
 ## [Backlog v1.3] — em planejamento
 
