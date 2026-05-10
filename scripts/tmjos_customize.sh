@@ -210,9 +210,16 @@ gtk-theme='Adwaita-dark'
 icon-theme='Adwaita'
 font-name='Cantarell 11'
 monospace-font-name='JetBrains Mono 11'
+clock-show-date=true
+clock-show-seconds=false
+clock-show-weekday=false
 
 [org/gnome/shell]
 favorite-apps=['code.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'tmjpad.desktop', 'gnome-control-center.desktop']
+# Desabilita Ubuntu Dock (barra vertical lateral) e ícones do desktop —
+# TMJOs usa Plank na base, sem ícones flutuando no desktop. Sem essas
+# duas linhas, fica dois docks competindo + ícones de Home/Trash visíveis.
+disabled-extensions=['ubuntu-dock@ubuntu.com', 'ubuntu-appindicators@ubuntu.com', 'ding@rastersoft.com']
 EOF
 
 $SUDO dconf update
@@ -234,7 +241,7 @@ X-GNOME-Autostart-enabled=true
 X-GNOME-Autostart-Phase=Applications
 EOF
 
-# 6g) Plank user-level skel (já tinha; reaplica pra garantir)
+# 6g) Plank user-level skel (pra users criados na instalação)
 echo -e "  ${GREEN}→${NC} Plank config em /etc/skel"
 SKEL_PLANK_DIR="/etc/skel/.config/plank/dock1"
 $SUDO mkdir -p "$SKEL_PLANK_DIR/launchers"
@@ -259,6 +266,34 @@ show-dock-item=true
 theme='Transparent'
 unhide-delay=0
 use-custom-font=false
+EOF
+
+# 6h) First-run setup: copia config do Plank pro user atual se ainda não tem.
+# Isso resolve o caso do live-CD (user 'ubuntu' já existe, /etc/skel não foi
+# aplicado) e também usuários antigos que tinham a distro sem essa config.
+echo -e "  ${GREEN}→${NC} TMJOs first-run autostart (Plank config no live-CD)"
+$SUDO tee /usr/local/bin/tmjos-first-run > /dev/null << 'EOF'
+#!/bin/sh
+# Copia config do Plank do /etc/skel pro user atual se ainda não existe.
+# Roda no autostart phase=Initialization, antes do Plank ser iniciado.
+if [ ! -d "$HOME/.config/plank" ] && [ -d /etc/skel/.config/plank ]; then
+    mkdir -p "$HOME/.config"
+    cp -r /etc/skel/.config/plank "$HOME/.config/"
+fi
+exit 0
+EOF
+$SUDO chmod +x /usr/local/bin/tmjos-first-run
+
+$SUDO tee /etc/xdg/autostart/tmjos-first-run.desktop > /dev/null << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=TMJOs First-Run Setup
+Comment=Copia configs default pra usuário atual se ainda não tem
+Exec=/usr/local/bin/tmjos-first-run
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Phase=Initialization
 EOF
 
 # ===========================================

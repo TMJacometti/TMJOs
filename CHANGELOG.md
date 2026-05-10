@@ -11,9 +11,14 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - Plymouth boot splash com logo TMJOs
 - GRUB theme personalizado
 - GDM (login screen) com wallpaper TMJOs
-- **Regenerar wallpaper:** v1.0 tem ambiguidade visual (parece "TM T JOs"
-  por causa do T grande central separando "TM" e "JOs"). Refazer com
-  tipografia "TMJOs" contínua, mantendo dragão + janelas IDE flutuantes.
+- **Regenerar wallpaper + logo:** v1.0 tem ambiguidade visual (parece
+  "TM T JOs" por causa do T grande central separando "TM" e "JOs").
+  Refazer com tipografia "TMJOs" contínua. Em geração no Nano Banana.
+- **Investigar `ubuntu-desktop-bootstrap` popup:** o instalador novo
+  do Ubuntu 24.04 abre uma tela de erro "Something went wrong" ao
+  iniciar o live-CD do TMJOs. Não bloqueia (close → tudo funciona),
+  mas é cosmético ruim. Provável incompatibilidade com customizações
+  via Cubic.
 - Ícone próprio do TMJPad
 - Empacotamento `.deb` do TMJPad
 - TMJPad: Find & Replace (Ctrl+F, Ctrl+H)
