@@ -39,7 +39,7 @@ else
     SUDO="sudo"
 fi
 
-TMJOS_REPO_URL="https://tmjacometti.github.io/TMJOs"
+TMJOS_REPO_URL="https://packages.tmjos.com.br"
 
 echo -e "${BLUE}╔═══════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║   TMJOs - Customização v1.3 (apt-based)   ║${NC}"
@@ -139,7 +139,7 @@ $SUDO mkdir -p /usr/share/keyrings
 $SUDO curl -fsSL "$TMJOS_REPO_URL/keys/tmjos-archive-keyring.gpg" \
     -o /usr/share/keyrings/tmjos-archive-keyring.gpg
 
-echo "deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] $TMJOS_REPO_URL noble main" \
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] $TMJOS_REPO_URL noble main" \
     | $SUDO tee /etc/apt/sources.list.d/tmjos.list > /dev/null
 
 $SUDO apt update
