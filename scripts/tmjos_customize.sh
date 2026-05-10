@@ -389,41 +389,78 @@ echo -e "  ${GREEN}→${NC} Launcher 'Todos os Apps' (Plank → GNOME Apps view)
 # abordagens em fallback até uma funcionar.
 $SUDO tee /usr/local/bin/tmjos-show-apps > /dev/null << 'EOF'
 #!/bin/sh
-# Abre a Apps View do GNOME Shell. Tenta:
-#  1. xdotool key Super (works no X11 — abre overview, depois App grid)
-#  2. ydotool key Super (works no Wayland se ydotool tá rodando)
-#  3. gdbus Eval (works em GNOME ≤ 45)
-#  4. dbus-send pra org.gnome.Shell ShowApplications
+# Toggle Apps View do GNOME Shell.
+#
+# Estratégia toggle: mantém um state file em /tmp. Se existe, manda Esc
+# (fecha overview); se não existe, manda Super+A (abre apps grid).
+# State file timeout = 5s — se passou disso sem clique novo, assume
+# fechado (caso user tenha fechado por outro caminho tipo Esc, Super,
+# clique fora). Cada toque no Plank alterna o estado.
+#
+# Senão tiver xdotool/ydotool, cai pros dbus methods (toggle não, mas
+# pelo menos abre).
 
-# Detecta sessão
 SESSION_TYPE="${XDG_SESSION_TYPE:-x11}"
+STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/tmjos-apps-open"
+STATE_TIMEOUT=5  # segundos
 
-# Método 1+2: simular tecla Super (mostra Activities + abre App grid após)
-if [ "$SESSION_TYPE" = "x11" ] && command -v xdotool >/dev/null 2>&1; then
-    xdotool key super+a 2>/dev/null && exit 0
-fi
-if [ "$SESSION_TYPE" = "wayland" ] && command -v ydotool >/dev/null 2>&1; then
-    # Super_L (125) + A (30): GNOME 46 mapeia esse atalho direto pra Apps view
-    ydotool key 125:1 30:1 30:0 125:0 2>/dev/null && exit 0
+# Trata o state file: se for mais antigo que STATE_TIMEOUT, considera
+# stale (assume overview foi fechado por outro caminho).
+is_open() {
+    [ -f "$STATE_FILE" ] || return 1
+    age=$(( $(date +%s) - $(stat -c %Y "$STATE_FILE" 2>/dev/null || echo 0) ))
+    [ "$age" -le "$STATE_TIMEOUT" ]
+}
+
+mark_open()   { touch "$STATE_FILE" 2>/dev/null; }
+mark_closed() { rm -f "$STATE_FILE" 2>/dev/null; }
+
+send_super_a() {
+    if [ "$SESSION_TYPE" = "x11" ] && command -v xdotool >/dev/null 2>&1; then
+        xdotool key super+a 2>/dev/null && return 0
+    fi
+    if [ "$SESSION_TYPE" = "wayland" ] && command -v ydotool >/dev/null 2>&1; then
+        ydotool key 125:1 30:1 30:0 125:0 2>/dev/null && return 0
+    fi
+    return 1
+}
+
+send_escape() {
+    if [ "$SESSION_TYPE" = "x11" ] && command -v xdotool >/dev/null 2>&1; then
+        xdotool key Escape 2>/dev/null && return 0
+    fi
+    if [ "$SESSION_TYPE" = "wayland" ] && command -v ydotool >/dev/null 2>&1; then
+        ydotool key 1:1 1:0 2>/dev/null && return 0  # 1 = Escape
+    fi
+    return 1
+}
+
+# Toggle: se aberto recentemente, fecha; senão abre
+if is_open; then
+    if send_escape; then
+        mark_closed
+        exit 0
+    fi
 fi
 
-# Método 3: GNOME Shell Eval (legacy, mas tenta)
+if send_super_a; then
+    mark_open
+    exit 0
+fi
+
+# Fallback final pra ambientes sem xdotool/ydotool: abre via dbus
+# (sem capacidade de toggle, mas pelo menos exibe)
+dbus-send --session --print-reply=literal \
+    --dest=org.gnome.Shell \
+    /org/gnome/Shell \
+    org.gnome.Shell.ShowApplications \
+    >/dev/null 2>&1 || \
 gdbus call --session \
     --dest org.gnome.Shell \
     --object-path /org/gnome/Shell \
     --method org.gnome.Shell.Eval \
     "Main.overview.dash.showAppsButton.checked = true; Main.overview.show();" \
-    >/dev/null 2>&1 && exit 0
-
-# Método 4: dbus-send via interface ShowApplications (GNOME ≥ 46)
-dbus-send --session --print-reply=literal \
-    --dest=org.gnome.Shell \
-    /org/gnome/Shell \
-    org.gnome.Shell.ShowApplications \
-    >/dev/null 2>&1 && exit 0
-
-# Último recurso: abre Files com apps:// URI (só lista mas não é o ideal)
-xdg-open "applications:///" 2>/dev/null || true
+    >/dev/null 2>&1 || true
 EOF
 $SUDO chmod +x /usr/local/bin/tmjos-show-apps
 
