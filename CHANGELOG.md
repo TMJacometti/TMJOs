@@ -52,9 +52,14 @@ via apt e listados na store.
   ao customize.sh OR criar pacote `tmjos-installer` que Depends ubiquity.
   Workaround pro user atual no live-CD:
   ```
-  sudo apt install -y ubiquity ubiquity-frontend-gtk ubiquity-slideshow-ubuntu
+  sudo apt install -y ubiquity ubiquity-frontend-gtk
+  # NÃO instala ubiquity-slideshow-ubuntu — requer gir1.2-webkit2-4.1
+  # que não tá no live-CD slim e quebra com:
+  #   ValueError: Namespace WebKit2 not available
   sudo ubiquity gtk_ui
   ```
+  Pacote `tmjos-installer` futuro vai puxar ubiquity + frontend-gtk
+  SEM o slideshow, eliminando a dep WebKit2.
 
 
 - `tmjos-os-identity 1.3.0-3`: trocar `dpkg-divert --rename` por
