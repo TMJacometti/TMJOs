@@ -7,27 +7,8 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [Backlog v1.3] — em planejamento
 
-### Slim Plus — alvo: rodar em 4GB RAM (estilo elementaryOS)
-
-Meta: ISO ~2.5GB, RAM idle ~900MB (de ~1.4GB hoje), sem perda visível
-de UX pro usuário típico.
-
-- **Remover:**
-  - `gnome-software` (~200MB RAM) — TMJOs Software Center vai substituir
-  - `snapd` + snaps default (~200MB RAM, ~100MB disco) — não usamos snap
-  - `evolution-data-server` (~150MB) — cache de email/contatos
-  - `gnome-calendar`, `gnome-contacts`, `gnome-characters`, `yelp`
-  - `file-roller` (Nautilus tem archive plugin nativo)
-  - `gnome-system-monitor` (htop substitui)
-- **Disable (não remove, só desativa serviços):**
-  - `tracker3` extract/miner — indexação de arquivos pesa ~300MB RAM e
-    queima disco. `systemctl --user mask tracker-extract-3.service
-    tracker-miner-fs-3.service`
-  - `update-notifier` autostart — quem quer update roda apt
-- **Adicionar:**
-  - `zram-config` — comprime RAM em swap virtual, ganha ~30% RAM
-    efetiva grátis em sistemas low-mem
-  - `preload` — daemon que pré-carrega apps mais usados em RAM ociosa
+(Slim Aggressive foi promovido pra v1.2 — todos os cortes, disable de
+tracker3 e adição de zram/preload já entram na release pública.)
 
 ### Boot & visuais
 
@@ -78,7 +59,8 @@ v1.2.0 é o primeiro build com TUDO polido e Find/Replace funcional.
   centro do splash.
 - **Plymouth layout reorganizado** — logo TMJOs pequeno (80x80) +
   "Loading..." no rodapé, em vez do logo grande no centro.
-- **Activities button escondido** via Just Perfection extension.
+- **Activities button escondido** via CSS injection no Yaru shell theme
+  (mais robusto que extension de terceiros — sem deps externas).
 - **Plank trim:** 4 launchers default (Todos os Apps + VSCode + TMJPad
   + Terminal) em vez dos 6 anteriores.
 - **"Todos os Apps" sticky:** o launcher é re-injetado no dock se o
@@ -90,6 +72,17 @@ v1.2.0 é o primeiro build com TUDO polido e Find/Replace funcional.
   clipboard QEMU↔Host, drag-drop, dynamic resize.
 - **Fonts:** fonts-jetbrains-mono explicitamente instalado (referenciado
   no dconf default monospace).
+- **Release notes URL** rebranded para o CHANGELOG do TMJOs.
+
+### Slim Aggressive — RAM idle ~700MB, ISO ~2GB (target: notebooks 4GB)
+
+- **Removido:** gnome-software, snapd, evolution-data-server,
+  update-notifier, thunderbird, gnome-calendar, gnome-contacts,
+  gnome-characters, yelp, file-roller, gnome-system-monitor.
+- **Disabled (via tmjos-first-run):** tracker3 indexação
+  (extract/miner-fs/miner-rss/writeback/xdg-portal masked).
+- **Adicionado:** zram-config (RAM compactada como swap virtual,
+  ~30% RAM efetiva extra), preload (pré-carrega apps em RAM ociosa).
 
 ### Adicionado — Sistema base
 - Distribuição base Ubuntu 24.04 LTS Desktop (kernel 6.8 GA)
@@ -165,7 +158,7 @@ v1.2.0 é o primeiro build com TUDO polido e Find/Replace funcional.
 
 ### Mantido (decisão de produto)
 - Firefox: browser padrão de fato dos usuários Ubuntu
-- Thunderbird: cliente de email útil para muitos casos de uso
+  (Thunderbird foi removido em v1.2 — usuário usa webmail ou outro cliente)
 
 ### Suprimido (cosmético)
 - Welcome popups do Ubuntu installer / gnome-initial-setup que abrem

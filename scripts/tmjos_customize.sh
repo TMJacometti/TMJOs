@@ -58,24 +58,40 @@ $SUDO apt upgrade -y
 echo -e "${YELLOW}[2/8] Removendo apps desnecessários (slim)...${NC}"
 
 APPS_TO_REMOVE=(
+    # Telemetria / opcional
     "ubuntu-report"
     "apport"
     "popularity-contest"
+    # Office suite
     "libreoffice-calc"
     "libreoffice-impress"
     "libreoffice-writer"
     "libreoffice-draw"
     "libreoffice-core"
     "libreoffice-common"
+    # Apps GNOME que ninguém usa em distro pra dev
     "gnome-todo"
     "gnome-maps"
     "gnome-music"
     "gnome-videos"
+    "gnome-calendar"
+    "gnome-contacts"
+    "gnome-characters"
+    "gnome-system-monitor"
+    "yelp"
+    "file-roller"
+    # Mídia (TMJOs não é multimedia distro)
     "totem"
     "rhythmbox"
     "shotwell"
     "remmina"
     "transmission-gtk"
+    # SLIM PLUS — corte agressivo pra rodar em 4GB RAM
+    "gnome-software"          # ~200MB RAM, TMJOs Software Center substitui
+    "snapd"                    # ~200MB RAM, ~100MB disco — não usamos snap
+    "evolution-data-server"   # ~150MB RAM cache email
+    "update-notifier"         # popup chato, quem quer roda apt
+    "thunderbird"              # ~350MB RAM, dev usa webmail/clients alternativos
 )
 
 for app in "${APPS_TO_REMOVE[@]}"; do
@@ -113,10 +129,10 @@ echo -e "${YELLOW}[4/8] Instalando apps...${NC}"
 # Editor + dev
 $SUDO apt install -y code git git-flow docker.io docker-compose
 
-# Dock + customização GNOME
+# Dock + customização GNOME (just-perfection NÃO existe no Ubuntu 24.04
+# apt; usamos CSS hack no Yaru shell theme pra esconder Activities button)
 $SUDO apt install -y plank gnome-tweaks dconf-editor \
-    gnome-shell-extensions gnome-shell-extension-manager \
-    gnome-shell-extension-just-perfection
+    gnome-shell-extensions gnome-shell-extension-manager
 
 # CLI essenciais
 $SUDO apt install -y curl wget htop neofetch vim nano build-essential \
@@ -134,6 +150,11 @@ $SUDO apt install -y fonts-jetbrains-mono fonts-cantarell fonts-noto-color-emoji
 # virt-manager. qemu-guest-agent permite host enviar comandos ao guest.
 # Inofensivos em hardware real (services não iniciam sem host suportar).
 $SUDO apt install -y spice-vdagent qemu-guest-agent
+
+# SLIM PLUS — RAM efetiva extra em sistemas low-mem
+# zram-config: comprime RAM ociosa em "swap" virtual (ganha ~30% RAM efetiva)
+# preload:     daemon que pré-carrega apps mais usados em RAM ociosa
+$SUDO apt install -y zram-config preload
 
 # ===========================================
 # FASE 5 — Clonar repo TMJOs (pra pegar assets)
@@ -243,22 +264,38 @@ clock-show-weekday=false
 [org/gnome/shell]
 favorite-apps=['code.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'tmjpad.desktop', 'gnome-control-center.desktop']
 # Desabilita Ubuntu Dock (barra vertical lateral) e ícones do desktop.
-# Habilita Just Perfection pra esconder Activities button + outros polish.
 disabled-extensions=['ubuntu-dock@ubuntu.com', 'ubuntu-appindicators@ubuntu.com', 'ding@rastersoft.com']
-enabled-extensions=['just-perfection-desktop@just-perfection']
-
-# Just Perfection: esconde Activities button no top bar e o app picker
-# que aparece no overview (TMJOs usa Plank + "Todos os Apps" launcher).
-[org/gnome/shell/extensions/just-perfection]
-activities-button=false
-app-menu=false
-panel-arrow=false
-search=true
-workspace=true
-window-picker-icon=true
 EOF
 
 $SUDO dconf update
+
+# 6e.2) CSS hack: esconde GNOME Activities button no top bar
+# (substitui o que faríamos via just-perfection extension, que não existe
+# no apt do Ubuntu 24.04). Editamos o Yaru shell theme — tema default
+# do Ubuntu 24.04. Compatível com Yaru-dark também.
+echo -e "  ${GREEN}→${NC} CSS hack: hide Activities button"
+for css in /usr/share/gnome-shell/theme/Yaru/gnome-shell.css \
+           /usr/share/gnome-shell/theme/Yaru-dark/gnome-shell.css \
+           /usr/share/gnome-shell/gnome-shell.css; do
+    if [ -f "$css" ]; then
+        if ! grep -q "TMJOs hide activities" "$css"; then
+            $SUDO tee -a "$css" > /dev/null << 'EOF'
+
+/* TMJOs hide activities — esconde Activities button do top bar */
+#panel .panel-button.activities-button,
+#panel .panel-button:first-child {
+    visibility: hidden;
+    width: 0;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+EOF
+            echo "    patched $css"
+        fi
+    fi
+done
 
 # 6f) Plank autostart system-wide (todo usuário ganha o dock no login)
 echo -e "  ${GREEN}→${NC} Plank autostart (/etc/xdg/autostart)"
@@ -343,23 +380,12 @@ EOF
 echo -e "  ${GREEN}→${NC} TMJOs first-run autostart (Plank config no live-CD)"
 $SUDO tee /usr/local/bin/tmjos-first-run > /dev/null << 'EOF'
 #!/bin/sh
-# TMJOs first-run / every-login setup. Roda no autostart phase=Initialization,
-# antes do Plank iniciar. Faz duas coisas:
-#
-# 1. Copia config do Plank do /etc/skel pro user se ainda não existe.
-#    Resolve o caso live-CD onde o user 'ubuntu' já existe e nunca pegou
-#    o /etc/skel.
-#
-# 2. Garante que 'tmjos-show-apps.dockitem' está SEMPRE como primeiro
-#    item no dock. O user pode remover/reorganizar os outros launchers
-#    (VSCode, TMJPad, Terminal) — mas o "Todos os Apps" volta no próximo
-#    login, porque é o ponto de entrada pro app drawer e a distro não
-#    funciona bem sem ele.
+# TMJOs first-run / every-login setup. Roda no autostart phase=Initialization.
 
 PLANK_DIR="$HOME/.config/plank/dock1"
 PLANK_SETTINGS="$PLANK_DIR/settings"
 
-# 1) First-time copy from /etc/skel
+# 1) First-time copy do Plank config do /etc/skel
 if [ ! -d "$HOME/.config/plank" ] && [ -d /etc/skel/.config/plank ]; then
     mkdir -p "$HOME/.config"
     cp -r /etc/skel/.config/plank "$HOME/.config/"
@@ -368,11 +394,26 @@ fi
 # 2) Re-injetar 'tmjos-show-apps.dockitem' como primeiro item se faltar
 if [ -f "$PLANK_SETTINGS" ]; then
     if ! grep -q "tmjos-show-apps.dockitem" "$PLANK_SETTINGS"; then
-        # Insere depois de "dock-items=[" — entra como primeiro item da lista
         sed -i "s|^dock-items=\[|dock-items=['tmjos-show-apps.dockitem', |" \
             "$PLANK_SETTINGS"
     fi
 fi
+
+# 3) SLIM PLUS — Disable tracker3 (indexação de arquivos pesa ~300MB RAM
+# e queima disco em background). Mascarar via systemctl --user faz só
+# pro usuário atual, sem afetar root ou multi-user.
+systemctl --user mask \
+    tracker-extract-3.service \
+    tracker-miner-fs-3.service \
+    tracker-miner-rss-3.service \
+    tracker-writeback-3.service \
+    tracker-xdg-portal-3.service \
+    >/dev/null 2>&1 || true
+systemctl --user stop \
+    tracker-extract-3.service \
+    tracker-miner-fs-3.service \
+    tracker-miner-rss-3.service \
+    >/dev/null 2>&1 || true
 
 exit 0
 EOF

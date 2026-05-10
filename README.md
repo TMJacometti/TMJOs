@@ -222,16 +222,14 @@ git push origin feature/sua-feature
 - [x] Identidade própria (`/etc/os-release`, `/etc/lsb-release`)
 - [x] Welcome popups do Ubuntu installer suprimidos
 - [x] **TMJPad Find & Replace** (Ctrl+F, Ctrl+H)
-- [x] Activities button escondido (Just Perfection)
+- [x] Activities button escondido (CSS injection no Yaru shell theme)
 - [x] **VM integration**: spice-vdagent + qemu-guest-agent (clipboard, drag-drop)
-- [x] ISO ~3GB
+- [x] **Slim Aggressive**: ISO ~2GB, RAM idle ~700MB (target: notebooks 4GB)
+  - Removido: gnome-software, snapd, evolution, thunderbird, e mais 6 apps
+  - Tracker3 disabled, zram-config + preload adicionados
 - [x] Documentação completa
 
-### 🔄 v1.3 (Próxima) — **Slim Plus**: rodar em 4GB RAM
-- [ ] **Remover** gnome-software, snapd, evolution-data-server, gnome-calendar/contacts/characters, yelp, file-roller, gnome-system-monitor
-- [ ] **Disable** tracker3 (indexação) + update-notifier autostart
-- [ ] **Adicionar** zram-config + preload (RAM virtual + cache)
-- [ ] Meta: ISO ~2.5GB, RAM idle ~900MB
+### 🔄 v1.3 (Próxima)
 - [ ] GRUB **visual theme** TMJOs (não só nome)
 - [ ] Plymouth: progress bar animada além do breathing glow
 - [ ] GDM (login screen) com wallpaper TMJOs
