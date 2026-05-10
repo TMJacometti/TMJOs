@@ -5,9 +5,8 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [Unreleased]
+## [Backlog v1.1] — em planejamento
 
-### Planejado (v1.1)
 - GRUB theme com visual TMJOs (v1.0 só renomeia distributor para "TMJOs")
 - Plymouth: progress bar animada além do breathing glow do logo
 - GDM (login screen) com wallpaper e logo TMJOs
@@ -102,5 +101,5 @@ Primeira release pública. **TMJOs 1.0 (codename: insano).**
   pacotes ficam instalados — o ícone "Install TMJOs" no desktop continua
   funcional, só os autostart popups são marcados `Hidden=true`.
 
-[Unreleased]: https://github.com/TMJacometti/TMJOs/compare/v1.0.0...HEAD
+[Backlog v1.1]: https://github.com/TMJacometti/TMJOs/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/TMJacometti/TMJOs/releases/tag/v1.0.0
