@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	# dconf profile + override db
+	mkdir -p debian/tmjos-defaults/etc/dconf/profile
+	mkdir -p debian/tmjos-defaults/etc/dconf/db/local.d
+	install -m644 files/profile-user \
+		debian/tmjos-defaults/etc/dconf/profile/user
+	install -m644 files/00-tmjos-defaults \
+		debian/tmjos-defaults/etc/dconf/db/local.d/00-tmjos-defaults

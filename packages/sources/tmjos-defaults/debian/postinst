@@ -1,0 +1,16 @@
+#!/bin/sh
+# postinst do tmjos-defaults — recompila o dconf db local pra os
+# overrides ficarem ativos.
+set -e
+
+case "$1" in
+    configure)
+        if command -v dconf >/dev/null 2>&1; then
+            dconf update || true
+        fi
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

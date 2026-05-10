@@ -1,0 +1,23 @@
+[org/gnome/desktop/background]
+picture-uri='file:///usr/share/backgrounds/tmjos/tmjos_wallpaper.png'
+picture-uri-dark='file:///usr/share/backgrounds/tmjos/tmjos_wallpaper.png'
+picture-options='zoom'
+primary-color='#0a0e2a'
+
+[org/gnome/desktop/screensaver]
+picture-uri='file:///usr/share/backgrounds/tmjos/tmjos_wallpaper.png'
+picture-options='zoom'
+
+[org/gnome/desktop/interface]
+color-scheme='prefer-dark'
+gtk-theme='Adwaita-dark'
+icon-theme='Adwaita'
+font-name='Cantarell 11'
+monospace-font-name='JetBrains Mono 11'
+clock-show-date=true
+clock-show-seconds=false
+clock-show-weekday=false
+
+[org/gnome/shell]
+favorite-apps=['code.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'tmjpad.desktop', 'gnome-control-center.desktop']
+disabled-extensions=['ubuntu-dock@ubuntu.com', 'ubuntu-appindicators@ubuntu.com', 'ding@rastersoft.com']
