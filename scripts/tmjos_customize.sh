@@ -159,6 +159,21 @@ echo -e "${YELLOW}[5/5] Instalando TMJOs metapackage...${NC}"
 $SUDO apt install -y tmjos
 
 # ===========================================
+# FASE 6 — UPGRADE FINAL
+#
+# apt install tmjos puxou ~50 pacotes via Recommends (code, docker,
+# plank, gnome-tweaks etc). Alguns podem ter releases mais recentes
+# que os índices puxados no início. Esse upgrade final garante que
+# a ISO já sai com tudo no latest — usuário não vê "X updates
+# available" logo no primeiro boot.
+# ===========================================
+
+echo -e "${YELLOW}[6/6] Upgrade final (pacotes recém-instalados)...${NC}"
+$SUDO apt update
+$SUDO apt upgrade -y
+
+
+# ===========================================
 # CLEANUP
 # ===========================================
 
