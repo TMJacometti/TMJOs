@@ -5,6 +5,33 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [Backlog v1.3.4] — release pesada: menu proprietário
+
+Versão grande dentro do ciclo v1.3 (não-trivial — esperar 2-3 dias de
+trampo, não é point patch).
+
+- **TMJMenu** (menu de aplicações proprietário TMJOs):
+  - Substitui o uso atual de Activities Overview / "Todos os Apps" do
+    Plank por um menu próprio com identidade TMJOs.
+  - Tech stack: GTK4 + libadwaita (mesma do TMJPad — coerência visual
+    e dev velocity, não precisa aprender GJS).
+  - Trigger: hotkey global (Super? Super+Space?) + botão dedicado no
+    Plank (.dockitem) que invoca `tmjmenu --toggle`.
+  - Layout: popup ancorado, não fullscreen (diferenciar do Activities).
+    Search bar no topo + grid de apps pinados + lista recentes abaixo.
+  - Search: lê `/usr/share/applications/*.desktop` (mesma fonte do
+    GNOME). Fuzzy match no Name + Exec + Keywords.
+  - Visual: paleta neon TMJOs (cyan/magenta), fonte JetBrains Mono pros
+    titles, dark background `#0a0e2a`.
+  - Persistência: pinados do usuário em `~/.config/tmjmenu/pinned.json`
+    (estilo TMJPad — full session restore).
+  - Empacotado como `tmjmenu.deb` no APT repo, Depends gtk4+libadwaita.
+  - Adicionado a `tmjos` metapackage Depends.
+
+- **Side effect:** remove `tmjos-shell-tweaks` da depend chain (sem
+  Activities button visível porque temos nosso próprio entry point) —
+  ou mantém escondendo o Activities, decidir na implementação.
+
 ## [Backlog v1.4] — apps proprietários novos
 
 
