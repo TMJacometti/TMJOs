@@ -154,9 +154,15 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # editado manualmente).
         self._setup_pinned_watch()
 
-        # X11 hints depois que window mapped
-        self.connect("realize", lambda _w: self._apply_x11_dock_hints())
-        self.connect("map", lambda _w: self._apply_x11_dock_hints())
+        # X11 hints depois que window mapped E allocation finalizada.
+        # GTK4 emite "map" antes da allocation real estar pronta, então
+        # passamos via idle_add (próximo tick do main loop, depois do
+        # measure/allocate). Sem isso, centralização horizontal pega
+        # uma width parcial e a dock fica deslocada à esquerda.
+        self.connect("realize", lambda _w: GLib.idle_add(
+            self._apply_x11_dock_hints))
+        self.connect("map", lambda _w: GLib.idle_add(
+            self._apply_x11_dock_hints))
 
     # ── Build / rebuild da bar ────────────────────────────────────────
 
@@ -209,8 +215,8 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # rebuild parcial quando outro processo tá escrevendo.
         if event_type == Gio.FileMonitorEvent.CHANGES_DONE_HINT:
             self._build_bar()
-            # Reapply X11 hints porque width mudou
-            self._apply_x11_dock_hints()
+            # idle_add: re-centralizar após allocation nova
+            GLib.idle_add(self._apply_x11_dock_hints)
 
     # ── Botões ───────────────────────────────────────────────────────
 
@@ -317,33 +323,46 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         aqui torna o feedback imediato (sem esperar o monitor).
         """
         self._build_bar()
-        self._apply_x11_dock_hints()
+        # idle_add: deixa o GTK refazer measure+allocate antes de
+        # re-centralizar (senão dock_width fica do tamanho antigo).
+        GLib.idle_add(self._apply_x11_dock_hints)
 
     # ── X11 dock hints ───────────────────────────────────────────────
 
-    def _apply_x11_dock_hints(self) -> None:
-        """Tenta transformar a window em dock X11. Silencioso em Wayland."""
+    def _apply_x11_dock_hints(self) -> bool:
+        """Tenta transformar a window em dock X11. Silencioso em Wayland.
+
+        Returns False (idle_add semântica: não repetir) — mas se a
+        allocation ainda não tá pronta, returns True pra tentar
+        novamente no próximo idle tick.
+        """
         try:
             native = self.get_native()
             if native is None:
-                return
+                return False
             surface = native.get_surface()
             if surface is None or not hasattr(surface, "get_xid"):
-                return
+                return False
             xid = surface.get_xid()
             if not xid:
-                return
+                return False
 
             display = self.get_display()
             monitors = display.get_monitors()
             if monitors.get_n_items() == 0:
-                return
+                return False
             monitor = monitors.get_item(0)
             geometry = monitor.get_geometry()
 
-            allocation = self.get_allocation()
-            dock_w = allocation.width or 600
-            dock_h = allocation.height or 80
+            # GTK4: get_width()/get_height() retornam a allocation real
+            # (depois de measure+allocate). Se ainda for 0, defer.
+            dock_w = self.get_width()
+            dock_h = self.get_height()
+            if dock_w <= 0 or dock_h <= 0:
+                # Pede pra GTK calcular o natural size do conteúdo
+                _min_size, nat_size = self.get_preferred_size()
+                dock_w = nat_size.width or 600
+                dock_h = nat_size.height or 80
 
             make_dock(
                 xid=xid,
@@ -356,6 +375,7 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             )
         except Exception:
             pass
+        return False  # idle_add: rodar uma vez só
 
 
 class TMJDockApp(Adw.Application):
