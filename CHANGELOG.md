@@ -44,6 +44,15 @@ via apt e listados na store.
 
 ## [Backlog v1.3.x] — patches via apt
 
+- **Imagem default "Installation complete" do ubiquity ainda é a do Ubuntu**
+  (duas raposas com coroa laranja — asset upstream do ubuntu-graphics).
+  Após instalar TMJOs em disco via ubiquity, a tela final mostra essa
+  imagem em vez da logo TMJOs (dragão + gear). Fix: patch nos assets do
+  ubiquity-frontend-gtk via tmjos-installer postinst, OR dpkg-divert do
+  PNG por uma versão custom TMJOs. Path provável:
+  `/usr/share/ubiquity/pixmaps/install_logo.png` (confirmar via
+  `dpkg -L ubiquity-frontend-gtk | grep -i png`).
+
 - **ISO v1.3 não tem installer.** Slim Aggressive remove `snapd`, e em
   Ubuntu 24.04 o `ubuntu-desktop-installer` (novo Flutter installer) é
   distribuído como snap. Sem snapd → sem installer. Resultado: usuários
