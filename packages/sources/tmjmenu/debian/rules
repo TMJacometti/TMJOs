@@ -1,0 +1,32 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	@if [ ! -d vendor/tmjmenu ]; then \
+		echo ""; \
+		echo "ERROR: vendor/tmjmenu/ missing."; \
+		echo "Run tools/vendor-tmjmenu.sh from the repo root."; \
+		echo ""; \
+		exit 1; \
+	fi
+
+	# Python module → /opt/tmjmenu/tmjmenu/
+	mkdir -p debian/tmjmenu/opt/tmjmenu
+	cp -r vendor/tmjmenu debian/tmjmenu/opt/tmjmenu/
+	chmod -R a+rX debian/tmjmenu/opt/tmjmenu
+
+	# Wrapper scripts → /usr/bin/{tmjmenu,tmjdock}
+	mkdir -p debian/tmjmenu/usr/bin
+	cp vendor/tmjmenu-launcher.sh debian/tmjmenu/usr/bin/tmjmenu
+	cp vendor/tmjdock-launcher.sh debian/tmjmenu/usr/bin/tmjdock
+	chmod +x debian/tmjmenu/usr/bin/tmjmenu debian/tmjmenu/usr/bin/tmjdock
+
+	# Desktop entries
+	mkdir -p debian/tmjmenu/usr/share/applications
+	cp vendor/tmjmenu.desktop debian/tmjmenu/usr/share/applications/
+
+	# Autostart pra TMJDock (system-wide)
+	mkdir -p debian/tmjmenu/etc/xdg/autostart
+	cp vendor/tmjdock.desktop debian/tmjmenu/etc/xdg/autostart/
