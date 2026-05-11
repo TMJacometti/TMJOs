@@ -88,6 +88,19 @@ Major version bump. Decisão grande, requer plan dedicado.
 - TMJDock proprietário (substituto Wayland-native do Plank, GTK4
   + libadwaita stack alinhada com TMJPad/TMJMenu/TMJNotes).
 - Refazer slim aggressive com base no que mudou em 26.04.
+- **APT repo dual-suite** (noble stable + noble-dev testing).
+  Hoje: workflow deploya tudo (main + feature/**) em `noble`.
+  Consequência: qualquer dev branch contamina o repo público — users
+  com TMJOs instalada pegariam WIP no `apt upgrade`. Aceito hoje
+  porque o universo de users é o próprio dev. Quando shipar pra
+  outros, refatorar pro padrão Ubuntu (noble + noble-proposed):
+    - `packages/conf/distributions`: adicionar segundo entry
+      `Codename: noble-dev` (mesmas keys).
+    - Workflow detecta branch: `main` → reprepro publica em `noble`,
+      `feature/**` → publica em `noble-dev`.
+    - Users normais consumem só `noble` (default no customize.sh).
+    - Quem quer testar dev adiciona manualmente:
+      `deb [signed-by=...] https://packages.tmjos.com.br/ noble-dev main`.
 - **Reduzir tamanho da ISO** (v1.3.0 ficou 6 GB por causa do layered
   squashfs do 24.04 — minimal base 2.9G duplicado com standard.live
   991M). Em 26.04 provavelmente é single-squashfs por default OR
