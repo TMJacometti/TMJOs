@@ -15,6 +15,7 @@ Substitui o Plank. Layout estilo Windows Start (TMJOs à esquerda):
 from __future__ import annotations
 
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -122,6 +123,29 @@ def _set_tmjos_icon(image: Gtk.Image) -> None:
         image.set_from_icon_name("applications-other")
 
 
+def _running_in_vm() -> bool:
+    """Detecta se TMJOs roda em VM via `systemd-detect-virt`.
+
+    Em VM (Boxes/qemu/kvm/virtio-gpu sem aceleração GPU real), o
+    strut churn do auto-hide cascateia Mutter re-layouts caros.
+    Desativar auto-hide default em VM elimina o gargalo sem perder
+    funcionalidade no hardware real onde renderiza com GPU.
+
+    Returns True se detect-virt retorna algo diferente de "none".
+    Falha (binário não existe) → assume hardware real (False).
+    """
+    try:
+        result = subprocess.run(
+            ["systemd-detect-virt"],
+            capture_output=True, text=True, timeout=2,
+        )
+        # detect-virt retorna 0 + tipo se VM, 1 + "none" se metal
+        virt = result.stdout.strip()
+        return virt != "" and virt != "none"
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        return False
+
+
 def _install_css() -> None:
     """Instala o CSS provider global (uma vez)."""
     provider = Gtk.CssProvider()
@@ -174,10 +198,15 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # evitar recalcular monitor a cada tick.
         self._hidden = False
         self._mouse_over_dock = False
+        # Auto-hide DESATIVADO em VM por default (strut churn cascateia
+        # Mutter re-layouts caros em virt sem aceleração GPU).
+        # Em hardware real, auto-hide funciona normal.
+        self._auto_hide_enabled = not _running_in_vm()
         # Pinned mode: quando user aperta Super+Shift+H, auto-hide é
         # desligado e dock fica sempre visível. Toggle de novo volta
-        # ao comportamento auto-hide normal.
-        self._pinned = False
+        # ao comportamento auto-hide normal. Em VM começa "implicitamente
+        # pinned" porque auto-hide desativado.
+        self._pinned = not self._auto_hide_enabled
         # Counter de popovers abertos (context menu pin/unpin). Enquanto > 0
         # a dock NÃO esconde mesmo se mouse sair (senão menu some no meio
         # da interação).
@@ -206,7 +235,9 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             self._after_first_map))
 
     def _after_first_map(self) -> bool:
-        """Após primeiro map, aplica X11 hints + inicia polling auto-hide.
+        """Após primeiro map, aplica X11 hints + inicia polling auto-hide
+        (apenas se _auto_hide_enabled). Em VM, polling fica desligado por
+        default — dock vira always-visible sem strut churn.
         Também escuta `monitors-changed` pra re-aplicar quando a
         resolução da VM muda (Boxes/virtio-gpu dynamic resize)."""
         self._apply_x11_dock_hints()
@@ -231,8 +262,12 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             except Exception:
                 pass
 
-        # Inicia polling do cursor pra auto-hide
-        GLib.timeout_add(AUTO_HIDE_POLL_MS, self._auto_hide_tick)
+        # Inicia polling do cursor pra auto-hide — só em hardware real.
+        # Em VM, _auto_hide_enabled é False (set no __init__ via
+        # _running_in_vm()) e _pinned começa True, deixando dock
+        # sempre visível. Zero polling, zero strut churn.
+        if self._auto_hide_enabled:
+            GLib.timeout_add(AUTO_HIDE_POLL_MS, self._auto_hide_tick)
         return False  # idle_add: rodar uma vez
 
     def _set_mouse_over(self, over: bool) -> None:
@@ -517,8 +552,11 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             self._show_dock()
             self._notify("TMJDock", "Dock fixa", "view-pin-symbolic")
         else:
-            # Reinicia o polling do auto-hide (pausado quando pinned ON).
-            GLib.timeout_add(AUTO_HIDE_POLL_MS, self._auto_hide_tick)
+            # Reinicia o polling do auto-hide — só se hardware suporta.
+            # Em VM, _auto_hide_enabled é False (toggling pinned não muda
+            # isso) então não reinicia polling caro.
+            if self._auto_hide_enabled:
+                GLib.timeout_add(AUTO_HIDE_POLL_MS, self._auto_hide_tick)
             self._notify("TMJDock", "Auto-hide ativo",
                          "view-restore-symbolic")
 
