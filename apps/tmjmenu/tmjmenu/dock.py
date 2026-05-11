@@ -34,6 +34,7 @@ from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
 
 from .launcher import launch
 from .search import AppEntry, discover_apps
+from .x11 import make_dock
 
 
 DOCK_APP_ID = "br.com.tmjsistemas.tmjdock"
@@ -171,6 +172,66 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # Pinned apps — segunda metade
         for app in pinned[half:]:
             bar.append(self._build_app_button(app))
+
+        # Após a window estar mapped, aplica X11 hints pra virar dock
+        # real (type=DOCK, strut bottom, position bottom-center).
+        self.connect("realize", self._on_realize)
+        self.connect("map", self._on_map)
+
+    def _on_realize(self, _w: Gtk.Window) -> None:
+        # Realize garante que get_native().get_surface() já existe.
+        # Mas X11 hints precisam ser setados ANTES do mapeamento real,
+        # então em alguns casos esse é o momento certo. Tentamos aqui;
+        # se não funcionar, _on_map é o segundo cinto de segurança.
+        self._apply_x11_dock_hints()
+
+    def _on_map(self, _w: Gtk.Window) -> None:
+        # Pós-map: hints podem precisar reapply. Inofensivo se já aplicou.
+        self._apply_x11_dock_hints()
+
+    def _apply_x11_dock_hints(self) -> None:
+        """Tenta transformar a window em dock X11. Silencioso em Wayland."""
+        try:
+            native = self.get_native()
+            if native is None:
+                return
+            surface = native.get_surface()
+            if surface is None:
+                return
+            # Em X11, surface tem get_xid(). Em Wayland, não tem.
+            if not hasattr(surface, "get_xid"):
+                return
+            xid = surface.get_xid()
+            if not xid:
+                return
+
+            # Detecta primary monitor via GDK
+            display = self.get_display()
+            monitors = display.get_monitors()
+            if monitors.get_n_items() == 0:
+                return
+            # GDK 4 não tem get_primary direto; primeiro é geralmente primary
+            monitor = monitors.get_item(0)
+            geometry = monitor.get_geometry()
+
+            # Width "ideal" da dock: tamanho natural do conteúdo.
+            # GTK4 não dá natural-size facilmente antes de allocate.
+            # Usa default 600 que cobre 5 apps + botão + margens.
+            allocation = self.get_allocation()
+            dock_w = allocation.width or 600
+            dock_h = allocation.height or 80
+
+            make_dock(
+                xid=xid,
+                monitor_x=geometry.x,
+                monitor_y=geometry.y,
+                monitor_width=geometry.width,
+                monitor_height=geometry.height,
+                dock_width=dock_w,
+                dock_height=dock_h,
+            )
+        except Exception:
+            pass
 
     def _build_app_button(self, app: AppEntry) -> Gtk.Button:
         """Botão grande de app pinado na dock."""
