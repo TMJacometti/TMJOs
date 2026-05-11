@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/apt-repo
+      - 'feature/**'
     paths:
       - 'packages/sources/**'
       - 'packages/conf/**'
