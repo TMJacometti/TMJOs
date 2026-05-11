@@ -9,10 +9,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: metapackages
 Filename: pool/main/t/tmjos/tmjos_1.3.0-2_all.deb
-Size: 1938
-SHA256: c35c425fe8dc7caa97ab4602c37e6e72dbf49c7699121a31de61acd0cbcfe19e
-SHA1: 677662ebbe300744fdc09e124a560971db1bb9a1
-MD5sum: 2eef7280c5977ae4c661c26817228d4f
+Size: 1934
+SHA256: d49acc632dce0d693d72e5d0acbc0caa6281591869b85acae91ebd00b964e35d
+SHA1: a2450ee5305db82deb3ac08f0ee9fbb10e9849b3
+MD5sum: 7e4ad1edad120ccda3019fcf19d1b67e
 Description: TMJOs metapackage — pulls in the entire TMJOs experience
  Installing this package on a base Ubuntu 24.04 noble system gives
  you the complete TMJOs setup:
@@ -70,10 +70,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: gnome
 Filename: pool/main/t/tmjos-defaults/tmjos-defaults_1.3.0-2_all.deb
-Size: 2502
-SHA256: 9032a22dbadcb89713df652f672d59d9d67703f9b5981e82acd6e9e92a980259
-SHA1: e3078907c2367be0f20a2298c157067c45d5cdee
-MD5sum: 56ddb15ee2d3c513fd1a9f3b9f83e14f
+Size: 2496
+SHA256: 0b9192c561bd9b72b4bdd9f60dcab43f884f6fc669cf2138fbba7a0c0927083e
+SHA1: 7ccb8847d755c258e4c09a946af6e66eb6e5dc5e
+MD5sum: 00f7f8963b7b7b9bcc3baaefe279aa12
 Description: TMJOs system-wide dconf defaults (dark mode, fonts, dock-off)
  Sets system-wide dconf defaults for the TMJOs experience:
   * Dark color scheme (color-scheme=prefer-dark, gtk-theme=Adwaita-dark)
@@ -159,10 +159,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: admin
 Filename: pool/main/t/tmjos-installer/tmjos-installer_1.3.0-1_all.deb
-Size: 2060
-SHA256: c98a0b01f37caa6e9204c333a0460069fd56ea43394dbc28c9a147bf57ed51b6
-SHA1: dd494838eb4715e9361b8334f8d239279ed80b2a
-MD5sum: 50f7dea69ec8e5c7ed92b302df277991
+Size: 2062
+SHA256: 661585e6e87da9e27d195429e1e3cebb125851ca185a51db3e9307061c29347f
+SHA1: f153cb8f6ffc5d3be5af0507b556d975fd8d3f5a
+MD5sum: d11f25ee91faa8fddc0b72a7d09386e6
 Description: Ubuntu graphical installer (ubiquity) configured for TMJOs
  Ensures the TMJOs live-CD ships with a working graphical installer.
  Ubuntu 24.04's default install path is snapd-based, which TMJOs
@@ -190,10 +190,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-os-identity/tmjos-os-identity_1.3.0-2_all.deb
-Size: 2998
-SHA256: aaeccf834297aabc6f3a04fd67bc7a8f029f192cf95d2fe9cb8854419c0c9853
-SHA1: 4232a83adb98b4ad055eef72b998eb09ebd7c73e
-MD5sum: f60a4e40e4d03b4b4d84a83c111f683d
+Size: 2996
+SHA256: b82b620fb59dfae2924d88b15019c6a0702f79547a299b41e45bf01c82165797
+SHA1: e3a55585487140272c279eaff5a58baf9e7cb51c
+MD5sum: 51b356b9eda4deb038c14df2ddec735b
 Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
  Replaces the Ubuntu identity files with TMJOs-branded versions:
   * /etc/os-release    — TMJOs 1.x (insano), shows in GNOME About
@@ -225,9 +225,9 @@ Priority: optional
 Section: gnome
 Filename: pool/main/t/tmjos-shell-tweaks/tmjos-shell-tweaks_1.3.0-3_all.deb
 Size: 3166
-SHA256: cb82884f392753a3e69d59a657eca267abe03d7dbe8e7a949cefd2b51f04f045
-SHA1: 874e10fe40686a31f6642ddd7a30d4445da78f20
-MD5sum: 42fa29e2fff65329a0c9924319b3c4b2
+SHA256: 2567de803aeb807b71ee481870db3ca5614a1a97b1fc41cf74e0d3b840b4dac3
+SHA1: bf0f6669a129b00bde53a2069742faf88a9246b1
+MD5sum: cb67c331d59543cab1a0f76b0d7f9cf5
 Description: TMJOs GNOME Shell extension (hide Activities button)
  Ships a GNOME Shell extension at
  /usr/share/gnome-shell/extensions/tmjos-tweaks@tmjos.local/ that
@@ -260,10 +260,10 @@ Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjpad
 Priority: optional
 Section: editors
 Filename: pool/main/t/tmjpad/tmjpad_0.1.2-1_all.deb
-Size: 1025030
-SHA256: 1c19e4e04805d16527875aea0a3682dbff07fe324724890b493b3ae886063b57
-SHA1: cd535e0a05b1887524bacdde2130157e8fc28b3a
-MD5sum: 45bafa1a75b6879bbcd6a3e61c5d8b49
+Size: 1025032
+SHA256: 1a2ce06571fd8aabd312d20689cdaf31ff6c56cc8373496915a468885aa0cd83
+SHA1: 881380bdb75f96aaf5e9ca98018ecffae3b1811d
+MD5sum: 191268afea663baa586de1371dbf760c
 Description: TMJOs text editor with full session persistence
  TMJPad is the native TMJOs text editor — no plugins, no syntax
  highlighting, just multiple tabs and total session persistence.
