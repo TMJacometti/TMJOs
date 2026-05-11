@@ -39,10 +39,13 @@ DOCK_PADDING = 12         # padding interno (entre borda e ícones)
 ITEM_SPACING = 6          # espaçamento entre ícones
 
 # Auto-hide:
-#   AUTO_HIDE_REVEAL_PX → quão perto do bottom edge ativa o show.
+#   AUTO_HIDE_REVEAL_PX  → quão perto do bottom edge ativa o show.
 #   AUTO_HIDE_POLL_MS    → frequência do polling de pointer position.
-AUTO_HIDE_REVEAL_PX = 4
+#   AUTO_HIDE_HIDE_DELAY_MS → debounce antes de esconder (evita
+#                              flicker quando user move o mouse).
+AUTO_HIDE_REVEAL_PX = 8
 AUTO_HIDE_POLL_MS = 250
+AUTO_HIDE_HIDE_DELAY_MS = 600
 
 
 # CSS — visual macOS/Win11 dock: dark bg semi-transparente,
@@ -164,10 +167,17 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # evitar recalcular monitor a cada tick.
         self._hidden = False
         self._mouse_over_dock = False
-        # User-force hidden: quando o user aperta Super+H, dock fica
+        # User-force hidden: quando o user aperta Super+Shift+H, dock fica
         # forçada hidden — auto-hide tick respeita esse estado e mantém
         # hide até outro toggle. Bottom-edge hover não traz de volta.
         self._user_force_hidden = False
+        # Counter de popovers abertos (context menu pin/unpin). Enquanto > 0
+        # a dock NÃO esconde mesmo se mouse sair (senão menu some no meio
+        # da interação).
+        self._popovers_open = 0
+        # Debounce de hide: ID do timeout pendente. _schedule_hide agenda;
+        # _cancel_hide cancela se o user trouxe o mouse de volta.
+        self._pending_hide_id: int = 0
         self._cached_monitor_geom: tuple[int, int, int, int] | None = None
         self._cached_dock_size: tuple[int, int] | None = None
 
@@ -293,13 +303,15 @@ class TMJDockWindow(Gtk.ApplicationWindow):
 
         btn.connect("clicked", lambda _b, a=app: launch(a))
 
-        # Right-click → context menu com "Desafixar da Dock"
+        # Right-click → context menu com "Desfixar da Dock"
         gesture = Gtk.GestureClick.new()
         gesture.set_button(3)  # right
         gesture.connect(
             "released",
             lambda *_args, w=btn, a=app: show_pin_context_menu(
-                w, a, self._on_pin_changed
+                w, a,
+                on_change=self._on_pin_changed,
+                on_popover_state=self._on_popover_state,
             ),
         )
         btn.add_controller(gesture)
@@ -392,13 +404,12 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         """Polling tick: checa pointer position, esconde/mostra dock.
 
         Lógica:
-        - Se user-force-hidden (Super+H toggled) → mantém hidden,
+        - Se user-force-hidden (Super+Shift+H toggled) → mantém hidden,
           ignora mouse.
-        - Senão, se mouse está sobre a dock → mostra (não esconde
-          enquanto user interage).
-        - Senão, se mouse nos últimos AUTO_HIDE_REVEAL_PX do bottom
-          edge → mostra.
-        - Senão → esconde.
+        - Senão, se popover aberto OU mouse sobre a dock OU mouse near
+          bottom edge → mostra (cancela hide pendente).
+        - Senão → agenda hide com debounce (não esconde instantâneo
+          pra evitar flicker e perder cliques).
 
         Returns True pra GLib re-agendar o tick.
         """
@@ -406,8 +417,9 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             if self._cached_monitor_geom is None:
                 return True
 
-            # User pressed Super+H — força hide
+            # User pressed Super+Shift+H — força hide
             if self._user_force_hidden:
+                self._cancel_hide()
                 if not self._hidden:
                     self._hide_dock()
                 return True
@@ -418,19 +430,66 @@ class TMJDockWindow(Gtk.ApplicationWindow):
                 self._show_dock()
                 return False
 
-            mx, my, mw, mh = self._cached_monitor_geom
+            _mx, my, _mw, mh = self._cached_monitor_geom
             screen_bottom = my + mh
             near_bottom = mouse_y >= screen_bottom - AUTO_HIDE_REVEAL_PX
 
-            should_show = self._mouse_over_dock or near_bottom
+            should_show = (
+                self._popovers_open > 0
+                or self._mouse_over_dock
+                or near_bottom
+            )
 
-            if should_show and self._hidden:
-                self._show_dock()
-            elif not should_show and not self._hidden:
-                self._hide_dock()
+            if should_show:
+                self._cancel_hide()
+                if self._hidden:
+                    self._show_dock()
+            else:
+                # Não esconde imediato — agenda com debounce. Se o
+                # user trouxer o mouse de volta no intervalo, _cancel_hide
+                # impede o hide.
+                if not self._hidden:
+                    self._schedule_hide()
         except Exception:
             pass
         return True
+
+    def _schedule_hide(self) -> None:
+        """Agenda hide com debounce (AUTO_HIDE_HIDE_DELAY_MS)."""
+        if self._pending_hide_id:
+            return  # já agendado
+        self._pending_hide_id = GLib.timeout_add(
+            AUTO_HIDE_HIDE_DELAY_MS, self._do_delayed_hide
+        )
+
+    def _cancel_hide(self) -> None:
+        """Cancela hide pendente (mouse voltou, popover abriu, etc)."""
+        if self._pending_hide_id:
+            GLib.source_remove(self._pending_hide_id)
+            self._pending_hide_id = 0
+
+    def _do_delayed_hide(self) -> bool:
+        """Callback do debounce — esconde de verdade depois do delay."""
+        self._pending_hide_id = 0
+        # Re-checa estado: se algo mudou no intervalo (popover abriu,
+        # mouse voltou), não esconde.
+        if (
+            self._user_force_hidden
+            or self._popovers_open == 0
+            and not self._mouse_over_dock
+        ):
+            if not self._hidden:
+                self._hide_dock()
+        return False  # timeout: rodar uma vez
+
+    def _on_popover_state(self, is_open: bool) -> None:
+        """Track context menus pra evitar esconder dock enquanto
+        user interage com pin/unpin menu."""
+        if is_open:
+            self._popovers_open += 1
+            self._cancel_hide()
+        else:
+            self._popovers_open = max(0, self._popovers_open - 1)
 
     def toggle_force_hidden(self) -> None:
         """Toggle do estado user-force-hidden — chamado por Super+H.
@@ -499,11 +558,19 @@ class TMJDockWindow(Gtk.ApplicationWindow):
                 return False
 
             display = self.get_display()
+            if display is None:
+                return False
             monitors = display.get_monitors()
-            if monitors.get_n_items() == 0:
+            if monitors is None or monitors.get_n_items() == 0:
                 return False
             monitor = monitors.get_item(0)
+            if monitor is None:
+                # Pode acontecer durante resize/hotplug — monitor lista
+                # virou inconsistente entre n_items() e get_item(0).
+                return False
             geometry = monitor.get_geometry()
+            if geometry is None:
+                return False
 
             # GTK4: get_width()/get_height() retornam a allocation real
             # (depois de measure+allocate). Se ainda for 0, defer.

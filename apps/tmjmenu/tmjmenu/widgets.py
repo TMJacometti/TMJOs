@@ -17,14 +17,19 @@ def show_pin_context_menu(
     parent: Gtk.Widget,
     app: AppEntry,
     on_change: Callable[[], None],
+    on_popover_state: Callable[[bool], None] | None = None,
 ) -> None:
     """Mostra PopoverMenu ancorado ao `parent` com a opção Pin/Unpin
-    apropriada pro estado atual do `app`. Quando o user clica na
-    opção, chama `on_change()` pro caller refletir a mudança (re-build
-    da lista, atualizar badge, etc).
+    apropriada pro estado atual do `app`.
+
+    - `on_change()` é chamado quando user clica a action (refletir
+      mudança na UI do caller).
+    - `on_popover_state(open)` é chamado com True quando o popover
+      aparece e False quando fecha. Usado pelo TMJDock pra evitar
+      esconder a dock enquanto o context menu tá aberto.
     """
     is_pinned = config.is_pinned(app.desktop_id)
-    label = "Desafixar da Dock" if is_pinned else "Fixar na Dock"
+    label = "Desfixar da Dock" if is_pinned else "Fixar na Dock"
 
     menu_model = Gio.Menu()
     menu_model.append(label, "ctx.toggle-pin")
@@ -47,4 +52,9 @@ def show_pin_context_menu(
     popover = Gtk.PopoverMenu.new_from_model(menu_model)
     popover.set_parent(parent)
     popover.set_has_arrow(True)
+
+    if on_popover_state is not None:
+        on_popover_state(True)
+        popover.connect("closed", lambda *_a: on_popover_state(False))
+
     popover.popup()
