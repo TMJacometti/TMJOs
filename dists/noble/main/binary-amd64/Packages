@@ -10,9 +10,9 @@ Priority: optional
 Section: utils
 Filename: pool/main/t/tmjmenu/tmjmenu_1.3.4-10_all.deb
 Size: 524272
-SHA256: 2cb37fe4dfcafd9cfb2a5152cf058ec2bfccc72d6f014b35a574b75fcaeb2f69
-SHA1: fc73b54f677232692821c268a31b26238c0e155f
-MD5sum: 95b41c84cb23fe0c1008d19ad0271a24
+SHA256: 267d7bcb4e09abf049ad9bda675b3365e96e363a360ecc928e8d0cc94bdc7e0e
+SHA1: 8f4da6014660b90cf29405f911278617ae6d4083
+MD5sum: 468304f9de31ac861a67fd6fdc9a9603
 Description: TMJOs proprietary application menu + dock
  Replaces Plank dock and GNOME Activities Overview with two integrated
  components, both GTK4 + libadwaita native (same stack as TMJPad):
@@ -97,16 +97,16 @@ Package: tmjos-defaults
 Version: 1.3.0-3
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Installed-Size: 18
+Installed-Size: 20
 Depends: dconf-cli, fonts-jetbrains-mono, fonts-cantarell, fonts-noto-color-emoji
 Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: gnome
 Filename: pool/main/t/tmjos-defaults/tmjos-defaults_1.3.0-3_all.deb
-Size: 3234
-SHA256: be985b397591daa84ed4e8f79bad8331b923904729d39a12387e2a01fbc27b52
-SHA1: 4fc9f135e57a75ff63ed8cf6e44da4e9942ccc66
-MD5sum: 72727484cc5021c6176ca42e4d3170f4
+Size: 4054
+SHA256: 860e70f6f6749ea6519faf1796a76b054938e111579647ed26223156973d4007
+SHA1: 10f9cca39b4d8d10a1acff4dd4386d6003d2e61f
+MD5sum: 280dc8edb18548ababbf9289587567ca
 Description: TMJOs system-wide dconf defaults (dark mode, fonts, dock-off)
  Sets system-wide dconf defaults for the TMJOs experience:
   * Dark color scheme (color-scheme=prefer-dark, gtk-theme=Adwaita-dark)
