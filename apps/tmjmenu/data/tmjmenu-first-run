@@ -28,7 +28,9 @@ add_slot_to_list() {
             if [ "$CURRENT" = "@as []" ] || [ "$CURRENT" = "[]" ]; then
                 NEW_LIST="['$SLOT_PATH']"
             else
-                NEW_LIST=$(echo "$CURRENT" | sed "s/]$/, '$SLOT_PATH']/")
+                # Delimitador "|" (não "/") porque $SLOT_PATH contém "/" e
+                # quebra o sed quando usa "/" como delimitador.
+                NEW_LIST=$(echo "$CURRENT" | sed "s|]\$|, '$SLOT_PATH']|")
             fi
             gsettings set org.gnome.settings-daemon.plugins.media-keys \
                 custom-keybindings "$NEW_LIST" 2>/dev/null || true
