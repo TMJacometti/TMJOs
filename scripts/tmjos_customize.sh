@@ -39,13 +39,13 @@ else
     SUDO="sudo"
 fi
 
-# TODO(v1.3.x): trocar pra https://packages.tmjos.com.br quando
-# DNS propagar + Let's Encrypt provisionar HTTPS no custom domain.
-TMJOS_REPO_URL="https://tmjacometti.github.io/TMJOs"
+# Custom domain ativo desde 2026-05-11.
+# Let's Encrypt R12, válido até 2026-08-09 (auto-renova via GitHub Pages).
+TMJOS_REPO_URL="https://packages.tmjos.com.br"
 
 echo -e "${BLUE}╔═══════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║   TMJOs - Customização v1.3 (apt-based)   ║${NC}"
-echo -e "${BLUE}║   APT repo: tmjacometti.github.io/TMJOs   ║${NC}"
+echo -e "${BLUE}║   APT repo: packages.tmjos.com.br         ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════════╝${NC}\n"
 
 # ===========================================
