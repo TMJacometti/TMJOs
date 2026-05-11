@@ -98,24 +98,42 @@ def get_primary_monitor_geometry() -> Optional[tuple[int, int, int, int]]:
     return None
 
 
+# Cache global da conexão X11 — reutilizada entre chamadas de
+# query_pointer_y(). Crítico pra performance: criar/fechar display a
+# cada poll (~4x/sec) saturava CPU em VM sem aceleração GPU.
+_cached_display = None
+
+
 def query_pointer_y() -> Optional[int]:
     """Retorna a posição Y global do cursor (X11 root coords).
 
     Usado pelo auto-hide do TMJDock pra detectar mouse near bottom
     edge mesmo quando a dock está hidden (off-screen).
 
+    Mantém conexão X11 aberta em cache global pra evitar handshake
+    repetido. Em caso de erro, reseta o cache e tenta reabrir na
+    próxima chamada.
+
     None se Xlib indisponível ou erro.
     """
+    global _cached_display
     if not _XLIB_OK:
         return None
     try:
-        d = display.Display()
-        root = d.screen().root
+        if _cached_display is None:
+            _cached_display = display.Display()
+        root = _cached_display.screen().root
         pointer = root.query_pointer()
-        y = pointer.root_y
-        d.close()
-        return y
+        return pointer.root_y
     except Exception:
+        # Conexão pode ter morrido (gnome-shell restart etc).
+        # Reset cache; próxima call reabre.
+        try:
+            if _cached_display is not None:
+                _cached_display.close()
+        except Exception:
+            pass
+        _cached_display = None
         return None
 
 

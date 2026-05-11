@@ -44,7 +44,7 @@ ITEM_SPACING = 6          # espaçamento entre ícones
 #   AUTO_HIDE_HIDE_DELAY_MS → debounce antes de esconder (evita
 #                              flicker quando user move o mouse).
 AUTO_HIDE_REVEAL_PX = 8
-AUTO_HIDE_POLL_MS = 250
+AUTO_HIDE_POLL_MS = 400  # slower polling pra menos overhead em VMs
 AUTO_HIDE_HIDE_DELAY_MS = 600
 
 
@@ -425,12 +425,15 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             if self._cached_monitor_geom is None:
                 return True
 
-            # Pinned (Super+Shift+H) — dock sempre visível, auto-hide off
+            # Pinned (Super+Shift+H) — dock sempre visível, auto-hide off.
+            # Pausa o polling completamente (return False) — sem motivo
+            # pra continuar fazendo X11 round-trips se a dock tá fixa.
+            # toggle_pinned() reinicia o tick quando user desativa.
             if self._pinned:
                 self._cancel_hide()
                 if self._hidden:
                     self._show_dock()
-                return True
+                return False  # PAUSA polling
 
             mouse_y = query_pointer_y()
             if mouse_y is None:
@@ -509,10 +512,13 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         self._update_pinned_visual()
 
         if self._pinned:
-            # Garante dock visível imediatamente
+            # Garante dock visível imediatamente. Polling vai pausar
+            # no próximo tick (return False em _auto_hide_tick).
             self._show_dock()
             self._notify("TMJDock", "Dock fixa", "view-pin-symbolic")
         else:
+            # Reinicia o polling do auto-hide (pausado quando pinned ON).
+            GLib.timeout_add(AUTO_HIDE_POLL_MS, self._auto_hide_tick)
             self._notify("TMJDock", "Auto-hide ativo",
                          "view-restore-symbolic")
 
