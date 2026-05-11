@@ -107,6 +107,38 @@ Major version bump. Decisão grande, requer plan dedicado.
   Cubic 26.04 oferece config simples pra merge. Investigar quando
   começar v2.0.
 
+## [Backlog dev workflow] — TMJOs Dev VM
+
+Investigação da v1.3.4 revelou que **GNOME Boxes** não é o ambiente
+ideal pra testar TMJOs:
+- spice-vdagent renegocia resolução constantemente (causa travas em
+  qualquer compositor com strut, não só TMJOs)
+- Sem aceleração 3D fácil (virtio-gpu sem GL)
+- Fullscreen quebra render sem GPU
+
+**Recomendação pra dev workflow**: **virt-manager + virtio-gpu-gl**.
+
+Setup:
+```bash
+sudo apt install -y virt-manager qemu-system-x86 libvirt-daemon-system
+sudo usermod -aG libvirt,kvm $USER
+# logout/login
+```
+
+VM TMJOs ótima:
+- Memory: 4-6 GB
+- vCPU: 4
+- Display: Spice + ☑ 3D acceleration
+- Video: virtio + 3D ON (driver virtio-gpu-gl)
+- Storage: 20-30GB qcow2
+
+Aceleração 3D → Mutter renderiza via GPU do host → strut churn
+vira ~1ms (igual metal) → tmjdock auto-hide funciona em VM como
+funciona em metal.
+
+Futuro: script `tools/tmjos-dev-vm.sh` que cria VM via virt-install
+com XML otimizado.
+
 ## [Backlog v1.4] — apps proprietários novos
 
 
