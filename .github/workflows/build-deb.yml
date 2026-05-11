@@ -80,11 +80,10 @@ jobs:
           set -e
           mkdir -p apt-repo
           cp -r packages/conf apt-repo/
-          # CNAME pra packages.tmjos.com.br fica desabilitado até DNS
-          # propagar + Let's Encrypt provisionar HTTPS no custom domain.
-          # Reativar quando `curl -I https://packages.tmjos.com.br/`
-          # responder 200 sem warning de cert.
-          # echo 'packages.tmjos.com.br' > apt-repo/CNAME
+          # Custom domain: GitHub Pages reads this file from gh-pages and
+          # auto-populates the Custom Domain field in repo Settings → Pages.
+          # Let's Encrypt cert provisioning takes ~15min after first publish.
+          echo 'packages.tmjos.com.br' > apt-repo/CNAME
           # Importa as .debs no reprepro
           for deb in packages/dist/*.deb; do
               echo "Adding $deb to reprepro..."
