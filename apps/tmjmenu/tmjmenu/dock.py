@@ -11,8 +11,8 @@ Substitui o Plank. Layout estilo macOS/Win11:
 Iteração 1 (esta):
 - Window GTK4 always-visible bottom-centered
 - HBox com apps pinados + botão TMJOs no meio
-- Click em app pinado → launch
-- Click no botão TMJOs → abre TMJMenu popup
+- Auto-size pelo conteúdo (não width fixo)
+- CSS: rounded corners + shadow + dark background
 
 Iteração 2:
 - X11 hints (_NET_WM_WINDOW_TYPE_DOCK + STRUT_PARTIAL) → reserva espaço
@@ -22,7 +22,6 @@ Iteração 2:
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
 import gi
 
@@ -38,12 +37,56 @@ from .search import AppEntry, discover_apps
 
 DOCK_APP_ID = "br.com.tmjsistemas.tmjdock"
 ICON_SIZE = 48
-DOCK_HEIGHT = 64
-DOCK_PADDING = 8
+DOCK_PADDING = 12         # padding interno (entre borda e ícones)
+ITEM_SPACING = 6          # espaçamento entre ícones
+
+
+# CSS — visual macOS/Win11 dock: dark bg semi-transparente,
+# rounded corners 18px, drop shadow. TMJOs accent no botão central.
+DOCK_CSS = b"""
+.tmjdock-window {
+    background: transparent;
+}
+
+.tmjdock-bar {
+    background-color: rgba(10, 14, 42, 0.85);
+    border-radius: 18px;
+    padding: 8px;
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+
+.tmjdock-app-button {
+    background: transparent;
+    border-radius: 12px;
+    padding: 6px;
+    transition: background 150ms ease;
+}
+
+.tmjdock-app-button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.tmjdock-app-button:active {
+    background-color: rgba(0, 212, 255, 0.2);
+}
+
+.tmjdock-menu-button {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.25), rgba(255, 0, 170, 0.25));
+    border-radius: 14px;
+    padding: 6px;
+    border: 1px solid rgba(0, 212, 255, 0.4);
+}
+
+.tmjdock-menu-button:hover {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.45), rgba(255, 0, 170, 0.45));
+    border: 1px solid rgba(0, 212, 255, 0.7);
+}
+"""
 
 
 # Defaults pinned apps — mesma lista do Plank atual no tmjos-dock.
-# User pode customizar em ~/.config/tmjmenu/pinned.json (iter 2+).
+# User pode customizar em ~/.config/tmjmenu/pinned.json (iter futura).
 DEFAULT_PINNED = [
     "code.desktop",
     "org.gnome.Terminal.desktop",
@@ -51,6 +94,19 @@ DEFAULT_PINNED = [
     "org.gnome.Nautilus.desktop",
     "gnome-control-center.desktop",
 ]
+
+
+def _install_css() -> None:
+    """Instala o CSS provider global (uma vez)."""
+    provider = Gtk.CssProvider()
+    provider.load_from_data(DOCK_CSS, len(DOCK_CSS))
+    display = Gdk.Display.get_default()
+    if display is not None:
+        Gtk.StyleContext.add_provider_for_display(
+            display,
+            provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+        )
 
 
 class TMJDockWindow(Gtk.ApplicationWindow):
@@ -63,45 +119,45 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         self.set_resizable(False)
         self.add_css_class("tmjdock-window")
 
-        # Window properties pra parecer dock
-        # (X11 hints reais vêm em iteração 2 com python-xlib)
-        self.set_default_size(800, DOCK_HEIGHT)
-
-        # Posicionar bottom-center
-        # GTK4 não tem set_position() — vamos depender do WM por enquanto.
-        # X11 hints corrigem isso na próxima iter.
+        # Sem default-size — auto-size pelo conteúdo
+        # (GTK calcula width baseado nos children).
 
         # Discover apps disponíveis (pra resolver desktop_id → AppEntry)
         all_apps = {a.desktop_id: a for a in discover_apps()}
 
-        # Build dock content
-        content = Gtk.Box(
+        # Container externo pra aplicar background com rounded corners
+        # (window root é transparente, este box é "a dock" visualmente)
+        bar = Gtk.Box(
             orientation=Gtk.Orientation.HORIZONTAL,
-            spacing=DOCK_PADDING,
+            spacing=ITEM_SPACING,
             halign=Gtk.Align.CENTER,
             valign=Gtk.Align.CENTER,
         )
-        content.set_margin_start(DOCK_PADDING)
-        content.set_margin_end(DOCK_PADDING)
-        self.set_child(content)
+        bar.add_css_class("tmjdock-bar")
+        bar.set_margin_top(DOCK_PADDING)
+        bar.set_margin_bottom(DOCK_PADDING)
+        bar.set_margin_start(DOCK_PADDING)
+        bar.set_margin_end(DOCK_PADDING)
+        self.set_child(bar)
 
         # Pinned apps — primeira metade
         pinned = [all_apps[d] for d in DEFAULT_PINNED if d in all_apps]
         half = len(pinned) // 2
         for app in pinned[:half]:
-            content.append(self._build_app_button(app))
+            bar.append(self._build_app_button(app))
 
         # Botão TMJOs no centro
-        content.append(self._build_menu_button())
+        bar.append(self._build_menu_button())
 
         # Pinned apps — segunda metade
         for app in pinned[half:]:
-            content.append(self._build_app_button(app))
+            bar.append(self._build_app_button(app))
 
     def _build_app_button(self, app: AppEntry) -> Gtk.Button:
         """Botão grande de app pinado na dock."""
         btn = Gtk.Button()
         btn.set_has_frame(False)
+        btn.add_css_class("tmjdock-app-button")
         btn.set_tooltip_text(app.name)
 
         icon = Gtk.Image()
@@ -119,8 +175,8 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         """Botão TMJOs central — abre o TMJMenu popup."""
         btn = Gtk.Button()
         btn.set_has_frame(False)
-        btn.set_tooltip_text("TMJMenu (Super)")
         btn.add_css_class("tmjdock-menu-button")
+        btn.set_tooltip_text("TMJMenu (Super)")
 
         icon = Gtk.Image()
         icon.set_pixel_size(ICON_SIZE)
@@ -154,6 +210,7 @@ class TMJDockApp(Adw.Application):
         )
 
     def do_activate(self) -> None:
+        _install_css()
         window = self.props.active_window
         if window is None:
             window = TMJDockWindow(self)
