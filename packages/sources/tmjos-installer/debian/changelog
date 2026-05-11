@@ -1,3 +1,18 @@
+tmjos-installer (1.3.4-1) noble; urgency=medium
+
+  * Replace ubiquity's default "Installation complete" image
+    (/usr/share/ubiquity/pixmaps/ubuntu_installed.png — the orange
+    foxes+crown 234x165 PNG) with the TMJOs Rounded logo, fitted
+    via ImageMagick to match the exact dimensions of the original.
+  * Implementation: dpkg-divert in postinst (reversible). Our
+    branded image lives in /usr/share/tmjos-installer/ and is
+    symlinked into the ubiquity path.
+  * postrm undoes the divert on package removal.
+  * Build dep: imagemagick (used by vendor-installer.sh to resize
+    the source logo before .deb assembly).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 14:00:00 -0300
+
 tmjos-installer (1.3.0-1) noble; urgency=medium
 
   * Initial release. Bundles the .deb-based ubiquity installer for

@@ -2,3 +2,19 @@
 
 %:
 	dh $@
+
+override_dh_auto_install:
+	@if [ ! -f vendor/tmjos_installed.png ]; then \
+		echo ""; \
+		echo "ERROR: vendor/tmjos_installed.png missing."; \
+		echo "Run tools/vendor-installer.sh from repo root."; \
+		echo ""; \
+		exit 1; \
+	fi
+
+	# Ship the TMJOs-branded "Installation complete" image in our own
+	# dir. Postinst uses dpkg-divert to redirect ubiquity's PNG path
+	# to this file (reversible on package removal).
+	mkdir -p debian/tmjos-installer/usr/share/tmjos-installer
+	cp vendor/tmjos_installed.png \
+		debian/tmjos-installer/usr/share/tmjos-installer/tmjos_installed.png

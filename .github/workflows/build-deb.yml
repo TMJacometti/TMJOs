@@ -30,7 +30,8 @@ jobs:
           sudo apt-get install -y \
               build-essential \
               devscripts debhelper dpkg-dev reprepro \
-              gnupg lintian fakeroot
+              gnupg lintian fakeroot \
+              imagemagick
 
       - name: Import GPG signing key
         env:

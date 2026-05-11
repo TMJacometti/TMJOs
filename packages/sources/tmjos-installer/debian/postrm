@@ -1,0 +1,27 @@
+#!/bin/sh
+# postrm do tmjos-installer — desfaz o dpkg-divert na imagem do ubiquity.
+
+set -e
+
+UBIQUITY_PNG=/usr/share/ubiquity/pixmaps/ubuntu_installed.png
+DIVERT_DEST=/usr/share/ubiquity/pixmaps/ubuntu_installed.png.tmjos-orig
+
+case "$1" in
+    remove|purge|disappear)
+        # Remove symlink antes do diversion remove (senão dpkg-divert
+        # se recusa a remover dizendo "diverted file still exists").
+        if [ -L "$UBIQUITY_PNG" ]; then
+            rm -f "$UBIQUITY_PNG"
+        fi
+        if dpkg-divert --list "$UBIQUITY_PNG" | grep -q "$DIVERT_DEST"; then
+            dpkg-divert --package tmjos-installer --rename \
+                --divert "$DIVERT_DEST" --remove "$UBIQUITY_PNG"
+        fi
+        ;;
+    *)
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
