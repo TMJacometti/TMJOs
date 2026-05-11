@@ -2,17 +2,17 @@ Package: tmjmenu
 Version: 1.3.4-3
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Installed-Size: 558
+Installed-Size: 559
 Depends: python3 (>= 3.10), python3-gi, python3-xlib, gir1.2-gtk-4.0, gir1.2-adw-1
 Recommends: tmjos-branding
 Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjmenu
 Priority: optional
 Section: utils
 Filename: pool/main/t/tmjmenu/tmjmenu_1.3.4-3_all.deb
-Size: 518120
-SHA256: b46f749ba8915424f936fa65ea44ad2d21469c45a3548fe00556be415fdd379d
-SHA1: c1f7758684eef3fecb7c718566894886d37daa59
-MD5sum: 14ccbd4393b1ce44079112437bbc7c85
+Size: 518522
+SHA256: 6bc108dea208e3a7bba562ab9e53bb8c492a64d21b4e727a35fa958850975d2d
+SHA1: e8130ecbd1679c5183c9be595f30ff61e1209e8f
+MD5sum: 967f0148506a634b5c977a6ce471a3f4
 Description: TMJOs proprietary application menu + dock
  Replaces Plank dock and GNOME Activities Overview with two integrated
  components, both GTK4 + libadwaita native (same stack as TMJPad):
