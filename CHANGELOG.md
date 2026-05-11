@@ -43,14 +43,11 @@ Próxima ISO pública. Esperar ~3-4 dias de trampo.
   confirmar via `dpkg -L ubiquity-frontend-gtk | grep -i png`).
   Patch aplicável via `apt upgrade` em sistemas v1.3.0 sem regen ISO.
 
-- **Tamanho da ISO** (atualmente 6 GB) reduzido pro target ~2.5 GB.
-  Investigar config Cubic: o ISO v1.3.0 tem 2 layers squashfs
-  separados (`minimal.squashfs` 2.9G + `minimal.standard.live.squashfs`
-  991M). Provável caminho: forçar single-squashfs merge OR remover
-  o minimal base intocado já que toda customização TMJOs vai pro
-  standard.live. Validar com `unsquashfs -s` em build.
-
 - **Bugs menores observados em v1.3.0** que surgirem no uso.
+
+**Removido do escopo:** redução do tamanho da ISO (6GB) — não vai
+caber aqui. Tema migrado pro backlog v2.0, junto com o rebase em
+26.04 (onde o issue do layered squashfs pode nem existir mais).
 
 ### Por que bundle
 
@@ -91,6 +88,11 @@ Major version bump. Decisão grande, requer plan dedicado.
 - TMJDock proprietário (substituto Wayland-native do Plank, GTK4
   + libadwaita stack alinhada com TMJPad/TMJMenu/TMJNotes).
 - Refazer slim aggressive com base no que mudou em 26.04.
+- **Reduzir tamanho da ISO** (v1.3.0 ficou 6 GB por causa do layered
+  squashfs do 24.04 — minimal base 2.9G duplicado com standard.live
+  991M). Em 26.04 provavelmente é single-squashfs por default OR
+  Cubic 26.04 oferece config simples pra merge. Investigar quando
+  começar v2.0.
 
 ## [Backlog v1.4] — apps proprietários novos
 
