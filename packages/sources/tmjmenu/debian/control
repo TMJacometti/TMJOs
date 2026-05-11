@@ -15,7 +15,8 @@ Depends: ${misc:Depends},
          python3-gi,
          python3-xlib,
          gir1.2-gtk-4.0,
-         gir1.2-adw-1
+         gir1.2-adw-1,
+         xdotool
 Recommends: tmjos-branding
 Description: TMJOs proprietary application menu + dock
  Replaces Plank dock and GNOME Activities Overview with two integrated

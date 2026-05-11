@@ -1,3 +1,17 @@
+tmjmenu (1.3.4-9) noble; urgency=medium
+
+  * Fix: botão "Mostrar todos os apps" não fazia nada quando clicado.
+    Razão: GNOME 46+ bloqueou org.gnome.Shell.ShowApplications via
+    D-Bus por segurança (AccessDenied pra apps unprivileged).
+  * Solução: simula keypress da Super key via `xdotool key Super_L`.
+    Super sozinha é o overlay-key default do GNOME (abre Activities
+    Overview). Nossa config só bind Super+Space e Super+Shift+H,
+    então Super sozinha continua intocada.
+  * Nova dep: xdotool (já era recommended pelo tmjos meta-package via
+    tmjos-dock, agora é Depends direto do tmjmenu).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 19:35:00 -0300
+
 tmjmenu (1.3.4-8) noble; urgency=high
 
   * Fix: tmjmenu-first-run crashava com `sed: unknown option to s`

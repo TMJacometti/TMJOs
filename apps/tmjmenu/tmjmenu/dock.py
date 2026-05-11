@@ -367,15 +367,17 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             pass
 
     def _on_show_apps_clicked(self, _btn: Gtk.Button) -> None:
-        """Abre o Activities Overview do GNOME Shell via D-Bus."""
+        """Abre o Activities Overview do GNOME Shell.
+
+        Em GNOME 46+, org.gnome.Shell.ShowApplications via D-Bus
+        retorna AccessDenied pra apps unprivileged. Então simulamos
+        o keypress da tecla Super (que é o overlay-key default —
+        nossa config só bind Super+Space e Super+Shift+H, Super
+        sozinha continua abrindo Activities).
+        """
         try:
             GLib.spawn_async(
-                [
-                    "gdbus", "call", "--session",
-                    "--dest", "org.gnome.Shell",
-                    "--object-path", "/org/gnome/Shell",
-                    "--method", "org.gnome.Shell.ShowApplications",
-                ],
+                ["xdotool", "key", "Super_L"],
                 flags=(
                     GLib.SpawnFlags.SEARCH_PATH
                     | GLib.SpawnFlags.STDOUT_TO_DEV_NULL
