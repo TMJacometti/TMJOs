@@ -29,6 +29,7 @@ from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
 from . import config
 from .launcher import launch
 from .search import AppEntry, discover_apps
+from .widgets import show_pin_context_menu
 from .x11 import make_dock
 
 
@@ -229,10 +230,15 @@ class TMJDockWindow(Gtk.ApplicationWindow):
 
         btn.connect("clicked", lambda _b, a=app: launch(a))
 
-        # Right-click → "Desafixar"
+        # Right-click → context menu com "Desafixar da Dock"
         gesture = Gtk.GestureClick.new()
         gesture.set_button(3)  # right
-        gesture.connect("released", lambda *_args, a=app: self._unpin_app(a))
+        gesture.connect(
+            "released",
+            lambda *_args, w=btn, a=app: show_pin_context_menu(
+                w, a, self._on_pin_changed
+            ),
+        )
         btn.add_controller(gesture)
 
         return btn
@@ -304,11 +310,12 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         except GLib.Error:
             pass
 
-    def _unpin_app(self, app: AppEntry) -> None:
-        """Right-click handler: remove app dos pinados + persist."""
-        config.remove_pinned(app.desktop_id)
-        # Re-build via watch handler (vai disparar) — fallback manual
-        # caso o monitor não rode (silencioso):
+    def _on_pin_changed(self) -> None:
+        """Callback do context menu — re-build da bar com estado novo.
+
+        O GFileMonitor de pinned.json também dispara, mas chamar
+        aqui torna o feedback imediato (sem esperar o monitor).
+        """
         self._build_bar()
         self._apply_x11_dock_hints()
 

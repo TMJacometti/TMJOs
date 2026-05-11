@@ -31,6 +31,7 @@ from gi.repository import Adw, GLib, Gtk  # noqa: E402
 from . import config
 from .launcher import launch
 from .search import AppEntry, discover_apps, search
+from .widgets import show_pin_context_menu
 
 
 APP_ID = "br.com.tmjsistemas.tmjmenu"
@@ -153,19 +154,16 @@ class TMJMenuWindow(Gtk.ApplicationWindow):
         gesture.set_button(3)  # right click
         gesture.connect(
             "released",
-            lambda *_args, a=app: self._toggle_pin(a),
+            lambda *_args, w=row, a=app: show_pin_context_menu(
+                w, a, self._on_pin_changed
+            ),
         )
         row.add_controller(gesture)
 
         return row
 
-    def _toggle_pin(self, app: AppEntry) -> None:
-        """Right-click numa row: pinar se não tá, despinar se já tá."""
-        if config.is_pinned(app.desktop_id):
-            config.remove_pinned(app.desktop_id)
-        else:
-            config.add_pinned(app.desktop_id)
-        # Re-popula pra refletir o pin badge atualizado
+    def _on_pin_changed(self) -> None:
+        """Callback do context menu — re-popula pra atualizar estrelas."""
         self._populate(self._search_entry.get_text())
 
     # ── Event handlers ────────────────────────────────────────────────
