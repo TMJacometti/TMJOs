@@ -22,6 +22,7 @@ Iteração 2:
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 import gi
 
@@ -94,6 +95,24 @@ DEFAULT_PINNED = [
     "org.gnome.Nautilus.desktop",
     "gnome-control-center.desktop",
 ]
+
+
+def _set_tmjos_icon(image: Gtk.Image) -> None:
+    """Tenta o icon 'tmjos' do theme (tmjos-branding instalado), fallback
+    pro asset embedded no módulo (dev local / sistemas sem tmjos-branding).
+    """
+    display = Gdk.Display.get_default()
+    if display is not None:
+        theme = Gtk.IconTheme.get_for_display(display)
+        if theme.has_icon("tmjos"):
+            image.set_from_icon_name("tmjos")
+            return
+    # Fallback: PNG embedded no package Python
+    asset = Path(__file__).parent / "assets" / "tmjos.png"
+    if asset.is_file():
+        image.set_from_file(str(asset))
+    else:
+        image.set_from_icon_name("applications-other")
 
 
 def _install_css() -> None:
@@ -180,8 +199,7 @@ class TMJDockWindow(Gtk.ApplicationWindow):
 
         icon = Gtk.Image()
         icon.set_pixel_size(ICON_SIZE)
-        # Usa o logo TMJOs do tmjos-branding (já instalado no sistema)
-        icon.set_from_icon_name("tmjos")
+        _set_tmjos_icon(icon)
         btn.set_child(icon)
 
         btn.connect("clicked", self._on_menu_button_clicked)

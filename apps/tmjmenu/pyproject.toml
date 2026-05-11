@@ -35,3 +35,6 @@ Repository = "https://github.com/TMJacometti/TMJOs"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["tmjmenu*"]
+
+[tool.setuptools.package-data]
+tmjmenu = ["assets/*.png"]
