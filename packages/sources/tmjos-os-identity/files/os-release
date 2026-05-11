@@ -1,0 +1,12 @@
+PRETTY_NAME="TMJOs 1.3"
+NAME="TMJOs"
+VERSION_ID="1.3"
+VERSION="1.3 (insano)"
+VERSION_CODENAME=insano
+ID=tmjos
+ID_LIKE="ubuntu debian"
+HOME_URL="https://github.com/TMJacometti/TMJOs"
+SUPPORT_URL="https://github.com/TMJacometti/TMJOs/issues"
+BUG_REPORT_URL="https://github.com/TMJacometti/TMJOs/issues"
+UBUNTU_CODENAME=noble
+LOGO=tmjos

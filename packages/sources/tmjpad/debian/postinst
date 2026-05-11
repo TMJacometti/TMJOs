@@ -1,0 +1,27 @@
+#!/bin/sh
+# postinst do tmjpad — refresca caches que dependem dos arquivos novos
+# instalados.
+
+set -e
+
+case "$1" in
+    configure)
+        # Atualiza icon cache do hicolor pra o ícone novo aparecer
+        # imediatamente em GNOME / Plank / file manager sem precisar
+        # logout/login.
+        if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+            gtk-update-icon-cache --quiet --force /usr/share/icons/hicolor || true
+        fi
+
+        # Atualiza database de .desktop entries
+        if command -v update-desktop-database >/dev/null 2>&1; then
+            update-desktop-database --quiet /usr/share/applications || true
+        fi
+        ;;
+    *)
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

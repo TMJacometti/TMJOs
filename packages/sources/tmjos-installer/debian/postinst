@@ -1,0 +1,26 @@
+#!/bin/sh
+# postinst do tmjos-installer — limpa estado runtime do PulseAudio
+# que o ubiquity tenta copiar (e falha) durante o install do live-CD.
+
+set -e
+
+case "$1" in
+    configure)
+        # /root/.config/pulse contém socket + cookie do PulseAudio,
+        # criado quando o daemon roda como root (acontece em alguns
+        # passos do Cubic). O ubiquity rsync-a o live filesystem
+        # pro target disk e quebra com permission denied nesses
+        # arquivos (modos 700, owner=root).
+        #
+        # Limpar aqui (no postinst, durante o build dentro do Cubic)
+        # garante que o squashfs final não tenha esses arquivos.
+        rm -rf /root/.config/pulse 2>/dev/null || true
+        rm -rf /root/.cache/pulse 2>/dev/null || true
+        ;;
+    *)
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

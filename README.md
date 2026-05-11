@@ -237,10 +237,11 @@ git push origin feature/sua-feature
 - [ ] Sons custom de boot/shutdown
 - [ ] **APT repo próprio** (`packages.tmjos.dev`) — distribuir apps TMJOs via apt
 - [ ] **TMJOs Software Center** (GTK4 GUI) — store com branding TMJOs sobre apt
-- [ ] **TMJCode** v0.1 — VSCode customizado TMJOs (primeiro app via store)
 - [ ] **Sistema de updates do core** — empacotar branding/dconf/plymouth/dock como `.deb` (`tmjos-meta`, `tmjos-branding`, etc.) pra que sistemas instalados recebam fixes via `apt upgrade tmjos` em vez de reinstalar a ISO
+- [ ] **TMJPad** repackaged como `.deb` no APT repo (primeira release patch v0.1.1 corrige icon-cache miss)
 
-### 🎨 v1.4 (Ideias)
+### 🎨 v1.4 (Apps proprietários novos)
+- [ ] **TMJCode** v0.1 — VSCode customizado com tema/extensões TMJOs (.deb via store)
 - [ ] **TMJNotes** — sticky notes nativas estilo Microsoft Sticky Notes,
   com persistência total, cores customizáveis, atalho global pra nova nota
 

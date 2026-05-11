@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=TMJOs First-Run Setup
+Comment=Copia configs default pra usuário atual se ainda não tem
+Exec=/usr/bin/tmjos-first-run
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Phase=Initialization

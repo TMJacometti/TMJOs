@@ -1,0 +1,28 @@
+Source: tmjos-branding
+Section: misc
+Priority: optional
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/TMJacometti/TMJOs
+
+Package: tmjos-branding
+Architecture: all
+Depends: ${misc:Depends},
+         plymouth-themes,
+         hicolor-icon-theme
+Description: TMJOs branding assets (wallpapers, logos, Plymouth theme)
+ Visual identity pieces of TMJOs:
+  * Wallpapers: tmjos_wallpaper.png (1920x1080) + 4K variant in
+    /usr/share/backgrounds/tmjos/
+  * Logos: Circular, Rounded, Square variants in
+    /usr/share/icons/tmjos/, plus the Rounded variant exposed as
+    the system icon "tmjos" in hicolor + pixmaps
+  * Plymouth boot splash theme TMJOs in /usr/share/plymouth/themes/tmjos/
+    (dragon + gear logo, breathing-glow opacity, blood-red TMJSistemas
+    watermark, "Loading..." text)
+ .
+ postinst:
+  * gtk-update-icon-cache so the system "tmjos" icon resolves
+  * update-alternatives sets default.plymouth → tmjos
+  * update-initramfs -u so the new theme is embedded in the initrd

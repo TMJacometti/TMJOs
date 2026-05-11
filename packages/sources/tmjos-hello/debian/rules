@@ -1,0 +1,7 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	install -Dm755 src/tmjos-hello debian/tmjos-hello/usr/bin/tmjos-hello

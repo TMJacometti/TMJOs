@@ -5,7 +5,47 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [Backlog v1.4] — ideias futuras
+## [Backlog v1.3.4] — release pesada: menu proprietário
+
+Versão grande dentro do ciclo v1.3 (não-trivial — esperar 2-3 dias de
+trampo, não é point patch).
+
+- **TMJMenu** (menu de aplicações proprietário TMJOs):
+  - Substitui o uso atual de Activities Overview / "Todos os Apps" do
+    Plank por um menu próprio com identidade TMJOs.
+  - Tech stack: GTK4 + libadwaita (mesma do TMJPad — coerência visual
+    e dev velocity, não precisa aprender GJS).
+  - Trigger: hotkey global (Super? Super+Space?) + botão dedicado no
+    Plank (.dockitem) que invoca `tmjmenu --toggle`.
+  - Layout: popup ancorado, não fullscreen (diferenciar do Activities).
+    Search bar no topo + grid de apps pinados + lista recentes abaixo.
+  - Search: lê `/usr/share/applications/*.desktop` (mesma fonte do
+    GNOME). Fuzzy match no Name + Exec + Keywords.
+  - Visual: paleta neon TMJOs (cyan/magenta), fonte JetBrains Mono pros
+    titles, dark background `#0a0e2a`.
+  - Persistência: pinados do usuário em `~/.config/tmjmenu/pinned.json`
+    (estilo TMJPad — full session restore).
+  - Empacotado como `tmjmenu.deb` no APT repo, Depends gtk4+libadwaita.
+  - Adicionado a `tmjos` metapackage Depends.
+
+- **Side effect:** remove `tmjos-shell-tweaks` da depend chain (sem
+  Activities button visível porque temos nosso próprio entry point) —
+  ou mantém escondendo o Activities, decidir na implementação.
+
+## [Backlog v1.4] — apps proprietários novos
+
+
+Versão centrada em apps. Depende da v1.3 ter shipado APT repo +
+TMJOs Software Center, porque ambos os apps abaixo são distribuídos
+via apt e listados na store.
+
+- **TMJCode** (VSCode customizado com tema/extensões TMJOs):
+  - Wrapper sobre VSCode upstream que injeta `--extensions-dir`
+    custom em `~/.tmjcode/extensions/`
+  - Tema dark TMJOs (paleta cyan/magenta neon)
+  - Extensões default pré-instaladas: prettier, eslint, tema TMJOs
+  - Comando: `tmjcode`
+  - Empacotado como `tmjcode.deb` no APT repo
 
 - **TMJNotes** (sticky notes nativas, estilo Microsoft Sticky Notes):
   - GTK4 + libadwaita (mesma stack do TMJPad)
@@ -18,7 +58,7 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Always-on-top opcional por nota
   - Markdown leve no texto (negrito, itálico, listas)
   - Comando: `tmjnotes` ou `tmjsticky`
-  - Distribuído via APT repo TMJOs (depende do repo estar de pé em v1.3)
+  - Empacotado como `tmjnotes.deb` no APT repo
 
 ## [1.2.x] — patches via apt (depende do APT repo da v1.3)
 
@@ -28,6 +68,45 @@ e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
   cache não pegou ou conflitou. Será o **primeiro caso de teste do
   sistema de updates v1.3**: empacota `tmjpad_0.1.1_all.deb` com o
   fix do cache e users instalados rodam `apt upgrade tmjpad`.
+
+## [Backlog v1.3.x] — patches via apt
+
+- **Imagem default "Installation complete" do ubiquity ainda é a do Ubuntu**
+  (duas raposas com coroa laranja — asset upstream do ubuntu-graphics).
+  Após instalar TMJOs em disco via ubiquity, a tela final mostra essa
+  imagem em vez da logo TMJOs (dragão + gear). Fix: patch nos assets do
+  ubiquity-frontend-gtk via tmjos-installer postinst, OR dpkg-divert do
+  PNG por uma versão custom TMJOs. Path provável:
+  `/usr/share/ubiquity/pixmaps/install_logo.png` (confirmar via
+  `dpkg -L ubiquity-frontend-gtk | grep -i png`).
+
+- **ISO v1.3 não tem installer.** Slim Aggressive remove `snapd`, e em
+  Ubuntu 24.04 o `ubuntu-desktop-installer` (novo Flutter installer) é
+  distribuído como snap. Sem snapd → sem installer. Resultado: usuários
+  bootando live-CD não conseguem instalar TMJOs em disco.
+  Fix planejado: adicionar `ubiquity` (installer clássico Debian, não-snap)
+  ao customize.sh OR criar pacote `tmjos-installer` que Depends ubiquity.
+  Workaround pro user atual no live-CD:
+  ```
+  sudo apt install -y ubiquity ubiquity-frontend-gtk
+  # NÃO instala ubiquity-slideshow-ubuntu — requer gir1.2-webkit2-4.1
+  # que não tá no live-CD slim e quebra com:
+  #   ValueError: Namespace WebKit2 not available
+  sudo ubiquity gtk_ui
+  ```
+  Pacote `tmjos-installer` futuro vai puxar ubiquity + frontend-gtk
+  SEM o slideshow, eliminando a dep WebKit2.
+
+
+- `tmjos-os-identity 1.3.0-3`: trocar `dpkg-divert --rename` por
+  `--no-rename` em postinst/postrm. dpkg loga warning sobre
+  rename de Essential package — funciona OK mas é boa prática
+  evitar. Patch via apt upgrade quando alguém abrir.
+
+- **Activities button hide via GJS extension** já está incluído em
+  `tmjos-shell-tweaks 1.3.0-3` + `tmjos-defaults 1.3.0-2`. Quem upgrade
+  da 1.3.0-1 (CSS hack quebrado) recebe o cleanup do divert via
+  apt upgrade automaticamente.
 
 ## [Backlog v1.3] — em planejamento
 

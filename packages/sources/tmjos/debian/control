@@ -1,0 +1,57 @@
+Source: tmjos
+Section: metapackages
+Priority: optional
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/TMJacometti/TMJOs
+
+Package: tmjos
+Architecture: all
+Depends: ${misc:Depends},
+         tmjos-branding (>= 1.3.0),
+         tmjos-os-identity (>= 1.3.0),
+         tmjos-dock (>= 1.3.0),
+         tmjos-defaults (>= 1.3.0),
+         tmjos-shell-tweaks (>= 1.3.0),
+         tmjos-installer (>= 1.3.0),
+         tmjpad (>= 0.1.2)
+Recommends: code,
+            git,
+            git-flow,
+            docker.io,
+            docker-compose,
+            gnome-tweaks,
+            dconf-editor,
+            gnome-shell-extensions,
+            gnome-shell-extension-manager,
+            python3-gi,
+            gir1.2-gtk-4.0,
+            gir1.2-adw-1,
+            spice-vdagent,
+            qemu-guest-agent,
+            zram-config,
+            preload,
+            curl,
+            htop,
+            neofetch,
+            vim,
+            dnsutils,
+            net-tools,
+            traceroute
+Description: TMJOs metapackage — pulls in the entire TMJOs experience
+ Installing this package on a base Ubuntu 24.04 noble system gives
+ you the complete TMJOs setup:
+   * Branding (wallpapers, logos, Plymouth)
+   * System identity (/etc/os-release etc.)
+   * Plank dock pre-configured + dock sync daemon
+   * dconf system-wide overrides (dark mode, fonts, Plank-only dock)
+   * Shell tweaks (Activities button hidden)
+   * TMJPad text editor
+ .
+ The Recommends list mirrors what the ISO ships preinstalled —
+ VSCode, Docker, Git, GNOME Tweaks, dev fonts, network tools, etc.
+ .
+ On TMJOs systems, `sudo apt upgrade tmjos` will pull the latest
+ versions of every component package, providing the post-release
+ update mechanism that v1.3 introduces.

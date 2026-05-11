@@ -1,0 +1,55 @@
+#!/bin/sh
+# TMJOs first-run / every-login setup.
+
+PLANK_DIR="$HOME/.config/plank/dock1"
+PLANK_SETTINGS="$PLANK_DIR/settings"
+LAUNCHERS_DIR="$PLANK_DIR/launchers"
+
+# 1) First-time copy do Plank config do /etc/skel
+if [ ! -d "$HOME/.config/plank" ] && [ -d /etc/skel/.config/plank ]; then
+    mkdir -p "$HOME/.config"
+    cp -r /etc/skel/.config/plank "$HOME/.config/"
+fi
+
+# 2) Re-injetar 'tmjos-show-apps.dockitem' como primeiro item se faltar
+if [ -f "$PLANK_SETTINGS" ]; then
+    if ! grep -q "tmjos-show-apps.dockitem" "$PLANK_SETTINGS"; then
+        sed -i "s|^dock-items=\[|dock-items=['tmjos-show-apps.dockitem', |" \
+            "$PLANK_SETTINGS"
+    fi
+fi
+
+# 2b) Garantir que TODOS os .dockitem do skel existem em launchers/
+if [ -d "$LAUNCHERS_DIR" ] && [ -d /etc/skel/.config/plank/dock1/launchers ]; then
+    for src in /etc/skel/.config/plank/dock1/launchers/*.dockitem; do
+        [ -f "$src" ] || continue
+        dest="$LAUNCHERS_DIR/$(basename "$src")"
+        [ ! -f "$dest" ] && cp "$src" "$dest"
+    done
+fi
+
+# 3) Enable tmjos-tweaks extension (hides Activities button).
+# system-db dconf override in tmjos-defaults sets the default, but
+# gnome-shell writes [] to user-db on first launch, overriding it.
+# Explicit enable here wins and persists across logins.
+if command -v gnome-extensions >/dev/null 2>&1; then
+    if gnome-extensions list 2>/dev/null | grep -q "tmjos-tweaks@tmjos.local"; then
+        gnome-extensions enable tmjos-tweaks@tmjos.local >/dev/null 2>&1 || true
+    fi
+fi
+
+# 4) Disable tracker3 (slim aggressive — economiza ~300MB RAM)
+systemctl --user mask \
+    tracker-extract-3.service \
+    tracker-miner-fs-3.service \
+    tracker-miner-rss-3.service \
+    tracker-writeback-3.service \
+    tracker-xdg-portal-3.service \
+    >/dev/null 2>&1 || true
+systemctl --user stop \
+    tracker-extract-3.service \
+    tracker-miner-fs-3.service \
+    tracker-miner-rss-3.service \
+    >/dev/null 2>&1 || true
+
+exit 0

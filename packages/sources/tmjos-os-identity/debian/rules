@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	# Os arquivos vão pra /usr/share/tmjos-os-identity/ e o postinst
+	# faz dpkg-divert + cp pra colocá-los em /etc/. Não toca em /etc
+	# diretamente porque base-files é Essential e não dá pra Conflicts.
+	mkdir -p debian/tmjos-os-identity/usr/share/tmjos-os-identity
+	install -m644 files/os-release    debian/tmjos-os-identity/usr/share/tmjos-os-identity/os-release
+	install -m644 files/lsb-release   debian/tmjos-os-identity/usr/share/tmjos-os-identity/lsb-release
+	install -m644 files/issue         debian/tmjos-os-identity/usr/share/tmjos-os-identity/issue
+	install -m644 files/issue.net     debian/tmjos-os-identity/usr/share/tmjos-os-identity/issue.net

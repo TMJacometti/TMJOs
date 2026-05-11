@@ -1,0 +1,14 @@
+tmjos-installer (1.3.0-1) noble; urgency=medium
+
+  * Initial release. Bundles the .deb-based ubiquity installer for
+    TMJOs ISOs, since Ubuntu 24.04's default installer is a snap
+    (snapd is removed by TMJOs's slim phase).
+  * Depends on ubiquity + ubiquity-frontend-gtk only — explicitly
+    NOT on ubiquity-slideshow-ubuntu, which requires WebKit2GTK
+    and crashed the installer on v1.3.0-1 ISO.
+  * Postinst cleans /root/.config/pulse and /root/.cache to avoid
+    permission-denied errors during ubiquity's rsync to target.
+    These dirs get populated by PulseAudio during the Cubic build
+    and then break the install pass.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 22:00:00 -0300
