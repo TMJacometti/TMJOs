@@ -1,3 +1,20 @@
+tmjos-defaults (1.3.0-3) noble; urgency=medium
+
+  * Force X11 session via /etc/gdm3/custom.conf (WaylandEnable=false).
+    Plank only supports X11; on Wayland it aborts at startup with
+    "Only X11 environments are supported", leaving installed TMJOs
+    systems with no dock. This is the root cause of the "wallpaper-only
+    desktop" reported after v1.3.0-2 install.
+  * Patch idempotent: re-running the postinst on already-patched
+    systems is a no-op.
+  * Note for v1.4+: replace Plank with a Wayland-native dock
+    (gnome-shell-extension-dashtodock is the leading candidate).
+    Plank is unmaintained since 2022 and Wayland is the future
+    default in GNOME — X11 fallback is a v1.3.x bridge, not a
+    long-term strategy.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 11:55:00 -0300
+
 tmjos-defaults (1.3.0-2) noble; urgency=medium
 
   * Add 'tmjos-tweaks@tmjos.local' to org.gnome.shell enabled-extensions.

@@ -1,12 +1,31 @@
 #!/bin/sh
-# postinst do tmjos-defaults — recompila o dconf db local pra os
-# overrides ficarem ativos.
+# postinst do tmjos-defaults
+#   1. recompila o dconf db local pra os overrides ficarem ativos
+#   2. força sessão X11 no GDM (necessário pra Plank — Plank só
+#      funciona em X11, não suporta Wayland)
 set -e
 
 case "$1" in
     configure)
         if command -v dconf >/dev/null 2>&1; then
             dconf update || true
+        fi
+
+        # Force X11 session (disable Wayland) — Plank requires X11.
+        # /etc/gdm3/custom.conf ships with the line commented as
+        # "#WaylandEnable=false". Uncomment if present; otherwise
+        # append a fresh [daemon] block.
+        GDM_CONF=/etc/gdm3/custom.conf
+        if [ -f "$GDM_CONF" ]; then
+            if grep -qE '^[[:space:]]*#?[[:space:]]*WaylandEnable=' "$GDM_CONF"; then
+                sed -i 's/^[[:space:]]*#\?[[:space:]]*WaylandEnable=.*/WaylandEnable=false/' "$GDM_CONF"
+            else
+                if grep -qE '^\[daemon\]' "$GDM_CONF"; then
+                    sed -i '/^\[daemon\]/a WaylandEnable=false' "$GDM_CONF"
+                else
+                    printf '\n[daemon]\nWaylandEnable=false\n' >> "$GDM_CONF"
+                fi
+            fi
         fi
         ;;
 esac
