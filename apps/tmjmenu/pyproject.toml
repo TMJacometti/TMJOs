@@ -26,6 +26,7 @@ classifiers = [
 
 [project.scripts]
 tmjmenu = "tmjmenu.app:main"
+tmjdock = "tmjmenu.dock:main"
 
 [project.urls]
 Homepage = "https://github.com/TMJacometti/TMJOs"
