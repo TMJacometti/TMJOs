@@ -30,13 +30,19 @@ from . import config
 from .launcher import launch
 from .search import AppEntry, discover_apps
 from .widgets import show_pin_context_menu
-from .x11 import make_dock
+from .x11 import hide_window_offscreen, make_dock, query_pointer_y, show_window_at
 
 
 DOCK_APP_ID = "br.com.tmjsistemas.tmjdock"
 ICON_SIZE = 48
 DOCK_PADDING = 12         # padding interno (entre borda e ícones)
 ITEM_SPACING = 6          # espaçamento entre ícones
+
+# Auto-hide:
+#   AUTO_HIDE_REVEAL_PX → quão perto do bottom edge ativa o show.
+#   AUTO_HIDE_POLL_MS    → frequência do polling de pointer position.
+AUTO_HIDE_REVEAL_PX = 4
+AUTO_HIDE_POLL_MS = 150
 
 
 # CSS — visual macOS/Win11 dock: dark bg semi-transparente,
@@ -154,6 +160,20 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # editado manualmente).
         self._setup_pinned_watch()
 
+        # Auto-hide state. Dock começa visível. Cache de geometria pra
+        # evitar recalcular monitor a cada tick.
+        self._hidden = False
+        self._mouse_over_dock = False
+        self._cached_monitor_geom: tuple[int, int, int, int] | None = None
+        self._cached_dock_size: tuple[int, int] | None = None
+
+        # Track mouse hovering a dock (impede esconder enquanto user
+        # tá usando — clicks, hover sobre botões).
+        motion = Gtk.EventControllerMotion.new()
+        motion.connect("enter", lambda *_a: self._set_mouse_over(True))
+        motion.connect("leave", lambda *_a: self._set_mouse_over(False))
+        self.add_controller(motion)
+
         # X11 hints depois que window mapped E allocation finalizada.
         # GTK4 emite "map" antes da allocation real estar pronta, então
         # passamos via idle_add (próximo tick do main loop, depois do
@@ -162,7 +182,17 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         self.connect("realize", lambda _w: GLib.idle_add(
             self._apply_x11_dock_hints))
         self.connect("map", lambda _w: GLib.idle_add(
-            self._apply_x11_dock_hints))
+            self._after_first_map))
+
+    def _after_first_map(self) -> bool:
+        """Após primeiro map, aplica X11 hints + inicia polling auto-hide."""
+        self._apply_x11_dock_hints()
+        # Inicia polling do cursor pra auto-hide
+        GLib.timeout_add(AUTO_HIDE_POLL_MS, self._auto_hide_tick)
+        return False  # idle_add: rodar uma vez
+
+    def _set_mouse_over(self, over: bool) -> None:
+        self._mouse_over_dock = over
 
     # ── Build / rebuild da bar ────────────────────────────────────────
 
@@ -329,6 +359,78 @@ class TMJDockWindow(Gtk.ApplicationWindow):
 
     # ── X11 dock hints ───────────────────────────────────────────────
 
+    # ── Auto-hide ────────────────────────────────────────────────────
+
+    def _auto_hide_tick(self) -> bool:
+        """Polling tick: checa pointer position, esconde/mostra dock.
+
+        Lógica:
+        - Se mouse está sobre a dock → mostra (não esconde enquanto
+          user interage).
+        - Senão, se mouse está nos últimos AUTO_HIDE_REVEAL_PX pixels
+          do bottom edge → mostra.
+        - Senão → esconde.
+
+        Returns True pra GLib re-agendar o tick.
+        """
+        try:
+            if self._cached_monitor_geom is None:
+                return True
+
+            mouse_y = query_pointer_y()
+            if mouse_y is None:
+                # Xlib indisponível — desabilita auto-hide silenciosamente
+                self._show_dock()
+                return False
+
+            mx, my, mw, mh = self._cached_monitor_geom
+            screen_bottom = my + mh
+            near_bottom = mouse_y >= screen_bottom - AUTO_HIDE_REVEAL_PX
+
+            should_show = self._mouse_over_dock or near_bottom
+
+            if should_show and self._hidden:
+                self._show_dock()
+            elif not should_show and not self._hidden:
+                self._hide_dock()
+        except Exception:
+            pass
+        return True
+
+    def _hide_dock(self) -> None:
+        if self._cached_monitor_geom is None:
+            return
+        xid = self._get_xid()
+        if xid is None:
+            return
+        _, my, _, mh = self._cached_monitor_geom
+        hide_window_offscreen(xid, my + mh)
+        self._hidden = True
+
+    def _show_dock(self) -> None:
+        if self._cached_monitor_geom is None or self._cached_dock_size is None:
+            return
+        xid = self._get_xid()
+        if xid is None:
+            return
+        mx, my, mw, mh = self._cached_monitor_geom
+        dw, dh = self._cached_dock_size
+        win_x = mx + (mw - dw) // 2
+        margin = 12
+        win_y = my + mh - dh - margin
+        show_window_at(xid, win_x, win_y, dw, dh)
+        self._hidden = False
+
+    def _get_xid(self) -> int | None:
+        native = self.get_native()
+        if native is None:
+            return None
+        surface = native.get_surface()
+        if surface is None or not hasattr(surface, "get_xid"):
+            return None
+        xid = surface.get_xid()
+        return xid or None
+
     def _apply_x11_dock_hints(self) -> bool:
         """Tenta transformar a window em dock X11. Silencioso em Wayland.
 
@@ -373,6 +475,11 @@ class TMJDockWindow(Gtk.ApplicationWindow):
                 dock_width=dock_w,
                 dock_height=dock_h,
             )
+            # Cache pro auto-hide tick não recalcular toda vez
+            self._cached_monitor_geom = (
+                geometry.x, geometry.y, geometry.width, geometry.height,
+            )
+            self._cached_dock_size = (dock_w, dock_h)
         except Exception:
             pass
         return False  # idle_add: rodar uma vez só

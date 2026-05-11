@@ -96,3 +96,93 @@ def get_primary_monitor_geometry() -> Optional[tuple[int, int, int, int]]:
     mas dock.py usa GDK pra detectar monitor.
     """
     return None
+
+
+def query_pointer_y() -> Optional[int]:
+    """Retorna a posição Y global do cursor (X11 root coords).
+
+    Usado pelo auto-hide do TMJDock pra detectar mouse near bottom
+    edge mesmo quando a dock está hidden (off-screen).
+
+    None se Xlib indisponível ou erro.
+    """
+    if not _XLIB_OK:
+        return None
+    try:
+        d = display.Display()
+        root = d.screen().root
+        pointer = root.query_pointer()
+        y = pointer.root_y
+        d.close()
+        return y
+    except Exception:
+        return None
+
+
+def hide_window_offscreen(xid: int, screen_height: int) -> bool:
+    """Move a window pra fora da tela (y = screen_height + 10).
+
+    Também zera o _NET_WM_STRUT_PARTIAL pra que windows maximizadas
+    aproveitem o espaço que estava reservado pela dock.
+
+    Retorna True se aplicou.
+    """
+    if not _XLIB_OK:
+        return False
+    try:
+        d = display.Display()
+        win = d.create_resource_object("window", xid)
+
+        # Move pra baixo da tela
+        win.configure(y=screen_height + 10)
+
+        # Strut zerado — libera espaço pra windows maximizadas
+        atom_strut = d.intern_atom("_NET_WM_STRUT_PARTIAL")
+        win.change_property(atom_strut, CARDINAL, 32,
+                            [0] * 12)
+        atom_strut_old = d.intern_atom("_NET_WM_STRUT")
+        win.change_property(atom_strut_old, CARDINAL, 32,
+                            [0, 0, 0, 0])
+
+        d.sync()
+        d.close()
+        return True
+    except Exception:
+        return False
+
+
+def show_window_at(xid: int, x: int, y: int,
+                   dock_width: int, dock_height: int) -> bool:
+    """Move a window pra (x, y) + restaura _NET_WM_STRUT_PARTIAL.
+
+    Usado pra "mostrar" a dock no auto-hide: move pra posição bottom
+    e restaura o strut pra reservar espaço.
+    """
+    if not _XLIB_OK:
+        return False
+    try:
+        d = display.Display()
+        win = d.create_resource_object("window", xid)
+
+        win.configure(x=x, y=y, width=dock_width, height=dock_height)
+
+        # Restaura strut bottom
+        margin = 12
+        strut_bottom = dock_height + margin
+        bottom_start_x = x
+        bottom_end_x = x + dock_width - 1
+        atom_strut = d.intern_atom("_NET_WM_STRUT_PARTIAL")
+        win.change_property(
+            atom_strut, CARDINAL, 32,
+            [0, 0, 0, strut_bottom, 0, 0, 0, 0, 0, 0,
+             bottom_start_x, bottom_end_x],
+        )
+        atom_strut_old = d.intern_atom("_NET_WM_STRUT")
+        win.change_property(atom_strut_old, CARDINAL, 32,
+                            [0, 0, 0, strut_bottom])
+
+        d.sync()
+        d.close()
+        return True
+    except Exception:
+        return False
