@@ -100,10 +100,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: x11
 Filename: pool/main/t/tmjos-dock/tmjos-dock_1.3.0-2_all.deb
-Size: 5118
-SHA256: a44878f3c3222c494978788b1f8f034d15b3d7f8f74a3769d88934fa99b8414e
-SHA1: 87b13e133836b0d3c9011e440240c002f536257e
-MD5sum: 66caee0a1e9abb13f09ee9bd12f8cbdc
+Size: 5114
+SHA256: 9823713ef43995dd9c7c873e0d50278681744cbe925df1529b39401ee249ec88
+SHA1: 10513112760b0877dd90a78d34862d8748a6327d
+MD5sum: a85698ef4aed238ea6602ef35cab162f
 Description: TMJOs Plank dock pre-configured with sticky launchers
  Pre-configured Plank dock for TMJOs:
   * /etc/skel/.config/plank/dock1/settings — bottom dock, transparent
