@@ -59,6 +59,39 @@ VM independente do número de mudanças. v1.3.0 já validou o pipeline
 apt-only — agora podemos consolidar 3-4 melhorias num único re-spin
 ISO + apt patches simultâneos.
 
+## [Backlog v2.0 "Insano 2"] — rebase em Ubuntu 26.04 LTS
+
+Major version bump. Decisão grande, requer plan dedicado.
+
+### Motivação
+- 26.04 LTS = suporte até 2031 (vs 24.04 = 2029).
+- Wayland muito mais maduro — chance de eliminar a dependência de
+  X11 forçado (que existe apenas pra Plank funcionar). Pode liberar
+  refator do dock pra Wayland-native.
+- Layered squashfs pode ter sido revertido / configurável em 26.04.
+- GNOME 48+ com APIs e fixes que não existem no GNOME 46 do 24.04.
+
+### Trabalho envolvido
+- Rebuild dos 9 pacotes `.deb` com novo codename (`noble` → `<P|Q>`).
+- Re-test completo: ISO build, install, apt repo, dock, extensions,
+  TMJPad, TMJMenu, etc.
+- VSCode repo + ubiquity (ou substituto Flutter installer) precisam
+  verificação de compat com 26.04.
+- Cubic precisa suportar 26.04 (validar antes de começar).
+- Estratégia de migração pra users 24.04 instalados: documentar que
+  v2.0 = clean install (apt upgrade não cruza bases).
+
+### Pré-requisitos antes de começar
+- Validar Cubic 2026.x suporta Ubuntu 26.04.
+- Validar 26.04 ISO oficial não-layered (single squashfs).
+- Confirmar TMJOs roda OK em VM com Ubuntu 26.04 base.
+
+### Sub-bonus possível
+- Refresh visual aproveitando GNOME 48 (acabamento polído).
+- TMJDock proprietário (substituto Wayland-native do Plank, GTK4
+  + libadwaita stack alinhada com TMJPad/TMJMenu/TMJNotes).
+- Refazer slim aggressive com base no que mudou em 26.04.
+
 ## [Backlog v1.4] — apps proprietários novos
 
 
