@@ -28,6 +28,7 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Adw, GLib, Gtk  # noqa: E402
 
+from . import config
 from .launcher import launch
 from .search import AppEntry, discover_apps, search
 
@@ -141,7 +142,31 @@ class TMJMenuWindow(Gtk.ApplicationWindow):
             comment_label.set_ellipsize(3)  # PANGO_ELLIPSIZE_END = 3
             text_box.append(comment_label)
 
+        # Pin indicator + right-click pra toggle pin
+        if config.is_pinned(app.desktop_id):
+            pin_icon = Gtk.Image.new_from_icon_name("starred-symbolic")
+            pin_icon.set_tooltip_text("Fixado na dock")
+            pin_icon.add_css_class("accent")
+            box.append(pin_icon)
+
+        gesture = Gtk.GestureClick.new()
+        gesture.set_button(3)  # right click
+        gesture.connect(
+            "released",
+            lambda *_args, a=app: self._toggle_pin(a),
+        )
+        row.add_controller(gesture)
+
         return row
+
+    def _toggle_pin(self, app: AppEntry) -> None:
+        """Right-click numa row: pinar se não tá, despinar se já tá."""
+        if config.is_pinned(app.desktop_id):
+            config.remove_pinned(app.desktop_id)
+        else:
+            config.add_pinned(app.desktop_id)
+        # Re-popula pra refletir o pin badge atualizado
+        self._populate(self._search_entry.get_text())
 
     # ── Event handlers ────────────────────────────────────────────────
 

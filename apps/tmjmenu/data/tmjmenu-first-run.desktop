@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=TMJMenu first-run
+Comment=Configura Super+Space → TMJMenu no primeiro login
+Exec=/usr/bin/tmjmenu-first-run
+Terminal=false
+X-GNOME-Autostart-enabled=true
+NoDisplay=true
+StartupNotify=false

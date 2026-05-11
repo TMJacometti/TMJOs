@@ -1,0 +1,42 @@
+#!/bin/sh
+# TMJMenu first-run / every-login setup.
+#
+# Configura keybinding custom Super+Space → `tmjmenu` via gsettings.
+# Idempotente: re-rodar não causa duplicatas nem reverte custom mods
+# do user (só insere o slot tmjmenu se ainda não existir).
+
+set -e
+
+SLOT_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/tmjmenu/"
+SLOT_REF="$SLOT_PATH"   # path como referência na lista
+
+# 1. Garante que o slot tmjmenu está na lista `custom-keybindings`
+CURRENT=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null || echo "@as []")
+
+# Se a lista atual não contém o nosso path, adiciona
+case "$CURRENT" in
+    *"$SLOT_PATH"*)
+        # Já está lá — no-op
+        ;;
+    *)
+        # Append do nosso slot. Tratar caso lista vazia.
+        if [ "$CURRENT" = "@as []" ] || [ "$CURRENT" = "[]" ]; then
+            NEW_LIST="['$SLOT_PATH']"
+        else
+            # Remove ']' do fim e adiciona nosso path
+            STRIPPED=$(echo "$CURRENT" | sed "s/]$/, '$SLOT_PATH']/")
+            NEW_LIST="$STRIPPED"
+        fi
+        gsettings set org.gnome.settings-daemon.plugins.media-keys \
+            custom-keybindings "$NEW_LIST" 2>/dev/null || true
+        ;;
+esac
+
+# 2. Define name + command + binding do slot
+SCHEMA="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$SLOT_PATH"
+
+gsettings set "$SCHEMA" name 'TMJMenu' 2>/dev/null || true
+gsettings set "$SCHEMA" command 'tmjmenu' 2>/dev/null || true
+gsettings set "$SCHEMA" binding '<Super>space' 2>/dev/null || true
+
+exit 0

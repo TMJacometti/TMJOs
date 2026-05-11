@@ -21,9 +21,11 @@ mkdir -p "$VENDOR"
 # 1. Python module (inclui assets/ embedded)
 cp -r "$SRC/tmjmenu" "$VENDOR/tmjmenu"
 
-# 2. Desktop entries
-cp "$SRC/data/tmjmenu.desktop" "$VENDOR/tmjmenu.desktop"
-cp "$SRC/data/tmjdock.desktop" "$VENDOR/tmjdock.desktop"
+# 2. Desktop entries + first-run script
+cp "$SRC/data/tmjmenu.desktop"              "$VENDOR/tmjmenu.desktop"
+cp "$SRC/data/tmjdock.desktop"              "$VENDOR/tmjdock.desktop"
+cp "$SRC/data/tmjmenu-first-run.desktop"    "$VENDOR/tmjmenu-first-run.desktop"
+cp "$SRC/data/tmjmenu-first-run"            "$VENDOR/tmjmenu-first-run"
 
 # 3. Wrapper scripts — gerados aqui pra rules apenas `cp`.
 cat > "$VENDOR/tmjmenu-launcher.sh" << 'LAUNCHER'

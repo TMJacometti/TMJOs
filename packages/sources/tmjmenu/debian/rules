@@ -17,16 +17,22 @@ override_dh_auto_install:
 	cp -r vendor/tmjmenu debian/tmjmenu/opt/tmjmenu/
 	chmod -R a+rX debian/tmjmenu/opt/tmjmenu
 
-	# Wrapper scripts → /usr/bin/{tmjmenu,tmjdock}
+	# Wrapper scripts + first-run → /usr/bin
 	mkdir -p debian/tmjmenu/usr/bin
 	cp vendor/tmjmenu-launcher.sh debian/tmjmenu/usr/bin/tmjmenu
 	cp vendor/tmjdock-launcher.sh debian/tmjmenu/usr/bin/tmjdock
-	chmod +x debian/tmjmenu/usr/bin/tmjmenu debian/tmjmenu/usr/bin/tmjdock
+	cp vendor/tmjmenu-first-run  debian/tmjmenu/usr/bin/tmjmenu-first-run
+	chmod +x debian/tmjmenu/usr/bin/tmjmenu \
+	         debian/tmjmenu/usr/bin/tmjdock \
+	         debian/tmjmenu/usr/bin/tmjmenu-first-run
 
 	# Desktop entries
 	mkdir -p debian/tmjmenu/usr/share/applications
 	cp vendor/tmjmenu.desktop debian/tmjmenu/usr/share/applications/
 
-	# Autostart pra TMJDock (system-wide)
+	# Autostart (system-wide):
+	#   tmjdock.desktop — sobe a dock no login
+	#   tmjmenu-first-run.desktop — configura Super+Space keybinding
 	mkdir -p debian/tmjmenu/etc/xdg/autostart
-	cp vendor/tmjdock.desktop debian/tmjmenu/etc/xdg/autostart/
+	cp vendor/tmjdock.desktop           debian/tmjmenu/etc/xdg/autostart/
+	cp vendor/tmjmenu-first-run.desktop debian/tmjmenu/etc/xdg/autostart/

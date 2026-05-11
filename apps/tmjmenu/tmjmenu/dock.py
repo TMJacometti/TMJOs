@@ -1,22 +1,15 @@
 """TMJDock — dock proprietária do TMJOs.
 
-Substitui o Plank. Layout estilo macOS/Win11:
+Substitui o Plank. Layout estilo Windows Start (TMJOs à esquerda):
 
-    ┌────────────────────────────────────────────────────────┐
-    │ □ VSCode  □ Terminal  □ TMJPad   ⬢ TMJ   □ Files  □ … │  ← centered
-    └────────────────────────────────────────────────────────┘
-                          ↑
-                  botão TMJOs (abre TMJMenu popup)
-
-Iteração 1 (esta):
-- Window GTK4 always-visible bottom-centered
-- HBox com apps pinados + botão TMJOs no meio
-- Auto-size pelo conteúdo (não width fixo)
-- CSS: rounded corners + shadow + dark background
-
-Iteração 2:
-- X11 hints (_NET_WM_WINDOW_TYPE_DOCK + STRUT_PARTIAL) → reserva espaço
-- Auto-hide com hover (mouse near bottom edge → show)
+    ┌──────────────────────────────────────────────────────┐
+    │ ⬢ TMJ  ⊞ ShowApps │ □ VSCode  □ Terminal  □ Files  │
+    └──────────────────────────────────────────────────────┘
+       ↑       ↑                ↑
+       │       │                pinados (config.py — persistido em
+       │       │                ~/.config/tmjmenu/pinned.json)
+       │       Activities Overview (gdbus org.gnome.Shell)
+       Botão TMJOs (abre TMJMenu popup)
 """
 
 from __future__ import annotations
@@ -33,6 +26,7 @@ gi.require_version("Gdk", "4.0")
 
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
 
+from . import config
 from .launcher import launch
 from .search import AppEntry, discover_apps
 from .x11 import make_dock
@@ -93,17 +87,6 @@ DOCK_CSS = b"""
 """
 
 
-# Defaults pinned apps — VSCode, Terminal, Files, TMJPad.
-# Settings/etc ficam no popup search (não merecem espaço dedicado).
-# User pode customizar em ~/.config/tmjmenu/pinned.json (iter futura).
-DEFAULT_PINNED = [
-    "code.desktop",                  # VSCode
-    "org.gnome.Terminal.desktop",    # Terminal
-    "org.gnome.Nautilus.desktop",    # Files
-    "tmjpad.desktop",                # TMJPad
-]
-
-
 def _set_tmjos_icon(image: Gtk.Image) -> None:
     """Tenta o icon 'tmjos' do theme (tmjos-branding instalado), fallback
     pro asset embedded no módulo (dev local / sistemas sem tmjos-branding).
@@ -145,106 +128,92 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         self.set_resizable(False)
         self.add_css_class("tmjdock-window")
 
-        # Sem default-size — auto-size pelo conteúdo
-        # (GTK calcula width baseado nos children).
-
         # Discover apps disponíveis (pra resolver desktop_id → AppEntry)
-        all_apps = {a.desktop_id: a for a in discover_apps()}
+        self._all_apps: dict[str, AppEntry] = {
+            a.desktop_id: a for a in discover_apps()
+        }
 
         # Container externo pra aplicar background com rounded corners
-        # (window root é transparente, este box é "a dock" visualmente)
-        bar = Gtk.Box(
+        self._bar = Gtk.Box(
             orientation=Gtk.Orientation.HORIZONTAL,
             spacing=ITEM_SPACING,
             halign=Gtk.Align.CENTER,
             valign=Gtk.Align.CENTER,
         )
-        bar.add_css_class("tmjdock-bar")
-        bar.set_margin_top(DOCK_PADDING)
-        bar.set_margin_bottom(DOCK_PADDING)
-        bar.set_margin_start(DOCK_PADDING)
-        bar.set_margin_end(DOCK_PADDING)
-        self.set_child(bar)
+        self._bar.add_css_class("tmjdock-bar")
+        self._bar.set_margin_top(DOCK_PADDING)
+        self._bar.set_margin_bottom(DOCK_PADDING)
+        self._bar.set_margin_start(DOCK_PADDING)
+        self._bar.set_margin_end(DOCK_PADDING)
+        self.set_child(self._bar)
 
-        # Botão TMJOs primeiro (canto esquerdo, estilo Windows Start)
-        bar.append(self._build_menu_button())
+        self._build_bar()
 
-        # Separador visual sutil entre TMJOs e apps pinados
+        # Re-build dock se pinned.json mudar (pin/unpin do popup ou
+        # editado manualmente).
+        self._setup_pinned_watch()
+
+        # X11 hints depois que window mapped
+        self.connect("realize", lambda _w: self._apply_x11_dock_hints())
+        self.connect("map", lambda _w: self._apply_x11_dock_hints())
+
+    # ── Build / rebuild da bar ────────────────────────────────────────
+
+    def _build_bar(self) -> None:
+        """Limpa e re-popula a bar. Chamado on init e on pinned.json change."""
+        # Limpa filhos existentes
+        child = self._bar.get_first_child()
+        while child:
+            next_child = child.get_next_sibling()
+            self._bar.remove(child)
+            child = next_child
+
+        # 1. Botão TMJOs (esquerda, Windows Start style)
+        self._bar.append(self._build_menu_button())
+
+        # 2. Botão "Show all apps" (Activities Overview)
+        self._bar.append(self._build_show_apps_button())
+
+        # 3. Separador
         sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
         sep.set_margin_start(4)
         sep.set_margin_end(4)
         sep.set_margin_top(8)
         sep.set_margin_bottom(8)
         sep.add_css_class("tmjdock-separator")
-        bar.append(sep)
+        self._bar.append(sep)
 
-        # Apps pinados à direita do botão TMJOs
-        pinned = [all_apps[d] for d in DEFAULT_PINNED if d in all_apps]
-        for app in pinned:
-            bar.append(self._build_app_button(app))
+        # 4. Apps pinados (do config.json)
+        for desktop_id in config.load_pinned():
+            app = self._all_apps.get(desktop_id)
+            if app is not None:
+                self._bar.append(self._build_app_button(app))
 
-        # Após a window estar mapped, aplica X11 hints pra virar dock
-        # real (type=DOCK, strut bottom, position bottom-center).
-        self.connect("realize", self._on_realize)
-        self.connect("map", self._on_map)
-
-    def _on_realize(self, _w: Gtk.Window) -> None:
-        # Realize garante que get_native().get_surface() já existe.
-        # Mas X11 hints precisam ser setados ANTES do mapeamento real,
-        # então em alguns casos esse é o momento certo. Tentamos aqui;
-        # se não funcionar, _on_map é o segundo cinto de segurança.
-        self._apply_x11_dock_hints()
-
-    def _on_map(self, _w: Gtk.Window) -> None:
-        # Pós-map: hints podem precisar reapply. Inofensivo se já aplicou.
-        self._apply_x11_dock_hints()
-
-    def _apply_x11_dock_hints(self) -> None:
-        """Tenta transformar a window em dock X11. Silencioso em Wayland."""
+    def _setup_pinned_watch(self) -> None:
+        """Re-build dock quando ~/.config/tmjmenu/pinned.json mudar.
+        Permite que pin/unpin do popup TMJMenu reflita na dock sem restart.
+        """
         try:
-            native = self.get_native()
-            if native is None:
-                return
-            surface = native.get_surface()
-            if surface is None:
-                return
-            # Em X11, surface tem get_xid(). Em Wayland, não tem.
-            if not hasattr(surface, "get_xid"):
-                return
-            xid = surface.get_xid()
-            if not xid:
-                return
-
-            # Detecta primary monitor via GDK
-            display = self.get_display()
-            monitors = display.get_monitors()
-            if monitors.get_n_items() == 0:
-                return
-            # GDK 4 não tem get_primary direto; primeiro é geralmente primary
-            monitor = monitors.get_item(0)
-            geometry = monitor.get_geometry()
-
-            # Width "ideal" da dock: tamanho natural do conteúdo.
-            # GTK4 não dá natural-size facilmente antes de allocate.
-            # Usa default 600 que cobre 5 apps + botão + margens.
-            allocation = self.get_allocation()
-            dock_w = allocation.width or 600
-            dock_h = allocation.height or 80
-
-            make_dock(
-                xid=xid,
-                monitor_x=geometry.x,
-                monitor_y=geometry.y,
-                monitor_width=geometry.width,
-                monitor_height=geometry.height,
-                dock_width=dock_w,
-                dock_height=dock_h,
-            )
+            config.CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+            gfile = Gio.File.new_for_path(str(config.PINNED_FILE))
+            self._monitor = gfile.monitor_file(Gio.FileMonitorFlags.NONE, None)
+            self._monitor.connect("changed", self._on_pinned_changed)
         except Exception:
-            pass
+            self._monitor = None
+
+    def _on_pinned_changed(
+        self, _monitor, _file, _other_file, event_type
+    ) -> None:
+        # Debounce: só rebuild em CHANGES_DONE_HINT pra evitar
+        # rebuild parcial quando outro processo tá escrevendo.
+        if event_type == Gio.FileMonitorEvent.CHANGES_DONE_HINT:
+            self._build_bar()
+            # Reapply X11 hints porque width mudou
+            self._apply_x11_dock_hints()
+
+    # ── Botões ───────────────────────────────────────────────────────
 
     def _build_app_button(self, app: AppEntry) -> Gtk.Button:
-        """Botão grande de app pinado na dock."""
         btn = Gtk.Button()
         btn.set_has_frame(False)
         btn.add_css_class("tmjdock-app-button")
@@ -259,14 +228,20 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         btn.set_child(icon)
 
         btn.connect("clicked", lambda _b, a=app: launch(a))
+
+        # Right-click → "Desafixar"
+        gesture = Gtk.GestureClick.new()
+        gesture.set_button(3)  # right
+        gesture.connect("released", lambda *_args, a=app: self._unpin_app(a))
+        btn.add_controller(gesture)
+
         return btn
 
     def _build_menu_button(self) -> Gtk.Button:
-        """Botão TMJOs central — abre o TMJMenu popup."""
         btn = Gtk.Button()
         btn.set_has_frame(False)
         btn.add_css_class("tmjdock-menu-button")
-        btn.set_tooltip_text("TMJMenu (Super)")
+        btn.set_tooltip_text("TMJMenu (Super+Space)")
 
         icon = Gtk.Image()
         icon.set_pixel_size(ICON_SIZE)
@@ -276,13 +251,24 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         btn.connect("clicked", self._on_menu_button_clicked)
         return btn
 
-    def _on_menu_button_clicked(self, _btn: Gtk.Button) -> None:
-        """Lança o TMJMenu (popup search). Dock continua aberta.
+    def _build_show_apps_button(self) -> Gtk.Button:
+        btn = Gtk.Button()
+        btn.set_has_frame(False)
+        btn.add_css_class("tmjdock-app-button")
+        btn.set_tooltip_text("Mostrar todos os apps")
 
-        Prod (.deb instalado): chama o wrapper /usr/bin/tmjmenu.
-        Dev (rodando do source): roda `python3 -m tmjmenu.app` no
-        mesmo interpreter pra evitar precisar instalar.
-        """
+        icon = Gtk.Image()
+        icon.set_pixel_size(ICON_SIZE)
+        icon.set_from_icon_name("view-app-grid-symbolic")
+        btn.set_child(icon)
+
+        btn.connect("clicked", self._on_show_apps_clicked)
+        return btn
+
+    # ── Event handlers ───────────────────────────────────────────────
+
+    def _on_menu_button_clicked(self, _btn: Gtk.Button) -> None:
+        """Lança o TMJMenu (popup search). Dock continua aberta."""
         if shutil.which("tmjmenu"):
             argv = ["tmjmenu"]
         else:
@@ -297,6 +283,71 @@ class TMJDockWindow(Gtk.ApplicationWindow):
                 ),
             )
         except GLib.Error:
+            pass
+
+    def _on_show_apps_clicked(self, _btn: Gtk.Button) -> None:
+        """Abre o Activities Overview do GNOME Shell via D-Bus."""
+        try:
+            GLib.spawn_async(
+                [
+                    "gdbus", "call", "--session",
+                    "--dest", "org.gnome.Shell",
+                    "--object-path", "/org/gnome/Shell",
+                    "--method", "org.gnome.Shell.ShowApplications",
+                ],
+                flags=(
+                    GLib.SpawnFlags.SEARCH_PATH
+                    | GLib.SpawnFlags.STDOUT_TO_DEV_NULL
+                    | GLib.SpawnFlags.STDERR_TO_DEV_NULL
+                ),
+            )
+        except GLib.Error:
+            pass
+
+    def _unpin_app(self, app: AppEntry) -> None:
+        """Right-click handler: remove app dos pinados + persist."""
+        config.remove_pinned(app.desktop_id)
+        # Re-build via watch handler (vai disparar) — fallback manual
+        # caso o monitor não rode (silencioso):
+        self._build_bar()
+        self._apply_x11_dock_hints()
+
+    # ── X11 dock hints ───────────────────────────────────────────────
+
+    def _apply_x11_dock_hints(self) -> None:
+        """Tenta transformar a window em dock X11. Silencioso em Wayland."""
+        try:
+            native = self.get_native()
+            if native is None:
+                return
+            surface = native.get_surface()
+            if surface is None or not hasattr(surface, "get_xid"):
+                return
+            xid = surface.get_xid()
+            if not xid:
+                return
+
+            display = self.get_display()
+            monitors = display.get_monitors()
+            if monitors.get_n_items() == 0:
+                return
+            monitor = monitors.get_item(0)
+            geometry = monitor.get_geometry()
+
+            allocation = self.get_allocation()
+            dock_w = allocation.width or 600
+            dock_h = allocation.height or 80
+
+            make_dock(
+                xid=xid,
+                monitor_x=geometry.x,
+                monitor_y=geometry.y,
+                monitor_width=geometry.width,
+                monitor_height=geometry.height,
+                dock_width=dock_w,
+                dock_height=dock_h,
+            )
+        except Exception:
             pass
 
 
