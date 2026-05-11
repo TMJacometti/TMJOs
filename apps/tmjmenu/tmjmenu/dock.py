@@ -164,6 +164,10 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # evitar recalcular monitor a cada tick.
         self._hidden = False
         self._mouse_over_dock = False
+        # User-force hidden: quando o user aperta Super+H, dock fica
+        # forçada hidden — auto-hide tick respeita esse estado e mantém
+        # hide até outro toggle. Bottom-edge hover não traz de volta.
+        self._user_force_hidden = False
         self._cached_monitor_geom: tuple[int, int, int, int] | None = None
         self._cached_dock_size: tuple[int, int] | None = None
 
@@ -365,16 +369,24 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         """Polling tick: checa pointer position, esconde/mostra dock.
 
         Lógica:
-        - Se mouse está sobre a dock → mostra (não esconde enquanto
-          user interage).
-        - Senão, se mouse está nos últimos AUTO_HIDE_REVEAL_PX pixels
-          do bottom edge → mostra.
+        - Se user-force-hidden (Super+H toggled) → mantém hidden,
+          ignora mouse.
+        - Senão, se mouse está sobre a dock → mostra (não esconde
+          enquanto user interage).
+        - Senão, se mouse nos últimos AUTO_HIDE_REVEAL_PX do bottom
+          edge → mostra.
         - Senão → esconde.
 
         Returns True pra GLib re-agendar o tick.
         """
         try:
             if self._cached_monitor_geom is None:
+                return True
+
+            # User pressed Super+H — força hide
+            if self._user_force_hidden:
+                if not self._hidden:
+                    self._hide_dock()
                 return True
 
             mouse_y = query_pointer_y()
@@ -396,6 +408,20 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         except Exception:
             pass
         return True
+
+    def toggle_force_hidden(self) -> None:
+        """Toggle do estado user-force-hidden — chamado por Super+H.
+
+        Off → On:  dock some imediatamente, fica oculta até próximo toggle.
+        On → Off:  retorna ao auto-hide normal (mostra se mouse near bottom).
+        """
+        self._user_force_hidden = not self._user_force_hidden
+        if self._user_force_hidden:
+            self._hide_dock()
+        else:
+            # Mostra imediatamente; próximo tick decide se mantém visível
+            # baseado em mouse position
+            self._show_dock()
 
     def _hide_dock(self) -> None:
         if self._cached_monitor_geom is None:
@@ -489,8 +515,36 @@ class TMJDockApp(Adw.Application):
     def __init__(self) -> None:
         super().__init__(
             application_id=DOCK_APP_ID,
-            flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
+            # HANDLES_COMMAND_LINE: secondary process (ex: `tmjdock
+            # --toggle-hide`) passa cmdline pra primary via D-Bus em
+            # vez de criar nova instance. Permite hotkey global trigger.
+            flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
         )
+        # Action toggle-hide: chamada via cmdline (`tmjdock --toggle-hide`)
+        # ou via D-Bus (gapplication action ...).
+        action = Gio.SimpleAction.new("toggle-hide", None)
+        action.connect("activate", self._on_toggle_hide_action)
+        self.add_action(action)
+
+    def _on_toggle_hide_action(
+        self, _action: Gio.SimpleAction, _param
+    ) -> None:
+        window = self.props.active_window
+        if isinstance(window, TMJDockWindow):
+            window.toggle_force_hidden()
+
+    def do_command_line(self, cmdline: Gio.ApplicationCommandLine) -> int:
+        args = cmdline.get_arguments()
+        # args[0] é o nome do programa
+        if "--toggle-hide" in args[1:]:
+            # Se a primary instance ainda não tem window (cold start),
+            # ativa pra criar window + force hidden.
+            if self.props.active_window is None:
+                self.activate()
+            self.activate_action("toggle-hide", None)
+        else:
+            self.activate()
+        return 0
 
     def do_activate(self) -> None:
         _install_css()

@@ -1,42 +1,60 @@
 #!/bin/sh
 # TMJMenu first-run / every-login setup.
 #
-# Configura keybinding custom Super+Space → `tmjmenu` via gsettings.
+# Configura keybindings custom do TMJOs via gsettings:
+#   Super+Space → tmjmenu (popup search)
+#   Super+H     → tmjdock --toggle-hide (force hide/show da dock)
+#
 # Idempotente: re-rodar não causa duplicatas nem reverte custom mods
-# do user (só insere o slot tmjmenu se ainda não existir).
+# do user (só insere os slots se ainda não existirem; redefine os
+# campos do nosso próprio slot pra garantir).
 
 set -e
 
-SLOT_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/tmjmenu/"
-SLOT_REF="$SLOT_PATH"   # path como referência na lista
+MENU_SLOT="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/tmjmenu/"
+HIDE_SLOT="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/tmjdock-hide/"
 
-# 1. Garante que o slot tmjmenu está na lista `custom-keybindings`
-CURRENT=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null || echo "@as []")
+# Helper: garante slot está na lista `custom-keybindings`.
+add_slot_to_list() {
+    SLOT_PATH="$1"
+    CURRENT=$(gsettings get org.gnome.settings-daemon.plugins.media-keys \
+        custom-keybindings 2>/dev/null || echo "@as []")
 
-# Se a lista atual não contém o nosso path, adiciona
-case "$CURRENT" in
-    *"$SLOT_PATH"*)
-        # Já está lá — no-op
-        ;;
-    *)
-        # Append do nosso slot. Tratar caso lista vazia.
-        if [ "$CURRENT" = "@as []" ] || [ "$CURRENT" = "[]" ]; then
-            NEW_LIST="['$SLOT_PATH']"
-        else
-            # Remove ']' do fim e adiciona nosso path
-            STRIPPED=$(echo "$CURRENT" | sed "s/]$/, '$SLOT_PATH']/")
-            NEW_LIST="$STRIPPED"
-        fi
-        gsettings set org.gnome.settings-daemon.plugins.media-keys \
-            custom-keybindings "$NEW_LIST" 2>/dev/null || true
-        ;;
-esac
+    case "$CURRENT" in
+        *"$SLOT_PATH"*)
+            # Já está lá — no-op
+            ;;
+        *)
+            if [ "$CURRENT" = "@as []" ] || [ "$CURRENT" = "[]" ]; then
+                NEW_LIST="['$SLOT_PATH']"
+            else
+                NEW_LIST=$(echo "$CURRENT" | sed "s/]$/, '$SLOT_PATH']/")
+            fi
+            gsettings set org.gnome.settings-daemon.plugins.media-keys \
+                custom-keybindings "$NEW_LIST" 2>/dev/null || true
+            ;;
+    esac
+}
 
-# 2. Define name + command + binding do slot
-SCHEMA="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$SLOT_PATH"
+# Helper: configura name/command/binding de um slot.
+configure_slot() {
+    SLOT_PATH="$1"
+    NAME="$2"
+    COMMAND="$3"
+    BINDING="$4"
 
-gsettings set "$SCHEMA" name 'TMJMenu' 2>/dev/null || true
-gsettings set "$SCHEMA" command 'tmjmenu' 2>/dev/null || true
-gsettings set "$SCHEMA" binding '<Super>space' 2>/dev/null || true
+    SCHEMA="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$SLOT_PATH"
+    gsettings set "$SCHEMA" name    "$NAME"    2>/dev/null || true
+    gsettings set "$SCHEMA" command "$COMMAND" 2>/dev/null || true
+    gsettings set "$SCHEMA" binding "$BINDING" 2>/dev/null || true
+}
+
+# 1. Super+Space → tmjmenu
+add_slot_to_list "$MENU_SLOT"
+configure_slot "$MENU_SLOT" 'TMJMenu' 'tmjmenu' '<Super>space'
+
+# 2. Super+H → tmjdock --toggle-hide
+add_slot_to_list "$HIDE_SLOT"
+configure_slot "$HIDE_SLOT" 'TMJDock Toggle Hide' 'tmjdock --toggle-hide' '<Super>h'
 
 exit 0
