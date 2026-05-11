@@ -6,9 +6,11 @@ on:
       - main
       - 'feature/**'
     paths:
+      - 'apps/**'
       - 'packages/sources/**'
       - 'packages/conf/**'
       - 'packages/keys/**'
+      - 'tools/**'
       - '.github/workflows/build-deb.yml'
   workflow_dispatch:
 
