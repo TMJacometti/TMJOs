@@ -5,10 +5,12 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [Backlog v1.3.4] — release pesada: menu proprietário
+## [Backlog v1.3.4] — release combinada: menu proprietário + cleanups
 
-Versão grande dentro do ciclo v1.3 (não-trivial — esperar 2-3 dias de
-trampo, não é point patch).
+Bundling de TMJMenu (feature grande) com correções v1.3.x acumuladas.
+Próxima ISO pública. Esperar ~3-4 dias de trampo.
+
+### Feature principal
 
 - **TMJMenu** (menu de aplicações proprietário TMJOs):
   - Substitui o uso atual de Activities Overview / "Todos os Apps" do
@@ -31,6 +33,31 @@ trampo, não é point patch).
 - **Side effect:** remove `tmjos-shell-tweaks` da depend chain (sem
   Activities button visível porque temos nosso próprio entry point) —
   ou mantém escondendo o Activities, decidir na implementação.
+
+### Correções acumuladas (puxadas do v1.3.x)
+
+- **Imagem default do ubiquity** (tela "Installation complete") trocada
+  pelo logo TMJOs (dragão + gear). Implementação via dpkg-divert no
+  postinst do `tmjos-installer` substituindo o PNG default
+  (`/usr/share/ubiquity/pixmaps/install_logo.png` ou similar —
+  confirmar via `dpkg -L ubiquity-frontend-gtk | grep -i png`).
+  Patch aplicável via `apt upgrade` em sistemas v1.3.0 sem regen ISO.
+
+- **Tamanho da ISO** (atualmente 6 GB) reduzido pro target ~2.5 GB.
+  Investigar config Cubic: o ISO v1.3.0 tem 2 layers squashfs
+  separados (`minimal.squashfs` 2.9G + `minimal.standard.live.squashfs`
+  991M). Provável caminho: forçar single-squashfs merge OR remover
+  o minimal base intocado já que toda customização TMJOs vai pro
+  standard.live. Validar com `unsquashfs -s` em build.
+
+- **Bugs menores observados em v1.3.0** que surgirem no uso.
+
+### Por que bundle
+
+Releases pesadas (com ISO nova) custam o mesmo trabalho de teste em
+VM independente do número de mudanças. v1.3.0 já validou o pipeline
+apt-only — agora podemos consolidar 3-4 melhorias num único re-spin
+ISO + apt patches simultâneos.
 
 ## [Backlog v1.4] — apps proprietários novos
 
