@@ -94,6 +94,13 @@ DOCK_CSS = b"""
     background-color: rgba(255, 255, 255, 0.12);
     min-width: 1px;
 }
+
+/* Dock pinned (Super+Shift+H) -- border cyan mais intenso e glow */
+.tmjdock-bar.pinned {
+    border: 1px solid rgba(0, 212, 255, 0.6);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4),
+                0 0 12px rgba(0, 212, 255, 0.25);
+}
 """
 
 
@@ -167,10 +174,10 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # evitar recalcular monitor a cada tick.
         self._hidden = False
         self._mouse_over_dock = False
-        # User-force hidden: quando o user aperta Super+Shift+H, dock fica
-        # forçada hidden — auto-hide tick respeita esse estado e mantém
-        # hide até outro toggle. Bottom-edge hover não traz de volta.
-        self._user_force_hidden = False
+        # Pinned mode: quando user aperta Super+Shift+H, auto-hide é
+        # desligado e dock fica sempre visível. Toggle de novo volta
+        # ao comportamento auto-hide normal.
+        self._pinned = False
         # Counter de popovers abertos (context menu pin/unpin). Enquanto > 0
         # a dock NÃO esconde mesmo se mouse sair (senão menu some no meio
         # da interação).
@@ -406,8 +413,7 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         """Polling tick: checa pointer position, esconde/mostra dock.
 
         Lógica:
-        - Se user-force-hidden (Super+Shift+H toggled) → mantém hidden,
-          ignora mouse.
+        - Se PINNED (Super+Shift+H toggled) → mantém visível, auto-hide off.
         - Senão, se popover aberto OU mouse sobre a dock OU mouse near
           bottom edge → mostra (cancela hide pendente).
         - Senão → agenda hide com debounce (não esconde instantâneo
@@ -419,11 +425,11 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             if self._cached_monitor_geom is None:
                 return True
 
-            # User pressed Super+Shift+H — força hide
-            if self._user_force_hidden:
+            # Pinned (Super+Shift+H) — dock sempre visível, auto-hide off
+            if self._pinned:
                 self._cancel_hide()
-                if not self._hidden:
-                    self._hide_dock()
+                if self._hidden:
+                    self._show_dock()
                 return True
 
             mouse_y = query_pointer_y()
@@ -473,13 +479,11 @@ class TMJDockWindow(Gtk.ApplicationWindow):
     def _do_delayed_hide(self) -> bool:
         """Callback do debounce — esconde de verdade depois do delay."""
         self._pending_hide_id = 0
-        # Re-checa estado: se algo mudou no intervalo (popover abriu,
-        # mouse voltou), não esconde.
-        if (
-            self._user_force_hidden
-            or self._popovers_open == 0
-            and not self._mouse_over_dock
-        ):
+        # Re-checa estado: se algo mudou no intervalo (pinned, popover
+        # abriu, mouse voltou), não esconde.
+        if self._pinned:
+            return False
+        if self._popovers_open == 0 and not self._mouse_over_dock:
             if not self._hidden:
                 self._hide_dock()
         return False  # timeout: rodar uma vez
@@ -493,19 +497,53 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         else:
             self._popovers_open = max(0, self._popovers_open - 1)
 
-    def toggle_force_hidden(self) -> None:
-        """Toggle do estado user-force-hidden — chamado por Super+H.
+    def toggle_pinned(self) -> None:
+        """Toggle do modo pinned — chamado por Super+Shift+H.
 
-        Off → On:  dock some imediatamente, fica oculta até próximo toggle.
-        On → Off:  retorna ao auto-hide normal (mostra se mouse near bottom).
+        Off → On:  auto-hide desligado, dock fica sempre visível, badge
+                   cyan glow + notify-send "Dock fixa".
+        On → Off:  volta ao comportamento auto-hide normal + notify-send
+                   "Auto-hide ativo".
         """
-        self._user_force_hidden = not self._user_force_hidden
-        if self._user_force_hidden:
-            self._hide_dock()
-        else:
-            # Mostra imediatamente; próximo tick decide se mantém visível
-            # baseado em mouse position
+        self._pinned = not self._pinned
+        self._update_pinned_visual()
+
+        if self._pinned:
+            # Garante dock visível imediatamente
             self._show_dock()
+            self._notify("TMJDock", "Dock fixa", "view-pin-symbolic")
+        else:
+            self._notify("TMJDock", "Auto-hide ativo",
+                         "view-restore-symbolic")
+
+    def _update_pinned_visual(self) -> None:
+        """Adiciona/remove class CSS .pinned na bar (glow cyan)."""
+        if self._pinned:
+            self._bar.add_css_class("pinned")
+        else:
+            self._bar.remove_css_class("pinned")
+
+    def _notify(self, summary: str, body: str, icon: str = "tmjos") -> None:
+        """Envia notification breve via `notify-send`.
+
+        Timeout 1500ms — feedback rápido, não fica poluindo o
+        notification tray.
+        """
+        try:
+            GLib.spawn_async(
+                ["notify-send",
+                 "--app-name=TMJDock",
+                 "--expire-time=1500",
+                 "--icon=" + icon,
+                 summary, body],
+                flags=(
+                    GLib.SpawnFlags.SEARCH_PATH
+                    | GLib.SpawnFlags.STDOUT_TO_DEV_NULL
+                    | GLib.SpawnFlags.STDERR_TO_DEV_NULL
+                ),
+            )
+        except GLib.Error:
+            pass
 
     def _hide_dock(self) -> None:
         if self._cached_monitor_geom is None:
@@ -623,7 +661,7 @@ class TMJDockApp(Adw.Application):
     ) -> None:
         window = self.props.active_window
         if isinstance(window, TMJDockWindow):
-            window.toggle_force_hidden()
+            window.toggle_pinned()
 
     def do_command_line(self, cmdline: Gio.ApplicationCommandLine) -> int:
         args = cmdline.get_arguments()

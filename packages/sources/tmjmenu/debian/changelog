@@ -1,3 +1,21 @@
+tmjmenu (1.3.4-10) noble; urgency=medium
+
+  * Super+Shift+H agora alterna PINNED em vez de force-hide:
+      - Off (default): comportamento auto-hide normal.
+      - On (pinned): auto-hide desligado, dock sempre visível,
+        border cyan glow visual indicator.
+  * Feedback de toggle via notify-send (1500ms timeout):
+      - "TMJDock — Dock fixa" quando ativa pinned.
+      - "TMJDock — Auto-hide ativo" quando desativa.
+  * Razão da mudança: a semantics anterior (force-hide) era confusa
+    porque user pressava Super+Shift+H mostrando a dock, mas como o
+    mouse estava longe, ela sumia logo. PINNED resolve isso — user
+    aperta Super+Shift+H quando quer trabalhar com a dock sempre
+    visível (ex: fazendo pin/unpin de vários apps em sequência),
+    e desativa quando volta ao workflow normal.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 19:50:00 -0300
+
 tmjmenu (1.3.4-9) noble; urgency=medium
 
   * Fix: botão "Mostrar todos os apps" não fazia nada quando clicado.
