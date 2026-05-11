@@ -50,8 +50,11 @@ class TMJMenuWindow(Gtk.ApplicationWindow):
 
         self._apps: list[AppEntry] = discover_apps()
 
-        # Esc fecha a janela
+        # Esc fecha a janela.
+        # Capture phase pra interceptar ANTES do GtkSearchEntry (que
+        # consome Esc por default pra limpar o texto).
         controller = Gtk.EventControllerKey.new()
+        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         controller.connect("key-pressed", self._on_key_pressed)
         self.add_controller(controller)
 

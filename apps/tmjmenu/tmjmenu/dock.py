@@ -21,6 +21,7 @@ Iteração 2:
 
 from __future__ import annotations
 
+import shutil
 import sys
 from pathlib import Path
 
@@ -84,17 +85,22 @@ DOCK_CSS = b"""
     background: linear-gradient(135deg, rgba(0, 212, 255, 0.45), rgba(255, 0, 170, 0.45));
     border: 1px solid rgba(0, 212, 255, 0.7);
 }
+
+.tmjdock-separator {
+    background-color: rgba(255, 255, 255, 0.12);
+    min-width: 1px;
+}
 """
 
 
-# Defaults pinned apps — mesma lista do Plank atual no tmjos-dock.
+# Defaults pinned apps — VSCode, Terminal, Files, TMJPad.
+# Settings/etc ficam no popup search (não merecem espaço dedicado).
 # User pode customizar em ~/.config/tmjmenu/pinned.json (iter futura).
 DEFAULT_PINNED = [
-    "code.desktop",
-    "org.gnome.Terminal.desktop",
-    "tmjpad.desktop",
-    "org.gnome.Nautilus.desktop",
-    "gnome-control-center.desktop",
+    "code.desktop",                  # VSCode
+    "org.gnome.Terminal.desktop",    # Terminal
+    "org.gnome.Nautilus.desktop",    # Files
+    "tmjpad.desktop",                # TMJPad
 ]
 
 
@@ -160,17 +166,21 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         bar.set_margin_end(DOCK_PADDING)
         self.set_child(bar)
 
-        # Pinned apps — primeira metade
-        pinned = [all_apps[d] for d in DEFAULT_PINNED if d in all_apps]
-        half = len(pinned) // 2
-        for app in pinned[:half]:
-            bar.append(self._build_app_button(app))
-
-        # Botão TMJOs no centro
+        # Botão TMJOs primeiro (canto esquerdo, estilo Windows Start)
         bar.append(self._build_menu_button())
 
-        # Pinned apps — segunda metade
-        for app in pinned[half:]:
+        # Separador visual sutil entre TMJOs e apps pinados
+        sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
+        sep.set_margin_start(4)
+        sep.set_margin_end(4)
+        sep.set_margin_top(8)
+        sep.set_margin_bottom(8)
+        sep.add_css_class("tmjdock-separator")
+        bar.append(sep)
+
+        # Apps pinados à direita do botão TMJOs
+        pinned = [all_apps[d] for d in DEFAULT_PINNED if d in all_apps]
+        for app in pinned:
             bar.append(self._build_app_button(app))
 
         # Após a window estar mapped, aplica X11 hints pra virar dock
@@ -267,10 +277,19 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         return btn
 
     def _on_menu_button_clicked(self, _btn: Gtk.Button) -> None:
-        """Lança `tmjmenu` (popup search). Dock continua aberta."""
+        """Lança o TMJMenu (popup search). Dock continua aberta.
+
+        Prod (.deb instalado): chama o wrapper /usr/bin/tmjmenu.
+        Dev (rodando do source): roda `python3 -m tmjmenu.app` no
+        mesmo interpreter pra evitar precisar instalar.
+        """
+        if shutil.which("tmjmenu"):
+            argv = ["tmjmenu"]
+        else:
+            argv = [sys.executable, "-m", "tmjmenu.app"]
         try:
             GLib.spawn_async(
-                ["tmjmenu"],
+                argv,
                 flags=(
                     GLib.SpawnFlags.SEARCH_PATH
                     | GLib.SpawnFlags.STDOUT_TO_DEV_NULL
