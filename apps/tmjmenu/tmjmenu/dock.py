@@ -42,7 +42,7 @@ ITEM_SPACING = 6          # espaçamento entre ícones
 #   AUTO_HIDE_REVEAL_PX → quão perto do bottom edge ativa o show.
 #   AUTO_HIDE_POLL_MS    → frequência do polling de pointer position.
 AUTO_HIDE_REVEAL_PX = 4
-AUTO_HIDE_POLL_MS = 150
+AUTO_HIDE_POLL_MS = 250
 
 
 # CSS — visual macOS/Win11 dock: dark bg semi-transparente,
@@ -189,8 +189,31 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             self._after_first_map))
 
     def _after_first_map(self) -> bool:
-        """Após primeiro map, aplica X11 hints + inicia polling auto-hide."""
+        """Após primeiro map, aplica X11 hints + inicia polling auto-hide.
+        Também escuta `monitors-changed` pra re-aplicar quando a
+        resolução da VM muda (Boxes/virtio-gpu dynamic resize)."""
         self._apply_x11_dock_hints()
+
+        # Re-cache + re-position quando monitor geometry muda (resize
+        # da janela Boxes, hotplug de monitor, mudança de resolução, etc).
+        display = self.get_display()
+        monitors = display.get_monitors()
+        monitors.connect(
+            "items-changed",
+            lambda *_a: GLib.idle_add(self._apply_x11_dock_hints),
+        )
+        # Notify::geometry no monitor primário pega resize só do
+        # próprio display sem hotplug.
+        if monitors.get_n_items() > 0:
+            primary = monitors.get_item(0)
+            try:
+                primary.connect(
+                    "notify::geometry",
+                    lambda *_a: GLib.idle_add(self._apply_x11_dock_hints),
+                )
+            except Exception:
+                pass
+
         # Inicia polling do cursor pra auto-hide
         GLib.timeout_add(AUTO_HIDE_POLL_MS, self._auto_hide_tick)
         return False  # idle_add: rodar uma vez

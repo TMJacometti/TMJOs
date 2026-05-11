@@ -1,3 +1,18 @@
+tmjmenu (1.3.4-6) noble; urgency=medium
+
+  * Mitigação de flicker quando VM (Boxes/virtio-gpu) redimensiona
+    a resolução dinamicamente após idle/reboot:
+      - Escuta GDK monitors-changed + notify::geometry no primary
+        monitor → re-cacheia geometry e re-aplica X11 hints
+        (re-centraliza dock + restore strut com novas dimensões).
+      - Auto-hide polling reduzido de 150ms pra 250ms (menos
+        overhead, suficiente pra hover responsivo).
+  * Workaround recomendado pro user: rodar Boxes em fullscreen
+    (Ctrl+Alt+F) — resolução fica fixa, sem redimensionamento
+    dinâmico do compositor host.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 18:20:00 -0300
+
 tmjmenu (1.3.4-5) noble; urgency=medium
 
   * Hotkey Super+H — force toggle hide/show da dock.
