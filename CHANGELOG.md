@@ -79,65 +79,81 @@ VM independente do número de mudanças. v1.3.0 já validou o pipeline
 apt-only — agora podemos consolidar 3-4 melhorias num único re-spin
 ISO + apt patches simultâneos.
 
-## [Backlog v2.0 "Insano 2"] — rebase em Ubuntu 26.04 LTS
+## [Backlog v2.0 "Insano 2"] — migração pra Debian puro
 
-Major version bump. Decisão grande, requer plan dedicado.
+**Major version bump filosófico**: TMJOs deixa de ser "Ubuntu modificado"
+e vira "Debian-based" com identidade independente. Slogan v2.0:
+
+> *"TMJOs 2.0 · Debian-based · Sem Canonical, sem snap, sem frescura"*
 
 ### Motivação
-- 26.04 LTS = suporte até 2031 (vs 24.04 = 2029).
-- Wayland muito mais maduro — chance de eliminar a dependência de
-  X11 forçado (que existe apenas pra Plank funcionar). Pode liberar
-  refator do dock pra Wayland-native.
-- Layered squashfs pode ter sido revertido / configurável em 26.04.
-- GNOME 48+ com APIs e fixes que não existem no GNOME 46 do 24.04.
 
-### Trabalho envolvido
-- Rebuild dos 9 pacotes `.deb` com novo codename (`noble` → `<P|Q>`).
-- Re-test completo: ISO build, install, apt repo, dock, extensions,
-  TMJPad, TMJMenu, etc.
-- VSCode repo + ubiquity (ou substituto Flutter installer) precisam
-  verificação de compat com 26.04.
-- Cubic precisa suportar 26.04 (validar antes de começar).
-- Estratégia de migração pra users 24.04 instalados: documentar que
-  v2.0 = clean install (apt upgrade não cruza bases).
+Ubuntu vai contra a filosofia "anti-bloat / OS INSANOS" do TMJOs:
+- snap forçado em pacotes core a cada release
+- ubiquity sendo deprecated (vira Flutter snap-based)
+- ubuntu-graphics empurra Spotify/Telegram via slideshow
+- Canonical impõe decisões corporativas (snap obrigatório, etc)
+
+Debian alinha:
+- **Zero Canonical**: sem snap, sem whoopsie, sem popularity-contest,
+  sem ubuntu-marketing
+- **Já nasce limpo**: TMJOs não precisa remover bloat — Debian é slim
+- **ubiquity → Calamares**: GTK4-native, controle total de branding
+- **Live-CD ~3GB** (vs 5-6GB do Ubuntu 24.04 layered)
+- **Sem hack `lsb-release codename=noble`**: TMJOs vira distro de verdade
+- **Community-only**: sem chefe corporativo decidindo features pra ti
+
+### Decisão base: Debian 13 "trixie"
+
+- Suporte até ~2030
+- GNOME 48
+- Estável a partir de Q3 2026
+- Single squashfs default
+
+### Trabalho envolvido (~3-5 dias)
+
+- **Migrar build**: Cubic (Ubuntu-only) → **live-build** (oficial Debian)
+- **Codename**: `noble` → `trixie` em todos os 11 changelogs +
+  `packages/conf/distributions` + `customize.sh`
+- **Installer**: ubiquity → Calamares (config branding TMJOs:
+  logo, slides, partitioner já bonitão)
+- **Re-test tudo**: ISO build, install, apt repo, dock, extensions,
+  TMJMenu/TMJDock/TMJStore/TMJPad
+- **Refactor `customize.sh`**: remove PPAs Ubuntu (Cubic etc),
+  ajusta apt sources pra Debian
+- **Documentar migração**: v1.x → v2.x é clean install (apt upgrade
+  não cruza bases distintas)
 
 ### Pré-requisitos antes de começar
-- Validar Cubic 2026.x suporta Ubuntu 26.04.
-- Validar 26.04 ISO oficial não-layered (single squashfs).
-- Confirmar TMJOs roda OK em VM com Ubuntu 26.04 base.
 
-### Sub-bonus possível
-- Refresh visual aproveitando GNOME 48 (acabamento polído).
-- TMJDock proprietário (substituto Wayland-native do Plank, GTK4
-  + libadwaita stack alinhada com TMJPad/TMJMenu/TMJNotes).
-- Refazer slim aggressive com base no que mudou em 26.04.
-- **APT repo dual-suite** (noble stable + noble-dev testing).
-  Hoje: workflow deploya tudo (main + feature/**) em `noble`.
-  Consequência: qualquer dev branch contamina o repo público — users
-  com TMJOs instalada pegariam WIP no `apt upgrade`. Aceito hoje
-  porque o universo de users é o próprio dev. Quando shipar pra
-  outros, refatorar pro padrão Ubuntu (noble + noble-proposed):
-    - `packages/conf/distributions`: adicionar segundo entry
-      `Codename: noble-dev` (mesmas keys).
-    - Workflow detecta branch: `main` → reprepro publica em `noble`,
-      `feature/**` → publica em `noble-dev`.
-    - Users normais consumem só `noble` (default no customize.sh).
-    - Quem quer testar dev adiciona manualmente:
-      `deb [signed-by=...] https://packages.tmjos.com.br/ noble-dev main`.
-- **Reduzir tamanho da ISO** (v1.3.0 ficou 6 GB por causa do layered
-  squashfs do 24.04 — minimal base 2.9G duplicado com standard.live
-  991M). Em 26.04 provavelmente é single-squashfs por default OR
-  Cubic 26.04 oferece config simples pra merge. Investigar quando
-  começar v2.0.
+- Debian 13 stable lançado (Q3 2026 ETA)
+- Validar TMJOs stack roda OK em VM Debian 13 base
+- Validar live-build produz ISO bootável + instalável
+- Verificar Calamares branding capability
 
-- **APT repo com components** (`main`, `apps`, `extras`). Padrão
-  Ubuntu (`main`, `restricted`, `universe`, `multiverse`). User
-  decide o que quer no source.list:
-  - `noble main` = só core (conservador)
-  - `noble main apps` = default TMJOs
-  - `noble main apps extras` = power user
-  Permite bump independente de TMJPad/TMJMenu/TMJCode sem mexer no
-  core. Combina com noble-dev pra stable vs WIP.
+## [Backlog v2.1 "Polimento Debian"] — pós-rebase
+
+Pendências que estavam na v2.0 sobre Ubuntu 26.04, agora movidas
+pra v2.1 sobre Debian 13 (após migração concluída).
+
+### Sub-bonus
+
+- Refresh visual aproveitando GNOME 48 (acabamento polído)
+- **TMJDock Wayland-native** (libgtk4-layer-shell substitui X11 hints)
+- Refazer slim aggressive baseado em Debian 13 base
+- **APT repo dual-suite** (trixie stable + trixie-dev testing):
+  - `packages/conf/distributions`: adicionar `Codename: trixie-dev`
+  - Workflow detecta branch: `main` → trixie, `feature/**` → trixie-dev
+  - Users normais consumem só `trixie` (default no customize.sh)
+  - Dev testers adicionam `trixie-dev` source manualmente
+- **APT components** (`main`, `apps`, `extras`):
+  - `trixie main` = só core (conservador)
+  - `trixie main apps` = default TMJOs
+  - `trixie main apps extras` = power user / community apps
+  - Permite bump independente de TMJPad/TMJMenu/TMJCode sem mexer
+    no core
+- **Reduzir tamanho da ISO** (Debian 13 single squashfs default
+  provavelmente resolve sozinho — confirmar)
 
 ## [Backlog dev workflow] — TMJOs Dev VM
 
@@ -171,23 +187,21 @@ funciona em metal.
 Futuro: script `tools/tmjos-dev-vm.sh` que cria VM via virt-install
 com XML otimizado.
 
-## [Backlog v2.0] — TMJOs Installer Slideshow
+## [Backlog v2.1] — TMJOs Installer Slideshow (Calamares)
 
 v1.3.4 e abaixo: install em silêncio (sem slideshow) — `ubiquity-slideshow-ubuntu`
 removido pelo customize.sh.
 
-Futuro: slideshow próprio durante a tela "Copying files" do ubiquity.
-Slides com identidade TMJOs:
+Em v2.0 (rebase Debian), Calamares substitui ubiquity → branding
+de slides fica trivial (Calamares tem `branding.desc` com slideshow
+QML nativo). Slides com identidade TMJOs:
 - "OS DA TMJSistemas · OS MELHORES · OS INSANOS"
 - "Slim Aggressive · ~700MB RAM idle"
 - "TMJMenu + TMJDock · launcher proprietário"
 - "APT repo · `sudo apt upgrade tmjos`"
 - "TMJPad · text editor com persistência total"
-- "Codename: insano"
-
-Implementação: pacote `tmjos-slideshow` que provê arquivos compatíveis
-com `ubiquity-slideshow-ubuntu` (HTML + assets em /usr/share/ubiquity-slideshow/).
-Conflicts com ubiquity-slideshow-ubuntu pra evitar Ubuntu marketing voltar.
+- Asset `tmjos-installing.png` (1024x1024) já empacotado no
+  tmjos-installer 1.3.4-3 — uso aqui.
 
 ## [Backlog — apps TMJOs independentes]
 
