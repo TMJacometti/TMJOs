@@ -40,10 +40,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: metapackages
 Filename: pool/main/t/tmjos/tmjos_2.0.0-2_all.deb
-Size: 2452
-SHA256: 9b25830d2d9f18d79eb739f5379f1548b6174e8a99d198544733e0de5889ca56
-SHA1: 17c71be6bf657ac7b5d75e16b557cb273ab45656
-MD5sum: 6b327cbc1ad1f2281957946fc9bbb8e1
+Size: 2446
+SHA256: 742449207e3d1d49afa7bc0eb22734df1403d3bd3b0ce25186108a89cc1bd6fa
+SHA1: ada2091f0701eb49150a5de9a320ac6ec5b5866d
+MD5sum: 1f12a36661f687f50390412952ce8282
 Description: TMJOs metapackage — pulls in the entire TMJOs experience
  Installing this package on a base Debian 13 (trixie) system gives
  you the complete TMJOs setup:
@@ -103,9 +103,9 @@ Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-calamares-branding/tmjos-calamares-branding_2.0.0-1_all.deb
 Size: 994380
-SHA256: 854ee56d1d9e67b85d563fa9ef358b419c78552bd4f14c405987da29f952434e
-SHA1: 9a90cef33234e17c3eb2d7964fe902e66ab99a47
-MD5sum: 2c23ca8d867097957ed7cb92123dcf37
+SHA256: d60f109ace8cc5f79e1643fefd1b99e4aaa784285793e7f8d7ee622589329e3f
+SHA1: e0c8a36f8e9000f45b759167dffa36c1a87fc145
+MD5sum: a2fc3dc7492c44d0fc863943c73f119b
 Description: TMJOs branding for Calamares installer
  Calamares branding component "tmjos" — provê:
   * branding.desc com strings TMJOs, paleta neon (cyan/magenta/dark navy)
