@@ -1,3 +1,19 @@
+tmjos-installer (1.3.4-2) noble; urgency=medium
+
+  * Substitui ubiquity.svg pelo logo TMJOs nos 6 sizes hicolor
+    (16/22/24/32/48/64). Top bar do GNOME durante o install agora
+    mostra logo TMJOs em vez de logo Ubuntu.
+  * Vendor script gera tmjos-ubiquity.svg via SVG wrapper com
+    TMJOs_Logo_Rounded.png embedded em base64 (128x128).
+    Single SVG cobre todos os 6 sizes via symlinks.
+  * postinst dpkg-divert idempotente nos 6 paths + symlink pro
+    nosso SVG + gtk-update-icon-cache pra GNOME pegar imediato.
+  * postrm reverte tudo em remove/purge.
+  * Backlog v1.3.5+: partitioner icons (install/manual/reinstall/
+    sidebyside) — aguardando assets Nano Banana TMJOs neon.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Tue, 12 May 2026 09:30:00 -0300
+
 tmjos-installer (1.3.4-1) noble; urgency=medium
 
   * Replace ubiquity's default "Installation complete" image

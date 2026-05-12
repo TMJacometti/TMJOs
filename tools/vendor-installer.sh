@@ -42,6 +42,22 @@ $MAGICK "$SRC_LOGO" \
     -extent 234x165 \
     "$VENDOR/tmjos_installed.png"
 
+# === Generate ubiquity-replacement SVG ===
+# Substitui /usr/share/icons/hicolor/*/apps/ubiquity.svg (logo do
+# ubiquity na top bar do GNOME quando o installer está rodando).
+# GTK icon theme espera SVG nesses paths — então criamos um SVG
+# wrapper com o PNG do logo TMJOs embedded em base64. PNG é
+# resizado pra 128x128 (cap razoável pra reduzir size do .svg).
+$MAGICK "$SRC_LOGO" -resize 128x128 "$VENDOR/tmjos-icon-128.png"
+LOGO_B64=$(base64 -w 0 "$VENDOR/tmjos-icon-128.png")
+cat > "$VENDOR/tmjos-ubiquity.svg" << SVG
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+  <image xlink:href="data:image/png;base64,${LOGO_B64}" x="0" y="0" width="128" height="128"/>
+</svg>
+SVG
+rm "$VENDOR/tmjos-icon-128.png"
+
 echo "✓ vendor/ populated."
 ls -lah "$VENDOR/"
 file "$VENDOR/tmjos_installed.png"

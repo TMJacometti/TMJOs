@@ -18,3 +18,8 @@ override_dh_auto_install:
 	mkdir -p debian/tmjos-installer/usr/share/tmjos-installer
 	cp vendor/tmjos_installed.png \
 		debian/tmjos-installer/usr/share/tmjos-installer/tmjos_installed.png
+
+	# TMJOs-branded SVG pra substituir /usr/share/icons/hicolor/*/apps/ubiquity.svg
+	# Postinst dpkg-divert + symlinks em 6 sizes (16, 22, 24, 32, 48, 64).
+	cp vendor/tmjos-ubiquity.svg \
+		debian/tmjos-installer/usr/share/tmjos-installer/tmjos-ubiquity.svg

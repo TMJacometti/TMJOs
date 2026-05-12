@@ -6,6 +6,8 @@ set -e
 UBIQUITY_PNG=/usr/share/ubiquity/pixmaps/ubuntu_installed.png
 DIVERT_DEST=/usr/share/ubiquity/pixmaps/ubuntu_installed.png.tmjos-orig
 
+UBIQUITY_SVG_SIZES="16 22 24 32 48 64"
+
 case "$1" in
     remove|purge|disappear)
         # Remove symlink antes do diversion remove (senão dpkg-divert
@@ -16,6 +18,23 @@ case "$1" in
         if dpkg-divert --list "$UBIQUITY_PNG" | grep -q "$DIVERT_DEST"; then
             dpkg-divert --package tmjos-installer --rename \
                 --divert "$DIVERT_DEST" --remove "$UBIQUITY_PNG"
+        fi
+
+        # Undo dos 6 ubiquity.svg diverts
+        for size in $UBIQUITY_SVG_SIZES; do
+            target="/usr/share/icons/hicolor/${size}x${size}/apps/ubiquity.svg"
+            divert_dest="${target}.tmjos-orig"
+            if [ -L "$target" ]; then
+                rm -f "$target"
+            fi
+            if dpkg-divert --list "$target" 2>/dev/null | grep -q "$divert_dest"; then
+                dpkg-divert --package tmjos-installer --rename \
+                    --divert "$divert_dest" --remove "$target" || true
+            fi
+        done
+        if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+            gtk-update-icon-cache --quiet --force \
+                /usr/share/icons/hicolor 2>/dev/null || true
         fi
         ;;
     *)

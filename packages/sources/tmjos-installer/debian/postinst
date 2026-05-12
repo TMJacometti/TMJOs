@@ -10,6 +10,10 @@ UBIQUITY_PNG=/usr/share/ubiquity/pixmaps/ubuntu_installed.png
 TMJOS_PNG=/usr/share/tmjos-installer/tmjos_installed.png
 DIVERT_DEST=/usr/share/ubiquity/pixmaps/ubuntu_installed.png.tmjos-orig
 
+# ubiquity icon nos 6 sizes hicolor (top bar/launcher logo)
+UBIQUITY_SVG_SIZES="16 22 24 32 48 64"
+TMJOS_SVG=/usr/share/tmjos-installer/tmjos-ubiquity.svg
+
 case "$1" in
     configure)
         # === 1) PulseAudio cleanup ===
@@ -32,6 +36,28 @@ case "$1" in
             # symlink (não cp) — upgrade do tmjos-installer com nova
             # imagem reflete sem precisar rerun postinst manual
             ln -sf "$TMJOS_PNG" "$UBIQUITY_PNG"
+        fi
+
+        # === 3) Replace ubiquity icon (top bar logo) ===
+        # /usr/share/icons/hicolor/<size>/apps/ubiquity.svg em 6 sizes.
+        # Mesma estratégia: dpkg-divert + symlink pro nosso SVG TMJOs.
+        if [ -f "$TMJOS_SVG" ]; then
+            for size in $UBIQUITY_SVG_SIZES; do
+                target="/usr/share/icons/hicolor/${size}x${size}/apps/ubiquity.svg"
+                divert_dest="${target}.tmjos-orig"
+                if [ -f "$target" ] || [ -L "$target" ]; then
+                    if ! dpkg-divert --list "$target" 2>/dev/null | grep -q "$divert_dest"; then
+                        dpkg-divert --package tmjos-installer --rename \
+                            --divert "$divert_dest" --add "$target" || true
+                    fi
+                    ln -sf "$TMJOS_SVG" "$target"
+                fi
+            done
+            # Refresh icon cache pra GNOME pegar o novo icon imediato
+            if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+                gtk-update-icon-cache --quiet --force \
+                    /usr/share/icons/hicolor 2>/dev/null || true
+            fi
         fi
         ;;
     *)
