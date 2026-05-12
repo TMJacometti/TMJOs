@@ -172,46 +172,51 @@ done
 
 apt-get update
 
-APT_INSTALL="apt-get install -y \
+# Install TUDO em uma única chamada, com --no-install-recommends.
+# Recommends padrão do gnome-core puxam rygel, packagekit, modemmanager
+# (daemons problemáticos em chroot) + man-db, aspell-* (triggers lentos).
+# Listamos só o que QUEREMOS explicitamente — TMJOs slim aggressive de
+# fato, ISO menor, triggers só do essencial.
+echo "=== TMJOs: install consolidado (slim, sem Recommends) ==="
+apt-get install -y --no-install-recommends \
     -o Dpkg::Options::=--force-confdef \
     -o Dpkg::Options::=--force-confold \
-    -o APT::Install-Recommends=true"
-
-echo "=== TMJOs block: GNOME base ==="
-$APT_INSTALL \
-    gnome-core \
+    gnome-shell \
+    gnome-session \
+    gnome-terminal \
+    gnome-control-center \
     gnome-tweaks \
-    dconf-editor
-
-echo "=== TMJOs block: Evolution ==="
-$APT_INSTALL \
+    gnome-text-editor \
+    gnome-calculator \
+    gnome-system-monitor \
+    gnome-disk-utility \
+    gnome-screenshot \
+    nautilus \
+    file-roller \
+    eog \
+    gdm3 \
+    dconf-editor \
+    dconf-cli \
+    network-manager-gnome \
+    gvfs \
+    gvfs-backends \
+    xdg-user-dirs \
+    xdg-user-dirs-gtk \
     evolution \
-    evolution-ews
-
-echo "=== TMJOs block: Calamares + RAM tools ==="
-$APT_INSTALL \
+    evolution-ews \
     zram-tools \
     preload \
     calamares \
-    calamares-settings-debian
-
-echo "=== TMJOs block: Dev stack ==="
-$APT_INSTALL \
+    calamares-settings-debian \
     git \
     git-flow \
     docker.io \
-    docker-compose
-
-echo "=== TMJOs block: Python GTK ==="
-$APT_INSTALL \
+    docker-compose \
     python3 \
     python3-gi \
     python3-xlib \
     gir1.2-gtk-4.0 \
-    gir1.2-adw-1
-
-echo "=== TMJOs block: CLI + fonts ==="
-$APT_INSTALL \
+    gir1.2-adw-1 \
     dctrl-tools \
     curl \
     wget \
