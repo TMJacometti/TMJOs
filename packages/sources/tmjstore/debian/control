@@ -15,7 +15,7 @@ Depends: ${misc:Depends},
          python3-gi,
          gir1.2-gtk-4.0,
          gir1.2-adw-1,
-         policykit-1,
+         policykit-1 | polkitd,
          apt
 Recommends: tmjos-branding
 Description: TMJOs Software Center — apps proprietários TMJOs

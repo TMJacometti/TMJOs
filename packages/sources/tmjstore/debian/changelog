@@ -1,3 +1,27 @@
+tmjstore (0.1.3-1) noble; urgency=medium
+
+  * Fix: _is_from_tmj_repo() só aceitava packages.tmjos.com.br.
+    User reportou: TMJStore vazio no host Ubuntu 26.04 mesmo com
+    repo TMJOs configurado — porque o host tinha a URL legacy
+    tmjacometti.github.io/TMJOs (de antes da migração pro custom
+    domain). apt-cache policy mostrava essa URL e o filter falhava.
+  * Refactor: TMJ_REPO_ORIGIN → TMJ_REPO_ORIGINS (lista). Aceita:
+      - packages.tmjos.com.br (atual)
+      - tmjacometti.github.io/tmjos (legacy GH Pages)
+    Match case-insensitive pra robustez.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 22:10:00 -0300
+
+tmjstore (0.1.2-1) noble; urgency=medium
+
+  * Fix Depends pra ser portável entre Ubuntu 24.04 (noble) e 26.04:
+    policykit-1 → "policykit-1 | polkitd". Em noble o pacote legado
+    policykit-1 ainda existe; em 26.04+ foi renomeado pra polkitd.
+    Sem alternative, dpkg -i no host Ubuntu 26.04 falhava com
+    "policykit-1 not installable".
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 21:55:00 -0300
+
 tmjstore (0.1.1-1) noble; urgency=medium
 
   * Fix AttributeError 'Viewport' object has no attribute 'remove'

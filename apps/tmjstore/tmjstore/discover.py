@@ -21,7 +21,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
-TMJ_REPO_ORIGIN = "packages.tmjos.com.br"
+# Origens válidas do APT repo TMJOs. Lista pra cobrir:
+#   - packages.tmjos.com.br (custom domain atual)
+#   - tmjacometti.github.io/TMJOs (URL legacy GH Pages, ainda válida)
+#   - 192.168.* IPs (dev local serving via python -m http.server)
+# A check é case-insensitive substring no output do apt-cache policy.
+TMJ_REPO_ORIGINS = [
+    "packages.tmjos.com.br",
+    "tmjacometti.github.io/tmjos",
+]
 METAINFO_DIR = Path("/usr/share/metainfo")
 
 
@@ -71,13 +79,19 @@ def _list_tmj_packages() -> list[str]:
 
 
 def _is_from_tmj_repo(pkg_name: str) -> bool:
-    """Confirma que o pacote vem do APT repo TMJOs (não outro)."""
+    """Confirma que o pacote vem de algum APT repo TMJOs.
+
+    Aceita múltiplas origens válidas (packages.tmjos.com.br atual,
+    tmjacometti.github.io/tmjos legacy). Match case-insensitive
+    pra robustez.
+    """
     try:
         result = subprocess.run(
             ["apt-cache", "policy", pkg_name],
             capture_output=True, text=True, timeout=5,
         )
-        return TMJ_REPO_ORIGIN in result.stdout
+        output_lower = result.stdout.lower()
+        return any(origin in output_lower for origin in TMJ_REPO_ORIGINS)
     except (subprocess.TimeoutExpired, FileNotFoundError):
         return False
 
