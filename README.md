@@ -151,9 +151,10 @@ sudo lb config \
     --mirror-chroot http://deb.debian.org/debian/ \
     --mirror-binary http://deb.debian.org/debian/ \
     --parent-mirror-bootstrap http://deb.debian.org/debian/ \
+    --security false \
     --apt-recommends true
 
-# 3. Popula config/ com archives/hooks/package-lists TMJOs
+# 3. Popula config/ com hooks TMJOs
 sudo /caminho/pra/TMJOs/tools/tmjos-live-build-setup.sh
 
 # 4. Build

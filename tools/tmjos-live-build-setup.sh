@@ -4,8 +4,8 @@
 # Popula ~/tmjos-debian-build/config/ com configurações TMJOs:
 # - TMJOs APT repo + GPG key (archives/)
 # - VSCode repo (archives/)
-# - Lista de pacotes (package-lists/tmjos.list.chroot)
-# - Hooks pós-install (hooks/normal/)
+# - Hook early com pacotes Debian base (hooks/0100-*.chroot_early)
+# - Hooks pós-install TMJOs (hooks/normal/)
 #
 # Roda APÓS `lb config ...` ter sido executado.
 # Usage: sudo ./tools/tmjos-live-build-setup.sh
@@ -50,8 +50,17 @@ sed -i 's/^LB_MODE="ubuntu"$/LB_MODE="debian"/' "$CONFIG/common"
 # config/chroot — keyring + kernel naming
 sed -i 's/^LB_KEYRING_PACKAGES="ubuntu-keyring"$/LB_KEYRING_PACKAGES="debian-archive-keyring"/' "$CONFIG/chroot"
 sed -i 's/^LB_LINUX_PACKAGES="linux"$/LB_LINUX_PACKAGES="linux-image"/' "$CONFIG/chroot"
+sed -i 's/^LB_SECURITY="true"$/LB_SECURITY="false"/' "$CONFIG/chroot"
 
-# config/bootstrap — volatile mirrors (security updates flow)
+# config/bootstrap — mirrors. Security fica desativado no live-build
+# porque esta versão gera `trixie/updates`, suite antiga que 404 em
+# Debian moderno. O sistema instalado recebe updates via sources Debian.
+sed -i 's|^LB_PARENT_MIRROR_CHROOT_SECURITY="http://security.ubuntu.com/ubuntu/"$|LB_PARENT_MIRROR_CHROOT_SECURITY="http://security.debian.org/debian-security/"|' "$CONFIG/bootstrap"
+sed -i 's|^LB_PARENT_MIRROR_BINARY_SECURITY="http://security.ubuntu.com/ubuntu/"$|LB_PARENT_MIRROR_BINARY_SECURITY="http://security.debian.org/debian-security/"|' "$CONFIG/bootstrap"
+sed -i 's|^LB_MIRROR_CHROOT_SECURITY="http://security.ubuntu.com/ubuntu/"$|LB_MIRROR_CHROOT_SECURITY="http://security.debian.org/debian-security/"|' "$CONFIG/bootstrap"
+sed -i 's|^LB_MIRROR_BINARY_SECURITY="http://security.ubuntu.com/ubuntu/"$|LB_MIRROR_BINARY_SECURITY="http://security.debian.org/debian-security/"|' "$CONFIG/bootstrap"
+
+# config/bootstrap — volatile mirrors (trixie-updates)
 sed -i 's|^LB_MIRROR_CHROOT_VOLATILE="http://archive.ubuntu.com/ubuntu/"$|LB_MIRROR_CHROOT_VOLATILE="http://deb.debian.org/debian/"|' "$CONFIG/bootstrap"
 sed -i 's|^LB_MIRROR_BINARY_VOLATILE="http://archive.ubuntu.com/ubuntu/"$|LB_MIRROR_BINARY_VOLATILE="http://deb.debian.org/debian/"|' "$CONFIG/bootstrap"
 
@@ -65,81 +74,144 @@ sed -i 's/^LB_SYSLINUX_THEME="ubuntu-oneiric"$/LB_SYSLINUX_THEME=""/' "$CONFIG/b
 # em live-build a57 por timing issues (keys não registradas a tempo do
 # apt-get update interno).
 #
-# Solução robusta (pattern Tails/Kali): package-list contém só Debian
-# main, e um hook adiciona repos extras + faz apt install do `tmjos` e
-# `code` depois do install pass. Mais controlado e funciona em qualquer
-# versão do live-build.
+# Solução robusta: hook early instala a base Debian main, e o hook 0500
+# adiciona repos extras + faz apt install do `tmjos` e `code` depois do
+# install pass. Mais controlado e evita bugs de package-list do live-build.
 #
 # Limpa qualquer config legacy de attempts anteriores:
 rm -f "$CONFIG/archives/"tmjos.* "$CONFIG/archives/"microsoft.* 2>/dev/null || true
 rm -rf "$CONFIG/includes.chroot_before_packages" 2>/dev/null || true
 
-# === 2. package-lists/ ===
-echo "→ package-lists/tmjos.list.chroot"
+# === 2. Debian base packages — early hook ===
+# Evita `config/package-lists/*.list.chroot`: live-build a57 em alguns
+# hosts trava em lb_chroot_package-lists depois de instalar dctrl-tools.
+# Instalar a base Debian via hook early pula essa etapa defeituosa.
+# Kernel/firmware/live-boot ficam com as stages nativas do live-build
+# (lb_chroot_linux-image/lb_chroot_live-packages), evitando disparar
+# initramfs/firmware hooks cedo demais dentro deste hook.
+rm -rf "$CONFIG/package-lists"
+mkdir -p "$CONFIG/package-lists"
+mkdir -p "$CONFIG/hooks"
 
-cat > "$CONFIG/package-lists/tmjos.list.chroot" << 'EOF'
-# IMPORTANTE: este package-list contém APENAS pacotes de Debian main.
-# `tmjos` e `code` (de repos extras) são instalados pelo hook 0500.
+echo "→ hooks/0100-tmjos-debian-base.chroot_early"
+cat > "$CONFIG/hooks/0100-tmjos-debian-base.chroot_early" << 'HOOK'
+#!/bin/sh
+set -e
+echo "=== TMJOs Debian base packages ==="
 
-# === Kernel + firmware ===
-# Explícito porque `lb config` em algumas versões a57 gera nome errado
-# (`linux-amd64` em vez de `linux-image-amd64`) na config interna.
-linux-image-amd64
-firmware-linux-free
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+export UCF_FORCE_CONFFOLD=1
 
-# === GNOME desktop SLIM ===
-# gnome-core é o meta minimal do GNOME (~1GB vs ~3GB do task-gnome-desktop).
-# Traz gnome-shell, gdm3, nautilus, gnome-control-center, gnome-terminal,
-# gnome-text-editor, gnome-calculator, eog, file-roller — o essencial.
-gnome-core
-gnome-tweaks
-dconf-editor
+# === Speed up dpkg pre-install ===
+# Skip man pages + docs + extra locales. Economiza:
+#   - 200-500MB do tamanho final da ISO
+#   - 5-15min de man-db trigger pós-install (regenera ~5000 manpages
+#     toda vez que gnome-core+evolution chegam no chroot)
+# Apps modernos usam Web Help / --help; manpages essenciais ficam em
+# /usr/share/man/man1 dos coreutils que vêm no debootstrap base.
+cat > /etc/dpkg/dpkg.cfg.d/01-tmjos-no-docs << 'DPKG'
+# TMJOs: skip docs/man/locale-extras pra acelerar install + slim ISO
+path-exclude=/usr/share/man/*
+path-exclude=/usr/share/doc/*
+path-exclude=/usr/share/info/*
+path-exclude=/usr/share/groff/*
+path-exclude=/usr/share/lintian/*
+path-exclude=/usr/share/linda/*
+# Mantém só locales en_US e pt_BR (TMJOs é BR-first)
+path-exclude=/usr/share/locale/*
+path-include=/usr/share/locale/en_US/*
+path-include=/usr/share/locale/pt_BR/*
+path-include=/usr/share/locale/locale.alias
+DPKG
 
-# === Evolution (Exchange compat) ===
-evolution
-evolution-ews
+# === Reforça policy-rc.d ===
+# Live-build já criou /usr/sbin/policy-rc.d com exit 101 (deny daemon
+# starts), mas alguns scripts pós-install bypassam policy-rc.d e
+# rodam systemctl direto. Stub do systemctl evita travas.
+cat > /usr/sbin/policy-rc.d << 'POLICY'
+#!/bin/sh
+exit 101
+POLICY
+chmod +x /usr/sbin/policy-rc.d
 
-# === RAM efficiency (target idle ~700MB-1GB, OS roda em 2GB total) ===
-zram-tools
-preload
+# === Pre-mask daemons problemáticos ===
+# Esses daemons tentam conectar D-Bus/Avahi/socket durante post-install
+# e podem fazer dpkg ficar esperando indefinidamente em chroot.
+# Mascarar ANTES do install impede que systemd presets ativem eles.
+PREMASK="rygel.service \
+         fwupd.service fwupd-refresh.service fwupd-refresh.timer \
+         ModemManager.service \
+         packagekit.service packagekit-offline-update.service \
+         apt-daily.service apt-daily.timer \
+         apt-daily-upgrade.service apt-daily-upgrade.timer \
+         plymouth-quit-wait.service \
+         tracker-miner-fs-3.service tracker-miner-rss-3.service \
+         tracker-extract-3.service tracker-writeback-3.service"
 
-# === Installer ===
-calamares
-calamares-settings-debian
+mkdir -p /etc/systemd/system
+for svc in $PREMASK; do
+    ln -sf /dev/null "/etc/systemd/system/$svc" 2>/dev/null || true
+done
 
-# === Dev stack (sem `code` — vem de repo Microsoft, instalado em hook) ===
-git
-git-flow
-docker.io
-docker-compose
+apt-get update
 
-# === Python + GTK4 (pra apps TMJOs) ===
-python3
-python3-gi
-python3-xlib
-gir1.2-gtk-4.0
-gir1.2-adw-1
+APT_INSTALL="apt-get install -y \
+    -o Dpkg::Options::=--force-confdef \
+    -o Dpkg::Options::=--force-confold \
+    -o APT::Install-Recommends=true"
 
-# === CLI tools ===
-curl
-wget
-gpg
-ca-certificates
-htop
-fastfetch
-vim
-xdotool
-imagemagick
+echo "=== TMJOs block: GNOME base ==="
+$APT_INSTALL \
+    gnome-core \
+    gnome-tweaks \
+    dconf-editor
 
-# === Fonts ===
-fonts-jetbrains-mono
-fonts-cantarell
+echo "=== TMJOs block: Evolution ==="
+$APT_INSTALL \
+    evolution \
+    evolution-ews
 
-# === Live system essentials ===
-live-boot
-live-config
-live-config-systemd
-EOF
+echo "=== TMJOs block: Calamares + RAM tools ==="
+$APT_INSTALL \
+    zram-tools \
+    preload \
+    calamares \
+    calamares-settings-debian
+
+echo "=== TMJOs block: Dev stack ==="
+$APT_INSTALL \
+    git \
+    git-flow \
+    docker.io \
+    docker-compose
+
+echo "=== TMJOs block: Python GTK ==="
+$APT_INSTALL \
+    python3 \
+    python3-gi \
+    python3-xlib \
+    gir1.2-gtk-4.0 \
+    gir1.2-adw-1
+
+echo "=== TMJOs block: CLI + fonts ==="
+$APT_INSTALL \
+    dctrl-tools \
+    curl \
+    wget \
+    gpg \
+    ca-certificates \
+    htop \
+    fastfetch \
+    vim \
+    xdotool \
+    imagemagick \
+    fonts-jetbrains-mono \
+    fonts-cantarell
+
+echo "=== TMJOs Debian base packages done ==="
+HOOK
+chmod +x "$CONFIG/hooks/0100-tmjos-debian-base.chroot_early"
 
 # === 3. hooks/normal/ ===
 mkdir -p "$CONFIG/hooks/normal"

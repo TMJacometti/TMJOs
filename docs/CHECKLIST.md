@@ -52,11 +52,13 @@ sudo lb config \
     --mirror-chroot http://deb.debian.org/debian/ \
     --mirror-binary http://deb.debian.org/debian/ \
     --parent-mirror-bootstrap http://deb.debian.org/debian/ \
+    --security false \
     --apt-recommends true
 ```
 
 - [ ] `config/` dir criado
-- [ ] `grep -r 'archive.ubuntu' config/` retorna vazio
+- [ ] `grep -r '^LB_.*archive.ubuntu' config/` retorna vazio
+- [ ] `grep -r 'trixie/updates' config/` retorna vazio
 - [ ] `grep -r 'deb.debian.org' config/` retorna entries
 
 ### ✅ FASE 3 — POPULA CONFIG TMJOS
@@ -65,7 +67,8 @@ sudo lb config \
 sudo ~/Projetos/GitHub/TMJOs/tools/tmjos-live-build-setup.sh
 ```
 
-- [ ] `config/package-lists/tmjos.list.chroot` existe e lista apenas pacotes Debian main
+- [ ] `config/hooks/0100-tmjos-debian-base.chroot_early` instala a base Debian main
+- [ ] `config/package-lists/` não contém listas `.chroot` (evita trava em `lb_chroot_package-lists`)
 - [ ] `config/hooks/normal/0500-tmjos-apt-install.hook.chroot` adiciona os repos TMJOs/Microsoft e instala `tmjos code`
 - [ ] `config/hooks/normal/0700-tmjos-slim.hook.chroot` remove bloat e mascara serviços pesados
 - [ ] `config/hooks/normal/0900-tmjos-setup.hook.chroot` é executável

@@ -60,6 +60,7 @@ sudo lb config \
     --mirror-chroot http://deb.debian.org/debian/ \
     --mirror-binary http://deb.debian.org/debian/ \
     --parent-mirror-bootstrap http://deb.debian.org/debian/ \
+    --security false \
     --apt-recommends true \
     --debian-installer false
 ```
@@ -69,8 +70,10 @@ Isso cria `~/tmjos-debian-build/config/` com a estrutura base do live-build.
 ### Passo 2.2: Validar mirrors
 
 ```bash
-# Deve mostrar SÓ deb.debian.org (zero referência a archive.ubuntu)
-grep -r 'deb.debian.org\|archive.ubuntu' config/
+# Deve mostrar os mirrors Debian ativos; valores ativos com archive.ubuntu
+# ou trixie/updates não podem aparecer.
+grep -r '^LB_.*deb.debian.org' config/
+grep -r '^LB_.*archive.ubuntu\|trixie/updates' config/ || true
 ```
 
 ---
@@ -90,19 +93,19 @@ O script popula:
 
 | Diretório | Conteúdo |
 |---|---|
-| `config/archives/` | APT sources extras (TMJOs trixie + Microsoft VSCode) + GPG keys |
-| `config/package-lists/` | `tmjos.list.chroot` com lista completa de pacotes |
-| `config/hooks/normal/` | Hooks pós-install (icon-cache, desktop-database) |
+| `config/hooks/0100-tmjos-debian-base.chroot_early` | Instala a base Debian main sem usar package-list |
+| `config/hooks/normal/0500-tmjos-apt-install.hook.chroot` | Adiciona repos TMJOs/Microsoft e instala `tmjos code` |
+| `config/hooks/normal/` | Hooks pós-install (slim, icon-cache, desktop-database) |
 
 ### Passo 3.2: Conferir o que foi setado
 
 ```bash
-ls -la config/archives/
 ls -la config/package-lists/
+ls -la config/hooks/
 ls -la config/hooks/normal/
 
-# Lista de pacotes que serão instalados:
-cat config/package-lists/tmjos.list.chroot
+# Não deve ter lista .chroot: evitamos lb_chroot_package-lists.
+find config/package-lists -type f
 ```
 
 ---
