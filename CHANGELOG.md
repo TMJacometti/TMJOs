@@ -5,6 +5,51 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.3.4-final-ubuntu] - 2026-05-12 — última geração Ubuntu
+
+**Fim do ciclo Ubuntu.** v1.3.4 é a última release sobre Ubuntu 24.04.
+ISO oficial **não foi gerada nem subida pro R2** — v1.x ficou como
+preview interno (single dev).
+
+A partir de v2.0, TMJOs migra pra **Debian 13 (trixie)**:
+- Cubic → live-build
+- ubiquity → Calamares
+- noble → trixie
+- "Ubuntu modificado" → "Debian-based, sem Canonical"
+
+### Estado do APT repo após v1.3.4 (`packages.tmjos.com.br`)
+
+| Pacote | Versão | Status |
+|---|---|---|
+| `tmjos` (meta) | 1.3.4-1 | Estável |
+| `tmjmenu` (TMJMenu + TMJDock) | 1.3.4-14 | Estável |
+| `tmjstore` (software center) | 0.1.6-1 | MVP funcional |
+| `tmjpad` (editor) | 0.1.2-1 | Estável |
+| `tmjos-defaults` (slim runtime + X11 force) | 1.3.4-1 | Estável |
+| `tmjos-installer` (ubiquity branding TMJOs) | 1.3.4-3 | Estável (morre em v2.0) |
+| `tmjos-branding` | 1.3.0-1 | Estável |
+| `tmjos-os-identity` | 1.3.0-2 | Estável |
+| `tmjos-shell-tweaks` (GJS extension) | 1.3.0-3 | Estável (provavelmente desnecessário em v2.0) |
+| `tmjos-dock` (legacy Plank) | 1.3.0-2 | Legacy (morre em v2.0) |
+
+### O que porta pra Debian (v2.0)
+
+Apps GTK4 (TMJPad, TMJMenu, TMJDock, TMJStore) → 95-100% portáveis.
+APT repo + CI/CD GitHub Actions → reusa, só muda codename.
+Cloudflare R2 + DNS + LE → reusa.
+Logos, branding, identidade visual → 100% reusa.
+Políticas (versionamento independente de apps, etc) → reusa.
+
+### O que morre com Ubuntu
+
+- `customize.sh` estilo Cubic
+- `tmjos-installer` com dpkg-divert (vira `tmjos-calamares-branding`)
+- Ubuntu-slideshow fights (Calamares branding é nativo)
+- X11 force no GDM (Wayland direto via `gtk4-layer-shell`)
+- Slim aggressive (Debian já nasce slim)
+
+v2.0 começa fresh em `feature/v2.0-debian`.
+
 ## Política de versionamento
 
 **TMJOs (a distro)** segue SemVer baseado em mudança de **stack/infra**,
