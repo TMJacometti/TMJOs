@@ -40,10 +40,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: metapackages
 Filename: pool/main/t/tmjos/tmjos_2.0.0-1_all.deb
-Size: 2376
-SHA256: 4e20a2a16eb321c30c0a47aac1dc37fa6687b7830416b73383a7468473caea1d
-SHA1: b86c38bfe05873ab4f4b92cf9e4d4590924eae62
-MD5sum: 3ac2c5a8564b65333fe8136304ed55f5
+Size: 2378
+SHA256: 28c7005c62c34bb1376ca35510bba95121a3b0764a1c8d215b330aef6b29019b
+SHA1: ae6c767807dbd8a1ccc7907111f89607d534d5c8
+MD5sum: f68fc9816993f9f59389e6c69987e67e
 Description: TMJOs metapackage — pulls in the entire TMJOs experience
  Installing this package on a base Debian 13 (trixie) system gives
  you the complete TMJOs setup:
