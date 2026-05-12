@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>br.com.tmjsistemas.tmjstore</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>TMJStore</name>
+  <summary>Software Center proprietário do TMJOs</summary>
+  <summary xml:lang="en">TMJOs proprietary software center</summary>
+
+  <description>
+    <p>
+      TMJStore é o software center nativo do TMJOs. Descobre apps
+      proprietários TMJOs via AppStream metadata, instala via APT,
+      com visual neon próprio (sem capitalismo Ubuntu).
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>3 abas: Apps disponíveis, Instalados, Updates pendentes</li>
+      <li>Filtro implícito: só apps do APT repo TMJOs</li>
+      <li>Install/Remove/Upgrade via pkexec + apt</li>
+      <li>Refresh manual de lista</li>
+      <li>GTK4 + libadwaita nativo</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">tmjstore.desktop</launchable>
+
+  <categories>
+    <category>System</category>
+    <category>Settings</category>
+    <category>PackageManager</category>
+  </categories>
+
+  <keywords>
+    <keyword>store</keyword>
+    <keyword>software</keyword>
+    <keyword>install</keyword>
+    <keyword>tmjos</keyword>
+  </keywords>
+
+  <url type="homepage">https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjstore</url>
+  <url type="bugtracker">https://github.com/TMJacometti/TMJOs/issues</url>
+
+  <developer id="br.com.tmjsistemas">
+    <name>TMJSistemas</name>
+  </developer>
+
+  <provides>
+    <binary>tmjstore</binary>
+  </provides>
+
+  <content_rating type="oars-1.1" />
+
+  <releases>
+    <release version="0.1.0" date="2026-05-11">
+      <description>
+        <p>Initial release. 3 abas + AppStream discovery + apt install via pkexec.</p>
+      </description>
+    </release>
+  </releases>
+</component>
