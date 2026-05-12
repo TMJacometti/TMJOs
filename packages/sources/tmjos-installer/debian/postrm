@@ -7,6 +7,7 @@ UBIQUITY_PNG=/usr/share/ubiquity/pixmaps/ubuntu_installed.png
 DIVERT_DEST=/usr/share/ubiquity/pixmaps/ubuntu_installed.png.tmjos-orig
 
 UBIQUITY_SVG_SIZES="16 22 24 32 48 64"
+PARTITIONER_ICONS="install manual reinstall sidebyside"
 
 case "$1" in
     remove|purge|disappear)
@@ -23,6 +24,19 @@ case "$1" in
         # Undo dos 6 ubiquity.svg diverts
         for size in $UBIQUITY_SVG_SIZES; do
             target="/usr/share/icons/hicolor/${size}x${size}/apps/ubiquity.svg"
+            divert_dest="${target}.tmjos-orig"
+            if [ -L "$target" ]; then
+                rm -f "$target"
+            fi
+            if dpkg-divert --list "$target" 2>/dev/null | grep -q "$divert_dest"; then
+                dpkg-divert --package tmjos-installer --rename \
+                    --divert "$divert_dest" --remove "$target" || true
+            fi
+        done
+
+        # Undo dos 4 partitioner diverts
+        for icon in $PARTITIONER_ICONS; do
+            target="/usr/share/ubiquity/pixmaps/partitioner/${icon}.png"
             divert_dest="${target}.tmjos-orig"
             if [ -L "$target" ]; then
                 rm -f "$target"

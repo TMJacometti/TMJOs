@@ -1,3 +1,19 @@
+tmjos-installer (1.3.4-3) noble; urgency=medium
+
+  * Partitioner icons TMJOs (4 PNGs neon — install, manual, reinstall,
+    sidebyside) substituem os Ubuntu-themed na tela "Onde instalar?"
+    do ubiquity. Assets gerados via Nano Banana, resize 1024 → 64x64
+    via ImageMagick no vendor script.
+  * Banner tmjos-installing.png (1024x1024) empacotado em
+    /usr/share/tmjos-installer/ pra uso futuro (tmjos-slideshow.deb
+    em v1.4 ou v2.0 — não há slideshow ativo hoje porque
+    ubuntu-slideshow-ubuntu é removido pelo customize.sh).
+  * postinst diverte 4 paths /usr/share/ubiquity/pixmaps/partitioner/*.png
+    via dpkg-divert + symlink (idempotente).
+  * postrm reverte tudo em remove/purge.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Tue, 12 May 2026 12:20:00 -0300
+
 tmjos-installer (1.3.4-2) noble; urgency=medium
 
   * Substitui ubiquity.svg pelo logo TMJOs nos 6 sizes hicolor

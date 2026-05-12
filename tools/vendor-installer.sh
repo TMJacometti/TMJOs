@@ -58,6 +58,30 @@ cat > "$VENDOR/tmjos-ubiquity.svg" << SVG
 SVG
 rm "$VENDOR/tmjos-icon-128.png"
 
+# === Partitioner icons (4 PNGs 64x64) ===
+# Source files são partitioner-{install,manual,reinstall,sidebyside}.png
+# em apps/tmjos-installer/assets/partitioner/. Resize pra 64x64
+# (size original do ubiquity) — assets vieram 1024x1024 da Nano Banana.
+SRC_PARTITIONER="$REPO_ROOT/apps/tmjos-installer/assets/partitioner"
+mkdir -p "$VENDOR/partitioner"
+for icon in install manual reinstall sidebyside; do
+    src="$SRC_PARTITIONER/partitioner-${icon}.png"
+    if [ -f "$src" ]; then
+        $MAGICK "$src" -resize 64x64 "$VENDOR/partitioner/${icon}.png"
+    else
+        echo "WARNING: $src not found, skipping ${icon}.png" >&2
+    fi
+done
+
+# === Banner installing (1024x1024) ===
+# Guardado em /usr/share/tmjos-installer/ pra uso futuro (v1.4+
+# pode trazer tmjos-slideshow.deb). Hoje não tem onde renderizar
+# porque ubuntu-slideshow-ubuntu foi removido pelo customize.sh.
+SRC_BANNER="$REPO_ROOT/apps/tmjos-installer/assets/tmjos-installing.png"
+if [ -f "$SRC_BANNER" ]; then
+    cp "$SRC_BANNER" "$VENDOR/tmjos-installing.png"
+fi
+
 echo "✓ vendor/ populated."
 ls -lah "$VENDOR/"
 file "$VENDOR/tmjos_installed.png"
