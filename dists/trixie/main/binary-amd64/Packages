@@ -9,10 +9,10 @@ Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjmenu
 Priority: optional
 Section: utils
 Filename: pool/main/t/tmjmenu/tmjmenu_1.3.4-15_all.deb
-Size: 1800770
-SHA256: c4783a1bfe632291ca11bcee5b1b2ccffdafa98faaa028ca75ff73e5787498eb
-SHA1: f1d7fcde9dce11afd0f81cfed41d8766bceec07a
-MD5sum: 9eb9e99cfe383607cacb89a51987cfcd
+Size: 1800768
+SHA256: 0372763ce31350d5b7ceb2c7c8f393d1ba6b3d40d6148ebd27be544d26fc5dce
+SHA1: 84f511265e7799c6e252a31a5555d8d63f31ccd2
+MD5sum: 3bdd6183c73dd60f30a5a1c80edb0a13
 Description: TMJOs proprietary application menu + dock
  Replaces Plank dock and GNOME Activities Overview with two integrated
  components, both GTK4 + libadwaita native (same stack as TMJPad):
@@ -40,10 +40,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: metapackages
 Filename: pool/main/t/tmjos/tmjos_2.0.0-3_all.deb
-Size: 2506
-SHA256: a181effab9d62e5ed89fca4f1eb653d5436222a41757ca7f3a33e88a179c95c3
-SHA1: 6b335ede94c51ab0a874569cce18a9ff501c8984
-MD5sum: 9d785f8630d63acec743b121da30857c
+Size: 2510
+SHA256: 56c02e164ea5bd5c3270c983d0f45ea5f33b9eee4a82a86d299577529846e874
+SHA1: 9a0f3d39434ef2b10c41ca322dc1ff1d828da8f8
+MD5sum: 069708634023f28d8c31829412fc06e7
 Description: TMJOs metapackage — pulls in the entire TMJOs experience
  Installing this package on a base Debian 13 (trixie) system gives
  you the complete TMJOs setup:
@@ -72,10 +72,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-branding/tmjos-branding_2.0.0-1_all.deb
-Size: 8987458
-SHA256: 0a466e233c8836811333771df90177ce64cf320c6360f1efec25420b1dbe2f84
-SHA1: cadfd7f4d588748792c0b2a2d77f124fed91e427
-MD5sum: 58116f0ecc64c50b4278f30e2fc1b814
+Size: 8987276
+SHA256: c4d7d43097af1c4102b44e3a1209a4d66ce9d51a72917f835f6e023989a9270d
+SHA1: a306b6710e632779bfca1b91bb02a8d1bc7c2e68
+MD5sum: 68af2c65be2b6d24eda8a824aaa03849
 Description: TMJOs branding assets (wallpapers, logos, Plymouth theme)
  Visual identity pieces of TMJOs:
   * Wallpapers: tmjos_wallpaper.png (1920x1080) + 4K variant in
@@ -102,10 +102,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-calamares-branding/tmjos-calamares-branding_2.0.0-1_all.deb
-Size: 994380
-SHA256: 0599b5187febe4a0b0488c998cdceca4b8fe4fb7f1c505271137742cd602f30a
-SHA1: d08a58b10f137a7286fb5dbe609b213021f3f7f9
-MD5sum: c52826cbbd7ebdca34f13a0422e4a22c
+Size: 994376
+SHA256: c5cf66821b3ca9dd9896e2036e8fae0f078af455f4ad418a1958b6c0d024835c
+SHA1: ccd05770591a8a04c141cbeb3f0e9fca16c5a0ec
+MD5sum: 2725e07150b241577d7896b490b3bfc9
 Description: TMJOs branding for Calamares installer
  Calamares branding component "tmjos" — provê:
   * branding.desc com strings TMJOs, paleta neon (cyan/magenta/dark navy)
@@ -131,10 +131,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: gnome
 Filename: pool/main/t/tmjos-defaults/tmjos-defaults_2.0.0-1_all.deb
-Size: 4658
-SHA256: f8d04e016ca1e481ab93728c41377fff627a9c172ae6c66d449ea33a502644be
-SHA1: c123bbdf5237afba8e3dd0ba2f9d46aa991bbed9
-MD5sum: 4e51d25906684717588232f7646ff3fb
+Size: 4668
+SHA256: f75262efe3c6b9e619913d17ade57972c5a8eb9f1809e50e334b04002ff99f86
+SHA1: a1c9d2e2d1ba4699cc683b0de2832a812b0e7e03
+MD5sum: 774e088e53580c6eb0c18289045d9f71
 Description: TMJOs system-wide dconf defaults (dark mode, fonts, dock-off)
  Sets system-wide dconf defaults for the TMJOs experience:
   * Dark color scheme (color-scheme=prefer-dark, gtk-theme=Adwaita-dark)
@@ -160,10 +160,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: utils
 Filename: pool/main/t/tmjos-hello/tmjos-hello_0.1.0-2_all.deb
-Size: 1786
-SHA256: 8c05495e13cf2ec2fe7c13b606f657c6d21b35c1cb97fa993f2356218c5e0942
-SHA1: 8e242d1c31c1845094ee24846cc18f0966a22f66
-MD5sum: 9d17312389c0c6c3abba926fd59bc88f
+Size: 1790
+SHA256: 80b4d9157be62efc5bb080afff84fd8bc65e004190473683daf55cad36286bab
+SHA1: 08857298f9db0b494744c5a3b5fab53d824c9979
+MD5sum: 86544ee22dff803809af616c5d9fdbaa
 Description: TMJOs pipeline smoke test package
  A trivial "hello world" package that exists only to validate the
  TMJOs APT repo pipeline end-to-end (build → sign → publish to
@@ -182,10 +182,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-os-identity/tmjos-os-identity_2.0.0-1_all.deb
-Size: 3062
-SHA256: 17e0f02c71a36e43eaa82d9786270ba5e5e31f2c63b2e264de619b42a950da20
-SHA1: 9aae620ee8d3bbd675f4de190cf7e8300e3a7e0c
-MD5sum: 36092bfc1a53f5d06b9eb6353a1514b5
+Size: 3064
+SHA256: d6d27cb0df1a2ff6a67e9cd425326ce3848af983d4b789f536e6865532b2ed2d
+SHA1: b5984f99792b42df28b8c62d3760c4bca7e3b141
+MD5sum: 0704f88a7ecce30a801aefdf301a106d
 Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
  Replaces the Debian identity files with TMJOs-branded versions:
   * /etc/os-release    — TMJOs 2.0 alpha on Debian 13 trixie, shown in
@@ -213,9 +213,9 @@ Priority: optional
 Section: editors
 Filename: pool/main/t/tmjpad/tmjpad_0.1.2-2_all.deb
 Size: 1026238
-SHA256: b4460cfd64f11d1601645c48928a36c6507c6ae015888264f4d3838b03c5774f
-SHA1: c6ff11ae563cd44d25f7949aaa31aaf5f9116ef1
-MD5sum: 8036fbf0c313c1004fc80914bd482b39
+SHA256: 3ff9899242c6c3f6a42ac637aaf41876fedc7aebb065724291314cfd7d4df433
+SHA1: eacedcb0f1f565930883c502a887d07e0a496d2f
+MD5sum: e70a58fe9c8da78397c80b4456094119
 Description: TMJOs text editor with full session persistence
  TMJPad is the native TMJOs text editor — no plugins, no syntax
  highlighting, just multiple tabs and total session persistence.
@@ -243,10 +243,10 @@ Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjstore
 Priority: optional
 Section: admin
 Filename: pool/main/t/tmjstore/tmjstore_0.1.6-2_all.deb
-Size: 1305754
-SHA256: d40b704226eb78ff72722f78fcd0cd9427b765eff322e2f050f46fadd1e0648c
-SHA1: e5015700edc208900e385af9769029bcae13a61a
-MD5sum: f2d8934e19829f5b9e8fe0d1f7c00839
+Size: 1305612
+SHA256: 0b7c801f509633362f4e65b9dfa99d49e787b0750772117a3ca5e85b935192c7
+SHA1: 6a6706f55ae87bc0ab1b1c992ef17e7c554e8fef
+MD5sum: 4120881a39d410211c3374e6e83ac4c8
 Description: TMJOs Software Center — apps proprietários TMJOs
  Descobre apps proprietários TMJOs no APT repo via AppStream
  metadata e instala/remove/atualiza via apt + pkexec.
