@@ -69,6 +69,11 @@ CORE_PACKAGES = frozenset({
     "tmjos-shell-tweaks",
     "tmjos-installer",
     "tmjos-hello",            # pipeline smoke test
+    # TMJMenu/TMJDock é o launcher proprietário — core UX da distro,
+    # mesma categoria de tmjos-defaults. Remover quebra a experiência.
+    # User que realmente quer remover usa `sudo apt remove tmjmenu`
+    # no terminal (força extra de "sei o que tô fazendo").
+    "tmjmenu",
 })
 
 
