@@ -36,11 +36,28 @@ fi
 echo "Populando $CONFIG com TMJOs branding..."
 
 # === 0. Fix vazamentos Ubuntu no `lb config` (quando rodado em host Ubuntu) ===
-# `lb config` em Ubuntu host puxa defaults Ubuntu — `LB_LINUX_PACKAGES="linux"`
-# concatena com `LB_LINUX_FLAVOURS="amd64"` virando `linux-amd64` (pacote
-# inexistente em Debian). Fix manual no config/chroot e config/binary.
-echo "→ corrigindo vazamentos Ubuntu em config/{chroot,binary}"
+# Root cause: `lb config` em host Ubuntu seta LB_MODE="ubuntu", que faz
+# live-build tratar o build como Ubuntu derivative. Isso vaza pra outras
+# vars: LB_KEYRING_PACKAGES, LB_LINUX_PACKAGES, mirrors, labels.
+# Fix manual em todos os config files.
+echo "→ corrigindo vazamentos Ubuntu em config/*"
+
+# config/common — LB_MODE é o root cause. Mudar pra debian fixa tudo
+# implicitamente em runtime, mas as outras vars já foram persistidas
+# pelo lb config — então precisamos mexer em cada uma também.
+sed -i 's/^LB_MODE="ubuntu"$/LB_MODE="debian"/' "$CONFIG/common"
+
+# config/chroot — keyring + kernel naming
+sed -i 's/^LB_KEYRING_PACKAGES="ubuntu-keyring"$/LB_KEYRING_PACKAGES="debian-archive-keyring"/' "$CONFIG/chroot"
 sed -i 's/^LB_LINUX_PACKAGES="linux"$/LB_LINUX_PACKAGES="linux-image"/' "$CONFIG/chroot"
+
+# config/bootstrap — volatile mirrors (security updates flow)
+sed -i 's|^LB_MIRROR_CHROOT_VOLATILE="http://archive.ubuntu.com/ubuntu/"$|LB_MIRROR_CHROOT_VOLATILE="http://deb.debian.org/debian/"|' "$CONFIG/bootstrap"
+sed -i 's|^LB_MIRROR_BINARY_VOLATILE="http://archive.ubuntu.com/ubuntu/"$|LB_MIRROR_BINARY_VOLATILE="http://deb.debian.org/debian/"|' "$CONFIG/bootstrap"
+
+# config/binary — labels e syslinux theme
+sed -i 's/^LB_HDD_LABEL="UBUNTU"$/LB_HDD_LABEL="TMJOS"/' "$CONFIG/binary"
+sed -i 's|^LB_NET_ROOT_PATH="/srv/ubuntu-live"$|LB_NET_ROOT_PATH="/srv/tmjos-live"|' "$CONFIG/binary"
 sed -i 's/^LB_SYSLINUX_THEME="ubuntu-oneiric"$/LB_SYSLINUX_THEME=""/' "$CONFIG/binary"
 
 # === 1. APT repos extras — via hook 0500 (rodado depois do install pass) ===
