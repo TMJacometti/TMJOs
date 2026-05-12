@@ -1,5 +1,5 @@
 Package: tmjmenu
-Version: 1.3.4-14
+Version: 1.3.4-15
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
 Installed-Size: 5627
@@ -8,11 +8,11 @@ Recommends: tmjos-branding
 Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjmenu
 Priority: optional
 Section: utils
-Filename: pool/main/t/tmjmenu/tmjmenu_1.3.4-14_all.deb
-Size: 1800666
-SHA256: 1e2b06f3d8b4f99085b63a213e7de3fcf3576ad5630a4228f2d6239efbb6fc2e
-SHA1: f22ab51d751b4aff8ac48c5710c1408886653e2e
-MD5sum: 3a0ba100414b078fb414b3491863e756
+Filename: pool/main/t/tmjmenu/tmjmenu_1.3.4-15_all.deb
+Size: 1800424
+SHA256: c73906dd034b606ebb9573281eab7a79938b33caf12b860b44a33155f08a7d3b
+SHA1: 84d7a1a77dd58de63a18756328c70354a69eb01e
+MD5sum: dca0c533126945ca3fff73d364950c5d
 Description: TMJOs proprietary application menu + dock
  Replaces Plank dock and GNOME Activities Overview with two integrated
  components, both GTK4 + libadwaita native (same stack as TMJPad):
@@ -30,7 +30,7 @@ Description: TMJOs proprietary application menu + dock
  of X11 hints).
 
 Package: tmjos
-Version: 2.0.0-2
+Version: 2.0.0-3
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
 Installed-Size: 8
@@ -39,11 +39,11 @@ Recommends: tmjstore, code, git, git-flow, docker.io, docker-compose, calamares,
 Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: metapackages
-Filename: pool/main/t/tmjos/tmjos_2.0.0-2_all.deb
-Size: 2446
-SHA256: 742449207e3d1d49afa7bc0eb22734df1403d3bd3b0ce25186108a89cc1bd6fa
-SHA1: ada2091f0701eb49150a5de9a320ac6ec5b5866d
-MD5sum: 1f12a36661f687f50390412952ce8282
+Filename: pool/main/t/tmjos/tmjos_2.0.0-3_all.deb
+Size: 2508
+SHA256: fee32fbf5f48d57cab3e59cc5a0643e3e6f2b1bcbcf99bb675b882ee1f958227
+SHA1: c50203b134e25074bbd3d74653fb15a10fc4ea5f
+MD5sum: 3ee58d5b3ff7e431631c0e5c06b1c537
 Description: TMJOs metapackage — pulls in the entire TMJOs experience
  Installing this package on a base Debian 13 (trixie) system gives
  you the complete TMJOs setup:
@@ -60,10 +60,10 @@ Description: TMJOs metapackage — pulls in the entire TMJOs experience
  .
  On TMJOs systems, `sudo apt upgrade tmjos` will pull the latest
  versions of every component package, providing the post-release
- update mechanism inherited from v1.3.
+ update mechanism for the Debian-based v2.0 line.
 
 Package: tmjos-branding
-Version: 1.3.0-1
+Version: 2.0.0-1
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
 Installed-Size: 9810
@@ -71,11 +71,11 @@ Depends: plymouth-themes, hicolor-icon-theme
 Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
-Filename: pool/main/t/tmjos-branding/tmjos-branding_1.3.0-1_all.deb
-Size: 8987292
-SHA256: f1b9ec8fd0a8938a94baacf6add079882d0a365ac78b337009e7f6218fbe1189
-SHA1: 5ae600345c50273a24db567b51cc4a92203a4512
-MD5sum: a3dab9f0fc7866e8f9fb9180fcc0732f
+Filename: pool/main/t/tmjos-branding/tmjos-branding_2.0.0-1_all.deb
+Size: 8987284
+SHA256: 356d6c5c4340dde214eaf2319ffbd6da0c6036a0b9379d40c72de58b42f4bebd
+SHA1: ef1cfbb56127c92d3df4ec51e0b94b778155af62
+MD5sum: 0b4395978163a99ea5e7fd4c1e1e07bc
 Description: TMJOs branding assets (wallpapers, logos, Plymouth theme)
  Visual identity pieces of TMJOs:
   * Wallpapers: tmjos_wallpaper.png (1920x1080) + 4K variant in
@@ -102,10 +102,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
 Filename: pool/main/t/tmjos-calamares-branding/tmjos-calamares-branding_2.0.0-1_all.deb
-Size: 994380
-SHA256: d60f109ace8cc5f79e1643fefd1b99e4aaa784285793e7f8d7ee622589329e3f
-SHA1: e0c8a36f8e9000f45b759167dffa36c1a87fc145
-MD5sum: a2fc3dc7492c44d0fc863943c73f119b
+Size: 994370
+SHA256: 3f7583ed15b5141904b7457d423f193d1c62d55ad68d04ecc42a9aac82adb56e
+SHA1: fceda68f5d47e6abbeee1772503f0cd44d3c7530
+MD5sum: f87ab0e07d6d7ded6282a0ccba703b30
 Description: TMJOs branding for Calamares installer
  Calamares branding component "tmjos" — provê:
   * branding.desc com strings TMJOs, paleta neon (cyan/magenta/dark navy)
@@ -122,7 +122,7 @@ Description: TMJOs branding for Calamares installer
  Pra sistema instalado, scripts/tmjos_customize.sh roda o sed.)
 
 Package: tmjos-defaults
-Version: 1.3.4-1
+Version: 2.0.0-1
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
 Installed-Size: 21
@@ -130,18 +130,18 @@ Depends: dconf-cli, fonts-jetbrains-mono, fonts-cantarell, fonts-noto-color-emoj
 Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: gnome
-Filename: pool/main/t/tmjos-defaults/tmjos-defaults_1.3.4-1_all.deb
-Size: 4548
-SHA256: b29ffb15ba7f428ec62b07a5b0c92270df71cf37bee502169b7d219b74228526
-SHA1: 0ab715c5d1427197566dde4fa2b766faee6fccb3
-MD5sum: 9272e18288301839e0412ff920de0150
+Filename: pool/main/t/tmjos-defaults/tmjos-defaults_2.0.0-1_all.deb
+Size: 4660
+SHA256: 5c087a1689ea89cbee4d623b2beb7566dd71332c6034149ecab8d38a6d754ef8
+SHA1: 8c2c962698f4181aea96ce23274df02f341148d7
+MD5sum: 460346477379002588c9b0a92b5b4190
 Description: TMJOs system-wide dconf defaults (dark mode, fonts, dock-off)
  Sets system-wide dconf defaults for the TMJOs experience:
   * Dark color scheme (color-scheme=prefer-dark, gtk-theme=Adwaita-dark)
   * TMJOs wallpaper as the desktop background
   * JetBrains Mono as the monospace font
-  * Disables Ubuntu Dock + appindicators + ding (desktop icons) so
-    Plank is the only dock and the desktop stays clean
+  * Disables distro dock/appindicator/desktop-icon extensions when
+    present, so TMJDock owns the desktop shell experience
   * GNOME shell favorite-apps preset (TMJPad included)
  .
  The override file lives at /etc/dconf/db/local.d/00-tmjos-defaults.
@@ -152,18 +152,18 @@ Description: TMJOs system-wide dconf defaults (dark mode, fonts, dock-off)
  correctly without extra steps.
 
 Package: tmjos-hello
-Version: 0.1.0-1
+Version: 0.1.0-2
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
 Installed-Size: 10
 Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: utils
-Filename: pool/main/t/tmjos-hello/tmjos-hello_0.1.0-1_all.deb
-Size: 1694
-SHA256: bd978783d07d271ae5c282eb961e395268a172d5b3755e5b4b7f2e04f26cad20
-SHA1: 1baad21987eccfabda31d6d90c153457b67e03cd
-MD5sum: 15756f39b89a26c6e64e3d39840298d8
+Filename: pool/main/t/tmjos-hello/tmjos-hello_0.1.0-2_all.deb
+Size: 1786
+SHA256: 84f7132726bf42265d6f6e1bdece76af1372080a0b15ff8483a395a7393f28d5
+SHA1: f0ad927603249d5244274d3a54e16fcfce505bc6
+MD5sum: 3cb8f21de52859ca934fc63b3b90d8cf
 Description: TMJOs pipeline smoke test package
  A trivial "hello world" package that exists only to validate the
  TMJOs APT repo pipeline end-to-end (build → sign → publish to
@@ -173,7 +173,7 @@ Description: TMJOs pipeline smoke test package
  Safe to keep installed; safe to remove.
 
 Package: tmjos-os-identity
-Version: 1.3.0-2
+Version: 2.0.0-1
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
 Installed-Size: 14
@@ -181,24 +181,19 @@ Depends: dpkg
 Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: misc
-Filename: pool/main/t/tmjos-os-identity/tmjos-os-identity_1.3.0-2_all.deb
-Size: 2996
-SHA256: b82b620fb59dfae2924d88b15019c6a0702f79547a299b41e45bf01c82165797
-SHA1: e3a55585487140272c279eaff5a58baf9e7cb51c
-MD5sum: 51b356b9eda4deb038c14df2ddec735b
+Filename: pool/main/t/tmjos-os-identity/tmjos-os-identity_2.0.0-1_all.deb
+Size: 3064
+SHA256: 728e39cd92414d8f90a29063f2ba39e5846ab35e453a34dd8661558128550813
+SHA1: 1e3b2791c31032f896bb3dd85e4c93c45811dc1d
+MD5sum: d3665b38a6cf61b42738490a23161b10
 Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
- Replaces the Ubuntu identity files with TMJOs-branded versions:
-  * /etc/os-release    — TMJOs 1.x (insano), shows in GNOME About
-                         and modern tools that read PRETTY_NAME / ID
-  * /etc/lsb-release   — KEPT AS UBUNTU NOBLE intentionally so that
-                         add-apt-repository, NodeJS install scripts,
-                         Docker get.docker.com, k8s setup and every
-                         other "lsb_release -cs"-based script
-                         continues to find a valid Ubuntu codename.
-                         Identity is shown via /etc/os-release; lsb
-                         is for compat.
+ Replaces the Debian identity files with TMJOs-branded versions:
+  * /etc/os-release    — TMJOs 2.0 alpha on Debian 13 trixie, shown in
+                         GNOME About and tools that read PRETTY_NAME / ID
+  * /etc/lsb-release   — TMJOs 2.0 alpha, codename trixie, for legacy
+                         scripts that still read lsb_release output
   * /etc/issue         — "TMJOs <ver> \n \l" banner shown at TTY login
-  * /etc/issue.net     — same content for telnet/ssh banner
+  * /etc/issue.net     — same content for remote login banners
  .
  Implementation: uses dpkg-divert to take ownership of the four
  files from the upstream base-files package. Originals are renamed
@@ -207,7 +202,7 @@ Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
  is the policy-friendly way.
 
 Package: tmjpad
-Version: 0.1.2-1
+Version: 0.1.2-2
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
 Installed-Size: 3036
@@ -216,11 +211,11 @@ Recommends: fonts-jetbrains-mono
 Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjpad
 Priority: optional
 Section: editors
-Filename: pool/main/t/tmjpad/tmjpad_0.1.2-1_all.deb
-Size: 1026162
-SHA256: 4b97ba94172df124289275ad17f4ec6a1abde98d7291ce51bc63ef71b64c5c6e
-SHA1: 8d058efad27e6b071018085290ca74f0f36e92de
-MD5sum: c8692c6757fbe93f7e61cfd90401b25c
+Filename: pool/main/t/tmjpad/tmjpad_0.1.2-2_all.deb
+Size: 1026238
+SHA256: a2dcb3e4c7964910dfda959f1d0c43d3e17e49e459cc7da046be1150f60bc3cd
+SHA1: 8ca3ce10d32aeb6145d6f4e0434237d5eda76a24
+MD5sum: 147a6fdd38377e74e17da1424e760c0d
 Description: TMJOs text editor with full session persistence
  TMJPad is the native TMJOs text editor — no plugins, no syntax
  highlighting, just multiple tabs and total session persistence.
@@ -238,7 +233,7 @@ Description: TMJOs text editor with full session persistence
    * GTK4 + libadwaita native
 
 Package: tmjstore
-Version: 0.1.6-1
+Version: 0.1.6-2
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
 Installed-Size: 5171
@@ -247,11 +242,11 @@ Recommends: tmjos-branding
 Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjstore
 Priority: optional
 Section: admin
-Filename: pool/main/t/tmjstore/tmjstore_0.1.6-1_all.deb
-Size: 1305718
-SHA256: c486d7457261d72da1fbad9a183dba17c1f9477e5c12b4034b646211fbaa5d8d
-SHA1: 5802003f923e7262320420ba9861916fe0be39ff
-MD5sum: 31c245c723ecb4d8e0139e414a2443b1
+Filename: pool/main/t/tmjstore/tmjstore_0.1.6-2_all.deb
+Size: 1305618
+SHA256: 8638d7a91d8d3faa93f4219bfb1aa66d7cf18e7561a2c9eaa18893423f8be761
+SHA1: 9dece185a24d88cd7d7786f8452ea00acb78fbf6
+MD5sum: ad7e5cfcb267f3c79e94f596342a394f
 Description: TMJOs Software Center — apps proprietários TMJOs
  Descobre apps proprietários TMJOs no APT repo via AppStream
  metadata e instala/remove/atualiza via apt + pkexec.
