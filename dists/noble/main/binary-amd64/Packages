@@ -9,10 +9,10 @@ Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjmenu
 Priority: optional
 Section: utils
 Filename: pool/main/t/tmjmenu/tmjmenu_1.3.4-14_all.deb
-Size: 1800686
-SHA256: 08a7d106becf65fd2bd5c1d7c41e1849f1eadac25b371882dfabd676deb3d909
-SHA1: 48a4616aade187fcbde6b9644e7719cafa165e33
-MD5sum: 8ddaca4b560512d7db34f4104a2b43f4
+Size: 1800676
+SHA256: b18f066c29f125a39a50139218d0345b9ac91663320eedde25ced054582bc595
+SHA1: aae074239beccdbef0c3255516b978e9ce130c6e
+MD5sum: d55841a62ff392bf5e00df895192c820
 Description: TMJOs proprietary application menu + dock
  Replaces Plank dock and GNOME Activities Overview with two integrated
  components, both GTK4 + libadwaita native (same stack as TMJPad):
@@ -183,19 +183,19 @@ Description: TMJOs pipeline smoke test package
  Safe to keep installed; safe to remove.
 
 Package: tmjos-installer
-Version: 1.3.4-1
+Version: 1.3.4-2
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Installed-Size: 69
+Installed-Size: 119
 Depends: ubiquity, ubiquity-frontend-gtk
 Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: admin
-Filename: pool/main/t/tmjos-installer/tmjos-installer_1.3.4-1_all.deb
-Size: 61410
-SHA256: 755e162ca99aecb3c3691e133725f6940173552eee78f309d9cf88d6387b50f2
-SHA1: 106827cef35f7fb5e72c930e4ece4d5585929b18
-MD5sum: 02fe4a75942169fb852ef0d96cca9f3f
+Filename: pool/main/t/tmjos-installer/tmjos-installer_1.3.4-2_all.deb
+Size: 101064
+SHA256: f000a38cc4803b218f85c6ff0b01af1fc938b0526f32a2979624b2bef1c93fff
+SHA1: cea34d1c03b3261327d44e9e50666e6d236d7544
+MD5sum: 9e9b341b5c6a78a0a782e0abdba33d0a
 Description: Ubuntu graphical installer (ubiquity) configured for TMJOs
  Ensures the TMJOs live-CD ships with a working graphical installer.
  Ubuntu 24.04's default install path is snapd-based, which TMJOs
