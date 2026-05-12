@@ -135,24 +135,21 @@ exit 101
 POLICY
 chmod +x /usr/sbin/policy-rc.d
 
-# === Stub update-initramfs durante install ===
-# Trigger update-initramfs em chroot pode travar tentando carregar
-# módulos do kernel. Live-build regenera o initrd correto na binary
-# stage de qualquer jeito — então durante install é seguro skipar.
-# Restauramos no fim do hook pra que stages binary não quebrem.
-if [ ! -f /usr/sbin/update-initramfs.real ]; then
-    mv /usr/sbin/update-initramfs /usr/sbin/update-initramfs.real
-    cat > /usr/sbin/update-initramfs << 'STUB'
-#!/bin/sh
-echo "[stub] update-initramfs $* skipped during chroot install (regenerated later by lb_binary)"
-exit 0
-STUB
-    chmod +x /usr/sbin/update-initramfs
-fi
-
-# === Stub ldconfig durante install (opcional defesa) ===
-# Ldconfig é fast normalmente, mas em chroots com bibliotecas
-# corrompidas pode travar. Não vamos stub aqui — só se necessário.
+# === Desativa update-initramfs durante install ===
+# Trigger update-initramfs em chroot pode travar (tenta carregar módulos
+# do kernel via depmod, mas chroot não tem kernel real). Criamos a
+# conf-file ANTES do initramfs-tools ser instalado — graças ao --force-
+# confold no apt-get, dpkg respeita esse arquivo quando o pacote chegar.
+# update_initramfs=no faz o trigger virar NOP.
+# Live-build regenera o initrd correto na binary stage (lb_binary_linux-
+# image) onde isso é seguro.
+mkdir -p /etc/initramfs-tools
+cat > /etc/initramfs-tools/update-initramfs.conf << 'CONF'
+# TMJOs: triggers update-initramfs ficam NOP durante chroot install.
+# Live-build regenera o initrd correto na stage binary.
+update_initramfs=no
+backup_initramfs=no
+CONF
 
 # === Pre-mask daemons problemáticos ===
 # Esses daemons tentam conectar D-Bus/Avahi/socket durante post-install
@@ -228,9 +225,12 @@ $APT_INSTALL \
     fonts-jetbrains-mono \
     fonts-cantarell
 
-# === Restore update-initramfs pra binary stage ===
-if [ -f /usr/sbin/update-initramfs.real ]; then
-    mv /usr/sbin/update-initramfs.real /usr/sbin/update-initramfs
+# === Re-ativa update-initramfs pra binary stage ===
+# Live-build vai precisar regenerar o initrd correto agora — então
+# voltamos a conf pra default.
+if [ -f /etc/initramfs-tools/update-initramfs.conf ]; then
+    sed -i 's/^update_initramfs=no$/update_initramfs=yes/' /etc/initramfs-tools/update-initramfs.conf
+    sed -i 's/^backup_initramfs=no$/backup_initramfs=yes/' /etc/initramfs-tools/update-initramfs.conf
 fi
 
 echo "=== TMJOs Debian base packages done ==="
