@@ -70,6 +70,17 @@ STORE_CSS = b"""
                                          rgba(255, 0, 170, 0.5));
 }
 
+/* Botao durante operacao apt -- verde "in progress" */
+.tmjstore-busy-btn {
+    background: linear-gradient(135deg, rgba(50, 200, 80, 0.4),
+                                         rgba(0, 212, 100, 0.4));
+    border: 1px solid rgba(50, 200, 80, 0.7);
+    border-radius: 8px;
+    padding: 6px 16px;
+    color: #d0ffd0;
+    font-weight: bold;
+}
+
 .tmjstore-installed-tag {
     color: #00d4ff;
     font-weight: bold;
@@ -105,14 +116,16 @@ def _install_css() -> None:
 
 
 def set_app_icon(image: Gtk.Image, pkg_name: str, size: int = 64) -> None:
-    """Seta o icon de um app. Tenta:
-    1. Icon name no theme (instalado via hicolor)
-    2. /usr/share/pixmaps/<pkg>.png
-    3. Asset embedded no Python module (apps/<pkg>/tmjstore/assets/<pkg>.png)
-       — fallback dev mode.
+    """Seta o icon de um app — tiers em ordem:
+    1. Theme icon (hicolor — só funciona se app instalado)
+    2. /usr/share/pixmaps/<pkg>.png (idem)
+    3. Cache local ~/.cache/tmjstore/icons/<pkg>.png (sobrevive uninstall)
+    4. Embedded asset (só pra tmjstore — dev mode)
+    5. application-x-executable (genérico)
     """
     from pathlib import Path
     from gi.repository import Gdk
+    from .discover import cached_icon_path
 
     image.set_pixel_size(size)
 
@@ -126,6 +139,12 @@ def set_app_icon(image: Gtk.Image, pkg_name: str, size: int = 64) -> None:
     pixmap = Path(f"/usr/share/pixmaps/{pkg_name}.png")
     if pixmap.is_file():
         image.set_from_file(str(pixmap))
+        return
+
+    # Tier 3: cache local — sobrevive uninstall
+    cached = cached_icon_path(pkg_name)
+    if cached is not None:
+        image.set_from_file(str(cached))
         return
 
     # Dev mode: embedded asset (só pra apps próprios — tmjstore)
@@ -144,16 +163,31 @@ class TMJStoreWindow(Adw.ApplicationWindow):
         self.set_title("TMJStore")
         self.set_default_size(WINDOW_WIDTH, WINDOW_HEIGHT)
 
+        # ToastOverlay envolve tudo — toasts aparecem flutuando.
+        self._toast_overlay = Adw.ToastOverlay()
+        self.set_content(self._toast_overlay)
+
         # NavigationView pra push/pop entre lista e detalhe
         self._nav = Adw.NavigationView()
-        self.set_content(self._nav)
+        self._toast_overlay.set_child(self._nav)
 
         # Página principal (lista com 3 tabs)
         self._main_page = self._build_main_page()
         self._nav.add(self._main_page)
 
+        # Set de ações em curso (evita double-click + permite track)
+        self._busy_pkgs: set[str] = set()
+        # Mapeia pkg → ação em curso (pra mostrar label correta no botão)
+        self._busy_action_map: dict[str, str] = {}
+
         # Populate inicial
         self._refresh()
+
+    def _toast(self, message: str, timeout: int = 3) -> None:
+        """Mostra Adw.Toast flutuante."""
+        toast = Adw.Toast.new(message)
+        toast.set_timeout(timeout)
+        self._toast_overlay.add_toast(toast)
 
     def _build_main_page(self) -> Adw.NavigationPage:
         """Constrói a página principal com 3 tabs."""
@@ -300,6 +334,18 @@ class TMJStoreWindow(Adw.ApplicationWindow):
         self._nav.push(page)
 
     def _build_action_button(self, app: TMJApp) -> Gtk.Button:
+        # Se app tem operação em curso, mostra botão "Aguarde..." verde
+        if app.pkg_name in self._busy_pkgs:
+            busy_label = {
+                "install": "Instalando…",
+                "remove": "Removendo…",
+                "upgrade": "Atualizando…",
+            }.get(self._busy_action_for(app.pkg_name), "Aguarde…")
+            btn = Gtk.Button(label=busy_label)
+            btn.add_css_class("tmjstore-busy-btn")
+            btn.set_sensitive(False)
+            return btn
+
         if app.has_update:
             btn = Gtk.Button(label="Atualizar")
             btn.add_css_class("tmjstore-install-btn")
@@ -316,16 +362,55 @@ class TMJStoreWindow(Adw.ApplicationWindow):
                 "install", app))
         return btn
 
+    def _busy_action_for(self, pkg_name: str) -> str:
+        """Retorna o tipo de ação em curso pro pkg, ou '' se nenhuma."""
+        return self._busy_action_map.get(pkg_name, "")
+
     def _do_action(self, action: str, app: TMJApp) -> None:
-        """Dispara apt action async + mostra toast/dialog."""
-        # Disable o botão clicado pra evitar double-click
-        # (busy state handled via toast)
+        """Dispara apt action async + feedback via toast.
+
+        Fluxo:
+        1. Toast imediato "Instalando X..." (não bloqueia user).
+        2. Adiciona app a _busy_pkgs (evita double-click).
+        3. apt roda async via GLib.spawn + child_watch.
+        4. on_done: toast OK/falha + pop detail (se aberto) + refresh
+           lista.
+        """
+        if app.pkg_name in self._busy_pkgs:
+            return  # já tem ação rodando — ignora double-click
+
+        verb_pt = {
+            "install": "Instalando",
+            "remove": "Removendo",
+            "upgrade": "Atualizando",
+        }.get(action, action)
+        verb_done_pt = {
+            "install": "instalado",
+            "remove": "removido",
+            "upgrade": "atualizado",
+        }.get(action, "OK")
+
+        self._busy_pkgs.add(app.pkg_name)
+        self._busy_action_map[app.pkg_name] = action
+        self._toast(f"{verb_pt} {app.display_name}…")
+        # Refresh imediato — botão troca pra "Instalando…" verde
+        self._refresh()
 
         def on_done(success: bool, msg: str) -> None:
-            # Re-discover pra atualizar UI
+            self._busy_pkgs.discard(app.pkg_name)
+            self._busy_action_map.pop(app.pkg_name, None)
+            if success:
+                self._toast(f"{app.display_name} {verb_done_pt} ✓")
+            else:
+                self._toast(f"Falha em {app.display_name}: {msg}", timeout=5)
+
+            # Se detail page tá no topo, volta pra lista
+            visible = self._nav.get_visible_page()
+            if visible is not None and visible is not self._main_page:
+                self._nav.pop()
+
+            # Refresh lista com novo estado
             self._refresh()
-            # TODO: mostrar toast com Adw.ToastOverlay
-            print(f"[tmjstore] {action} {app.pkg_name}: {success} - {msg}")
 
         if action == "install":
             installer.install(app.pkg_name, on_done)

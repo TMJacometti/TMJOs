@@ -43,6 +43,125 @@ def _metainfo_dirs() -> list[Path]:
 
 METAINFO_DIRS = _metainfo_dirs()
 
+# Cache local de AppStream metadata. Mantém appdata.xml dos apps
+# vistos pelo TMJStore mesmo após uninstall — senão o user veria
+# nome/icon/descrição fallback no card de um app que ele já conhece
+# (caso típico: TMJPad instalado → metadados ricos; remove TMJPad →
+# /usr/share/metainfo/ perde o XML → discover não acha → card pobre).
+_CACHE_BASE = Path(
+    os.environ.get("XDG_CACHE_HOME", str(Path.home() / ".cache"))
+) / "tmjstore"
+_CACHE_DIR = _CACHE_BASE / "appdata"
+ICON_CACHE_DIR = _CACHE_BASE / "icons"
+
+
+def _cache_appdata(pkg: str, xml_path: Path) -> None:
+    """Copia appdata.xml pro cache local (idempotente)."""
+    try:
+        _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        dest = _CACHE_DIR / f"{pkg}.appdata.xml"
+        # Skip se já cached com mesma mtime
+        if dest.exists() and dest.stat().st_mtime >= xml_path.stat().st_mtime:
+            return
+        dest.write_bytes(xml_path.read_bytes())
+    except OSError:
+        pass
+
+
+def _cached_appdata_path(pkg: str) -> Path | None:
+    """Retorna path do appdata cacheado, ou None se não existe."""
+    p = _CACHE_DIR / f"{pkg}.appdata.xml"
+    return p if p.is_file() else None
+
+
+def _cache_icon(pkg: str) -> None:
+    """Cacheia o icon do pacote se encontrar em path conhecido.
+
+    Procura em /usr/share/pixmaps/<pkg>.png ou
+    /usr/share/icons/hicolor/512x512/apps/<pkg>.png. Copia pro
+    cache pra sobreviver uninstall.
+    """
+    candidates = [
+        Path(f"/usr/share/pixmaps/{pkg}.png"),
+        Path(f"/usr/share/icons/hicolor/512x512/apps/{pkg}.png"),
+        Path(f"/usr/share/icons/hicolor/256x256/apps/{pkg}.png"),
+    ]
+    for src in candidates:
+        if src.is_file():
+            try:
+                ICON_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+                dest = ICON_CACHE_DIR / f"{pkg}.png"
+                if (not dest.exists()
+                        or dest.stat().st_mtime < src.stat().st_mtime):
+                    dest.write_bytes(src.read_bytes())
+            except OSError:
+                pass
+            return
+
+
+def cached_icon_path(pkg: str) -> Path | None:
+    """Retorna path do icon cacheado, ou None."""
+    p = ICON_CACHE_DIR / f"{pkg}.png"
+    return p if p.is_file() else None
+
+
+def _apt_cache_metadata(pkg: str) -> dict:
+    """Tier 2 fallback: extrai metadata via `apt-cache show <pkg>`.
+
+    Sempre funciona pra qualquer pacote no APT repo, mesmo nunca
+    instalado. Não tem releases/screenshots, mas tem nome + Description
+    (longa, do debian/control).
+
+    Apt show output:
+        Package: tmjpad
+        Architecture: all
+        Version: 0.1.2-1
+        Description: TMJOs text editor with full session persistence
+         TMJPad is the native TMJOs text editor...
+         More multi-line description with leading space.
+    """
+    out: dict = {"display_name": "", "summary": "", "description": ""}
+    try:
+        result = subprocess.run(
+            ["apt-cache", "show", pkg],
+            capture_output=True, text=True, timeout=5,
+        )
+        if result.returncode != 0:
+            return out
+
+        lines = result.stdout.splitlines()
+        in_desc = False
+        desc_lines: list[str] = []
+        for line in lines:
+            if line.startswith("Description:") or line.startswith("Description-en:"):
+                # primeira linha é o summary (single-line)
+                _, _, summary = line.partition(":")
+                out["summary"] = summary.strip()
+                in_desc = True
+                continue
+            if in_desc:
+                # Continuation lines começam com espaço (e ".\n" pra
+                # paragraph break em debian-style)
+                if line.startswith(" "):
+                    stripped = line[1:]  # remove leading space
+                    if stripped == ".":
+                        desc_lines.append("")  # paragraph break
+                    else:
+                        desc_lines.append(stripped)
+                else:
+                    # Field novo — fim da Description
+                    break
+
+        if desc_lines:
+            # Junta com newlines, depois colapsa runs de empty pra "\n\n"
+            text = "\n".join(desc_lines)
+            # Normaliza paragrafos (collapse runs de \n vazias)
+            paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+            out["description"] = "\n\n".join(paragraphs)
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+    return out
+
 
 # Origens válidas do APT repo TMJOs. Lista pra cobrir:
 #   - packages.tmjos.com.br (custom domain atual)
@@ -296,21 +415,40 @@ def discover_tmj_apps() -> list[TMJApp]:
         installed, inst_ver, cand_ver = _pkg_versions(pkg)
         has_update = installed and inst_ver != cand_ver and cand_ver != ""
 
-        # Tenta achar appdata.xml correspondente em qualquer dos paths
-        # XDG (user + system). Não exige que o app esteja instalado —
-        # se o XML existe (ex: dev mode após `make install` no host),
-        # lê metadata mesmo assim.
+        # Tenta achar appdata.xml em ordem:
+        # 1. metainfo dirs (XDG user, system) — fonte autoritativa
+        #    quando app está instalado.
+        # 2. cache local (~/.cache/tmjstore/appdata/) — fallback pra
+        #    apps já desinstalados (perdem /usr/share/metainfo/ entry
+        #    mas o user já conhecia os metadados pelo install anterior).
+        # Quando acha na fonte autoritativa, atualiza o cache.
         appdata: dict = {}
+        found_xml: Path | None = None
         for metainfo_dir in METAINFO_DIRS:
             if not metainfo_dir.is_dir():
                 continue
-            found = False
             for xml in metainfo_dir.glob(f"*{pkg}*.appdata.xml"):
-                appdata = _parse_appdata_xml(xml)
-                found = True
+                found_xml = xml
                 break
-            if found:
+            if found_xml is not None:
                 break
+
+        if found_xml is not None:
+            appdata = _parse_appdata_xml(found_xml)
+            _cache_appdata(pkg, found_xml)
+            # Aproveita pra cachear o icon enquanto app tá instalado
+            _cache_icon(pkg)
+        else:
+            # Tier 1: cache local
+            cached = _cached_appdata_path(pkg)
+            if cached is not None:
+                appdata = _parse_appdata_xml(cached)
+            else:
+                # Tier 2: apt-cache show — funciona sempre pra apps
+                # no APT repo, mesmo nunca instalados nem vistos antes.
+                # Não tem releases/screenshots/categories, mas tem
+                # name + description (do debian/control).
+                appdata = _apt_cache_metadata(pkg)
 
         # Fallback: nome capitalizado se não tem appdata
         display_name = appdata.get("display_name") or pkg.title()

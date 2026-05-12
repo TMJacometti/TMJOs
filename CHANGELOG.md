@@ -228,6 +228,12 @@ estiver pronto.
 - **v0.1.x (atual)**: 3 abas + AppStream metadata + install/remove/upgrade
   via pkexec + detail view com release history.
 - **v0.2 backlog**:
+  - **AppStream DEP-11 no APT repo**: CI roda `appstreamcli compose`
+    nos .debs gerados, gera `dists/noble/main/dep11/Components-amd64.yml.gz`
+    + icons cache. APT clients (TMJStore, gnome-software) leem
+    metadata + icons de **TODOS** apps no repo, mesmo nunca instalados.
+    Resolve fragilidade do cache local atual (que só funciona pra
+    apps já vistos). Padrão Linux, robusto.
   - **Download count**: contador por app. Requer analytics no APT
     repo (proxy hosting OR custom CGI no GH Pages — não-trivial).
   - **Search bar** dentro da store.

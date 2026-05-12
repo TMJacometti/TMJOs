@@ -1,23 +1,17 @@
-tmjstore (0.1.5-1) noble; urgency=medium
+tmjstore (0.1.6-1) noble; urgency=medium
 
-  * Nova tela de detalhe ao clicar num app na listagem.
-    Adw.NavigationView push/pop entre lista principal e detalhe.
-  * Detail page mostra:
-      - Header grande: icon 96px + nome + summary + action button
-      - Descrição completa (parseada do AppStream XML, com
-        suporte a <p> e <ul><li> com bullets)
-      - Chips de categorias
-      - Tabela de informações: versão atual, pacote, desenvolvedor,
-        licença, homepage, bug tracker (links clicáveis)
-      - Histórico de versões: lista cards com versão · data +
-        release notes (parseadas do XML)
-  * discover.py: novo TMJRelease dataclass + parsing completo de
-    todos os campos AppStream (developer, license, urls, releases).
-  * Backlog v0.2: download count (precisa analytics no APT repo).
-  * Backlog v0.3: reviews + botão Donate na detail view (Pix /
-    GitHub Sponsors / liberapay — esquema doido por dev).
+  * tmjmenu adicionado a CORE_PACKAGES (invisível na store).
+    Razão: TMJMenu/TMJDock é o launcher proprietário do TMJOs —
+    core UX, não app opcional. Remover quebra a experiência (sem
+    dock, sem popup search). Mesma categoria de tmjos-defaults /
+    tmjos-installer / tmjos-branding.
+    Quem realmente quiser remover usa `sudo apt remove tmjmenu`
+    no terminal — força extra de "sei o que estou fazendo".
+  * TMJStore continua visível na store (auto-update via UI).
+  * TMJPad continua único app removível (até TMJCode/TMJNotes
+    shiparem como apps user-facing).
 
- -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 22:40:00 -0300
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 22:20:00 -0300
 
 tmjstore (0.1.5-1) noble; urgency=medium
 
