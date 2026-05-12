@@ -43,39 +43,27 @@ echo "→ corrigindo vazamentos Ubuntu em config/{chroot,binary}"
 sed -i 's/^LB_LINUX_PACKAGES="linux"$/LB_LINUX_PACKAGES="linux-image"/' "$CONFIG/chroot"
 sed -i 's/^LB_SYSLINUX_THEME="ubuntu-oneiric"$/LB_SYSLINUX_THEME=""/' "$CONFIG/binary"
 
-# === 1. APT repos extras via includes.chroot_before_packages/ ===
-# Pattern recomendado (vs archives/) — sources e keys são copiadas pra
-# paths consistentes ANTES do install pass, com signed-by funcionando.
-# Live-build a57 tem timing issues com archives/, então evitamos.
-echo "→ includes.chroot_before_packages/ (TMJOs + VSCode)"
-
-KEYS_DIR="$CONFIG/includes.chroot_before_packages/usr/share/keyrings"
-SOURCES_DIR="$CONFIG/includes.chroot_before_packages/etc/apt/sources.list.d"
-mkdir -p "$KEYS_DIR" "$SOURCES_DIR"
-
-# TMJOs keyring (dearmored .gpg)
-curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg \
-    -o "$KEYS_DIR/tmjos-archive-keyring.gpg"
-
-cat > "$SOURCES_DIR/tmjos.list" << 'EOF'
-deb [arch=amd64 signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br trixie main apps extras
-EOF
-
-# Microsoft VSCode keyring (dearmor manualmente)
-curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
-    | gpg --dearmor > "$KEYS_DIR/microsoft.gpg"
-
-cat > "$SOURCES_DIR/vscode.list" << 'EOF'
-deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main
-EOF
-
-# Limpa archives/ antigo (caso setup tenha rodado antes em modo archives)
+# === 1. APT repos extras — via hook 0500 (rodado depois do install pass) ===
+# Tentamos archives/ e includes.chroot_before_packages/ — ambos falharam
+# em live-build a57 por timing issues (keys não registradas a tempo do
+# apt-get update interno).
+#
+# Solução robusta (pattern Tails/Kali): package-list contém só Debian
+# main, e um hook adiciona repos extras + faz apt install do `tmjos` e
+# `code` depois do install pass. Mais controlado e funciona em qualquer
+# versão do live-build.
+#
+# Limpa qualquer config legacy de attempts anteriores:
 rm -f "$CONFIG/archives/"tmjos.* "$CONFIG/archives/"microsoft.* 2>/dev/null || true
+rm -rf "$CONFIG/includes.chroot_before_packages" 2>/dev/null || true
 
 # === 2. package-lists/ ===
 echo "→ package-lists/tmjos.list.chroot"
 
 cat > "$CONFIG/package-lists/tmjos.list.chroot" << 'EOF'
+# IMPORTANTE: este package-list contém APENAS pacotes de Debian main.
+# `tmjos` e `code` (de repos extras) são instalados pelo hook 0500.
+
 # === Kernel + firmware ===
 # Explícito porque `lb config` em algumas versões a57 gera nome errado
 # (`linux-amd64` em vez de `linux-image-amd64`) na config interna.
@@ -86,7 +74,6 @@ firmware-linux-free
 # gnome-core é o meta minimal do GNOME (~1GB vs ~3GB do task-gnome-desktop).
 # Traz gnome-shell, gdm3, nautilus, gnome-control-center, gnome-terminal,
 # gnome-text-editor, gnome-calculator, eog, file-roller — o essencial.
-# Sem LibreOffice, sem games, sem gnome-music/maps/weather/etc.
 gnome-core
 gnome-tweaks
 dconf-editor
@@ -99,15 +86,11 @@ evolution-ews
 zram-tools
 preload
 
-# === TMJOs meta (puxa branding, identity, defaults, tmjmenu, tmjpad) ===
-tmjos
-
 # === Installer ===
 calamares
 calamares-settings-debian
 
-# === Dev stack ===
-code
+# === Dev stack (sem `code` — vem de repo Microsoft, instalado em hook) ===
 git
 git-flow
 docker.io
@@ -123,6 +106,8 @@ gir1.2-adw-1
 # === CLI tools ===
 curl
 wget
+gpg
+ca-certificates
 htop
 fastfetch
 vim
@@ -142,12 +127,46 @@ EOF
 # === 3. hooks/normal/ ===
 mkdir -p "$CONFIG/hooks/normal"
 
-# Hook 0500 — slim aggressive + service masking + zram setup.
-# Roda DEPOIS dos pacotes serem instalados (package-lists rodam antes
-# dos hooks). Remove gnome-* não-essenciais que vieram via gnome-core
-# deps + mascara serviços pesados pra rodar em 2GB RAM.
-echo "→ hooks/normal/0500-tmjos-slim.hook.chroot"
-cat > "$CONFIG/hooks/normal/0500-tmjos-slim.hook.chroot" << 'HOOK'
+# Hook 0500 — adiciona repos TMJOs + Microsoft VSCode e instala
+# `tmjos` (meta) + `code`. Rodar isto AQUI (e não via package-list)
+# evita timing issues do live-build a57 com archives/ e includes.
+echo "→ hooks/normal/0500-tmjos-apt-install.hook.chroot"
+cat > "$CONFIG/hooks/normal/0500-tmjos-apt-install.hook.chroot" << 'HOOK'
+#!/bin/sh
+set -e
+echo "=== TMJOs apt repos + install ==="
+
+mkdir -p /usr/share/keyrings
+
+# TMJOs APT repo (trixie)
+curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg \
+    -o /usr/share/keyrings/tmjos-archive-keyring.gpg
+cat > /etc/apt/sources.list.d/tmjos.list << 'SOURCES'
+deb [arch=amd64 signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br trixie main apps extras
+SOURCES
+
+# Microsoft VSCode
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
+    | gpg --dearmor > /usr/share/keyrings/microsoft.gpg
+cat > /etc/apt/sources.list.d/vscode.list << 'SOURCES'
+deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main
+SOURCES
+
+apt-get update
+
+# Install tmjos meta (puxa tmjos-branding, tmjos-os-identity, tmjos-defaults,
+# tmjmenu, tmjpad via Depends) + code (VSCode oficial).
+DEBIAN_FRONTEND=noninteractive apt-get install -y tmjos code
+
+echo "=== TMJOs apt install done ==="
+HOOK
+chmod +x "$CONFIG/hooks/normal/0500-tmjos-apt-install.hook.chroot"
+
+# Hook 0700 — slim aggressive + service masking + zram setup.
+# Remove gnome-* não-essenciais que vieram via gnome-core deps +
+# mascara serviços pesados pra rodar em 2GB RAM.
+echo "→ hooks/normal/0700-tmjos-slim.hook.chroot"
+cat > "$CONFIG/hooks/normal/0700-tmjos-slim.hook.chroot" << 'HOOK'
 #!/bin/sh
 set -e
 echo "=== TMJOs slim aggressive hook ==="
@@ -188,7 +207,7 @@ systemctl enable zramswap.service 2>/dev/null || true
 
 echo "=== TMJOs slim hook done ==="
 HOOK
-chmod +x "$CONFIG/hooks/normal/0500-tmjos-slim.hook.chroot"
+chmod +x "$CONFIG/hooks/normal/0700-tmjos-slim.hook.chroot"
 
 # Hook 0900 — caches finais (icon-cache, desktop-database).
 echo "→ hooks/normal/0900-tmjos-setup.hook.chroot"
