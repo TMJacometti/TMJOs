@@ -5,6 +5,29 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## Política de versionamento
+
+**TMJOs (a distro)** segue SemVer baseado em mudança de **stack/infra**,
+não em adição de apps:
+
+- **MAJOR (1.x → 2.x)** = rebase de Ubuntu base, mudança de stack
+  significativa, breakage proposital.
+- **MINOR (1.3 → 1.4)** = mudança de UX/feature substancial no core
+  da distro (não apps individuais).
+- **PATCH (1.3.0 → 1.3.4)** = bug fixes, point releases.
+
+**Apps TMJOs (TMJPad, TMJMenu, TMJCode, TMJNotes, ...)** têm
+**versionamento independente**. São lançados/atualizados como `.deb`
+no APT repo a qualquer momento — não exigem bump da distro.
+
+User existente roda `sudo apt install tmjcode` (app novo) ou
+`sudo apt upgrade tmjpad` (versão nova de app) sem precisar de ISO
+nova OU bump de versão da distro. Padrão Ubuntu/Debian — Firefox 122
+não vira "Ubuntu 24.05".
+
+Bumping a distro inteira pra adicionar um app é Apple-istão. TMJOs
+não faz isso.
+
 ## [Backlog v1.3.4] — release combinada: menu proprietário + cleanups
 
 Bundling de TMJMenu (feature grande) com correções v1.3.x acumuladas.
@@ -148,7 +171,7 @@ funciona em metal.
 Futuro: script `tools/tmjos-dev-vm.sh` que cria VM via virt-install
 com XML otimizado.
 
-## [Backlog v1.4 ou v2.0] — TMJOs Installer Slideshow
+## [Backlog v2.0] — TMJOs Installer Slideshow
 
 v1.3.4 e abaixo: install em silêncio (sem slideshow) — `ubiquity-slideshow-ubuntu`
 removido pelo customize.sh.
@@ -166,12 +189,11 @@ Implementação: pacote `tmjos-slideshow` que provê arquivos compatíveis
 com `ubiquity-slideshow-ubuntu` (HTML + assets em /usr/share/ubiquity-slideshow/).
 Conflicts com ubiquity-slideshow-ubuntu pra evitar Ubuntu marketing voltar.
 
-## [Backlog v1.4] — apps proprietários novos
+## [Backlog — apps TMJOs independentes]
 
-
-Versão centrada em apps. Depende da v1.3 ter shipado APT repo +
-TMJOs Software Center, porque ambos os apps abaixo são distribuídos
-via apt e listados na store.
+Lançados como `.deb` no APT repo durante o ciclo v1.3.x. Versões
+independentes da distro. Cada um vira `apt install <app>` quando
+estiver pronto.
 
 - **TMJCode** (VSCode customizado com tema/extensões TMJOs):
   - Wrapper sobre VSCode upstream que injeta `--extensions-dir`
@@ -193,6 +215,13 @@ via apt e listados na store.
   - Markdown leve no texto (negrito, itálico, listas)
   - Comando: `tmjnotes` ou `tmjsticky`
   - Empacotado como `tmjnotes.deb` no APT repo
+
+- **TMJOs Software Center**: GUI GTK4 listando + instalando apps do
+  APT repo TMJOs. UX mais bonita que `apt search`. Lança quando tiver
+  4+ apps proprietários publicados.
+
+- **Outros apps idealizados durante uso real** — sem precisar bumpar
+  a distro pra cada um.
 
 ## [1.2.x] — patches via apt (depende do APT repo da v1.3)
 
