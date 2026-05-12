@@ -1,28 +1,26 @@
 #!/bin/bash
 
 ###############################################
-# TMJOs - Script de Customização v1.3+
+# TMJOs v2.0 — Script de Customização (Debian 13 trixie)
 #
-# Roda dentro do chroot do Cubic (recomendado) ou em uma VM
-# Ubuntu 24.04 limpa pra testes (NÃO no host de trabalho — remove apps).
+# Diferente do v1.x (Ubuntu noble + Cubic), este script foi escrito
+# pra rodar em chroot Debian 13 montado por:
+#   - live-build hooks (CI pipeline)
+#   - debootstrap+chroot manual (dev local)
+#   - container Docker debian:trixie (testes)
 #
 # Faz, em ordem:
-#   1. update + slim (remove bloat)
-#   2. adiciona repo VSCode (Microsoft) — pra Recommends do tmjos
-#      meta-package puxar 'code'
-#   3. adiciona repo TMJOs (assinado) em packages.tmjos.dev
-#      via tmjacometti.github.io/TMJOs
-#   4. apt install tmjos — meta puxa todos os 6 core tmjos-* +
-#      tmjpad + Recommends (VSCode, Docker, Git, fonts, etc.)
-#   5. cleanup + verificação
-#
-# A diferença vs v1.2 customize.sh: o que era ~250 linhas de
-# cp/sed/dconf agora é uma única linha 'apt install tmjos'. Os
-# postinst hooks de cada tmjos-* package fazem o trabalho (dconf
-# update, plymouth alternatives, gtk-update-icon-cache, etc.).
-#
-# Killer feature: depois disso, sistemas instalados recebem updates
-# do core via 'sudo apt upgrade tmjos' — não precisa rebuildar ISO.
+#   1. apt update + upgrade
+#   2. SLIM AGGRESSIVE — remove bloat GNOME default do Debian
+#      (LibreOffice, games, gnome-music/maps/weather, etc).
+#      MANTÉM Evolution (Exchange compat).
+#   3. adiciona repo Microsoft VSCode
+#   4. adiciona repo TMJOs trixie em packages.tmjos.com.br
+#   5. apt install tmjos — meta puxa todos componentes TMJOs
+#   6. configura Calamares (instalador Debian) com branding TMJOs
+#   7. OPTIMIZE — mascara serviços pesados (tracker, packagekit,
+#      plymouth-quit-wait) + instala zram-tools/preload.
+#      Target: idle ~700MB-1GB RAM, OS roda em 2GB total.
 ###############################################
 
 set -euo pipefail
@@ -39,144 +37,188 @@ else
     SUDO="sudo"
 fi
 
-# Custom domain ativo desde 2026-05-11.
-# Let's Encrypt R12, válido até 2026-08-09 (auto-renova via GitHub Pages).
 TMJOS_REPO_URL="https://packages.tmjos.com.br"
 
 echo -e "${BLUE}╔═══════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║   TMJOs - Customização v1.3 (apt-based)   ║${NC}"
-echo -e "${BLUE}║   APT repo: packages.tmjos.com.br         ║${NC}"
+echo -e "${BLUE}║   TMJOs - Customização v2.0 (Debian-based)║${NC}"
+echo -e "${BLUE}║   APT repo: packages.tmjos.com.br trixie  ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════════╝${NC}\n"
 
 # ===========================================
-# FASE 1 — ATUALIZAR
+# FASE 1 — UPDATE
 # ===========================================
 
-echo -e "${YELLOW}[1/5] Atualizando sistema...${NC}"
+echo -e "${YELLOW}[1/7] Atualizando sistema...${NC}"
 $SUDO apt update
 $SUDO apt upgrade -y
 
+# Pacotes essenciais pra adicionar repos extras
+$SUDO apt install -y \
+    wget gpg apt-transport-https software-properties-common \
+    ca-certificates curl git
+
 # ===========================================
-# FASE 2 — SLIM AGGRESSIVE (remover bloat)
-#
-# tmjos meta-package só ADICIONA pacotes via Recommends. Os apps
-# que TMJOs não quer (LibreOffice, gnome-* desnecessários, snap,
-# tracker3, etc.) precisam sair antes do install.
+# FASE 2 — SLIM AGGRESSIVE
 # ===========================================
 
-echo -e "${YELLOW}[2/5] Slim aggressive (removendo bloat)...${NC}"
+echo -e "${YELLOW}[2/7] Slim aggressive — removendo bloat...${NC}"
 
-APPS_TO_REMOVE=(
-    # Telemetria
-    "ubuntu-report"
-    "apport"
-    "popularity-contest"
-    # Office suite
-    "libreoffice-calc"
-    "libreoffice-impress"
-    "libreoffice-writer"
-    "libreoffice-draw"
-    "libreoffice-core"
-    "libreoffice-common"
-    # Apps GNOME desnecessários
-    "gnome-todo"
-    "gnome-maps"
-    "gnome-music"
-    "gnome-videos"
-    "gnome-calendar"
-    "gnome-contacts"
-    "gnome-characters"
-    "gnome-system-monitor"
-    "yelp"
-    "file-roller"
-    # Mídia (TMJOs não é multimedia distro)
-    "totem"
-    "rhythmbox"
-    "shotwell"
-    "remmina"
-    "transmission-gtk"
-    # Slim Aggressive (RAM idle ~700MB, ISO ~2GB)
-    "gnome-software"          # ~200MB RAM, TMJOs Software Center substitui
-    "snapd"                    # ~200MB RAM, ~100MB disco
-    "evolution-data-server"   # ~150MB RAM cache email
-    "update-notifier"         # popup chato
-    "thunderbird"              # ~350MB RAM
-    # Ubuntu marketing slideshow (Spotify/GIMP/etc com "Enhance
-    # your creative"). Não somos OS de influencer.
-    # tmjos-installer postinst já evita Depend do slideshow, mas
-    # squashfs base do Ubuntu trazia mesmo assim — remove na fonte.
-    "ubiquity-slideshow-ubuntu"
+# Lista de pacotes a remover. Tudo via "|| true" pra não falhar se
+# algum pacote não estiver instalado (depende do task selecionado).
+# IMPORTANT: Evolution NÃO está aqui — user usa Exchange.
+BLOAT_PACKAGES=(
+    # LibreOffice suite (~400MB)
+    'libreoffice*'
+
+    # GNOME Help (yelp, ~100MB — apps modernos usam Web Help)
+    yelp
+    yelp-xsl
+
+    # Apps GNOME não essenciais
+    gnome-music
+    gnome-todo
+    gnome-maps
+    gnome-weather
+    gnome-contacts
+    gnome-photos
+    gnome-boxes
+
+    # Games (~200MB)
+    aisleriot
+    gnome-mahjongg
+    gnome-mines
+    gnome-sudoku
+    gnome-2048
+    gnome-chess
+    gnome-klotski
+    gnome-nibbles
+    gnome-robots
+    gnome-tetravex
+    five-or-more
+    four-in-a-row
+    hitori
+    iagno
+    lightsoff
+    quadrapassel
+    swell-foop
+    tali
+
+    # Media (substituídos por VLC/web em uso real)
+    totem
+    totem-common
+    totem-plugins
+    rhythmbox
+    rhythmbox-data
+    cheese
+    cheese-common
+
+    # Network
+    transmission-gtk
+    transmission-common
 )
 
-for app in "${APPS_TO_REMOVE[@]}"; do
-    echo -e "  Removendo: ${YELLOW}$app${NC}"
-    $SUDO apt remove -y "$app" 2>/dev/null || true
+for pkg in "${BLOAT_PACKAGES[@]}"; do
+    $SUDO apt remove --purge -y "$pkg" 2>/dev/null || true
 done
 
-$SUDO apt autoremove -y
-$SUDO apt autoclean -y
-$SUDO apt clean
+$SUDO apt autoremove --purge -y
 
 # ===========================================
-# FASE 3 — REPO VSCODE (Microsoft)
-#
-# tmjos Recommends inclui 'code'. Precisa do repo Microsoft pra
-# essa dep resolver. Sem isso, apt install tmjos puxa todos os
-# Recommends EXCETO code.
+# FASE 3 — VSCODE REPO
 # ===========================================
 
-echo -e "${YELLOW}[3/5] Adicionando repo Microsoft VSCode...${NC}"
-
-$SUDO apt install -y \
-    wget gpg apt-transport-https software-properties-common ca-certificates curl
+echo -e "${YELLOW}[3/7] Adicionando repo Microsoft VSCode...${NC}"
 
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc \
     | gpg --dearmor \
     | $SUDO tee /usr/share/keyrings/microsoft.gpg > /dev/null
-echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" \
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" \
     | $SUDO tee /etc/apt/sources.list.d/vscode.list > /dev/null
 
 # ===========================================
-# FASE 4 — REPO TMJOS (packages.tmjos.dev)
+# FASE 4 — TMJOS APT REPO (trixie)
 # ===========================================
 
-echo -e "${YELLOW}[4/5] Adicionando repo TMJOs...${NC}"
+echo -e "${YELLOW}[4/7] Adicionando repo TMJOs (trixie)...${NC}"
 
 $SUDO mkdir -p /usr/share/keyrings
 $SUDO curl -fsSL "$TMJOS_REPO_URL/keys/tmjos-archive-keyring.gpg" \
     -o /usr/share/keyrings/tmjos-archive-keyring.gpg
 
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] $TMJOS_REPO_URL noble main" \
+# Usa codename `trixie` (não noble como em v1.x)
+# Components main + apps + extras (granularidade v2.0)
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] $TMJOS_REPO_URL trixie main apps" \
     | $SUDO tee /etc/apt/sources.list.d/tmjos.list > /dev/null
 
 $SUDO apt update
 
 # ===========================================
 # FASE 5 — INSTALL TMJOS METAPACKAGE
-#
-# Puxa todos os componentes TMJOs e Recommends:
-#   tmjos-branding, tmjos-os-identity, tmjos-dock, tmjos-defaults,
-#   tmjos-shell-tweaks, tmjpad
-#   + Recommends: code, git, docker.io, gnome-tweaks, fonts, etc.
 # ===========================================
 
-echo -e "${YELLOW}[5/5] Instalando TMJOs metapackage...${NC}"
+echo -e "${YELLOW}[5/7] Instalando TMJOs metapackage + apps...${NC}"
+
+# Em Debian, o meta tmjos puxa via Depends:
+#   - tmjos-branding, tmjos-defaults, tmjos-os-identity
+#   - tmjmenu (TMJMenu + TMJDock)
+#   - tmjpad
+# E via Recommends:
+#   - tmjstore, code, git, docker, calamares, evolution,
+#     zram-tools, preload, etc.
 $SUDO apt install -y tmjos
 
 # ===========================================
-# FASE 6 — UPGRADE FINAL
-#
-# apt install tmjos puxou ~50 pacotes via Recommends (code, docker,
-# plank, gnome-tweaks etc). Alguns podem ter releases mais recentes
-# que os índices puxados no início. Esse upgrade final garante que
-# a ISO já sai com tudo no latest — usuário não vê "X updates
-# available" logo no primeiro boot.
+# FASE 6 — CALAMARES BRANDING (v2.0 alpha: básico)
 # ===========================================
 
-echo -e "${YELLOW}[6/6] Upgrade final (pacotes recém-instalados)...${NC}"
-$SUDO apt update
-$SUDO apt upgrade -y
+echo -e "${YELLOW}[6/7] Configurando Calamares (placeholder v2.0 alpha)...${NC}"
 
+# TODO em v2.0 stable: tmjos-calamares-branding package que provê:
+#   /etc/calamares/branding/tmjos/branding.desc
+#   /etc/calamares/branding/tmjos/show.qml (slideshow QML)
+#   /etc/calamares/branding/tmjos/*.png (assets)
+#
+# Por ora, garante calamares instalado. Branding default Debian.
+$SUDO apt install -y calamares calamares-settings-debian || true
+
+# ===========================================
+# FASE 7 — OPTIMIZE (mask services + zram + preload)
+# ===========================================
+
+echo -e "${YELLOW}[7/7] Otimizando pra rodar em 2GB RAM...${NC}"
+
+# Mascara serviços pesados que ficam consumindo RAM/CPU idle.
+# `|| true` porque alguns podem não existir (ex: tracker em sistemas
+# sem GNOME Files).
+MASK_SERVICES=(
+    # Tracker 3 — indexer GNOME (CPU/IO/RAM killer no idle)
+    tracker-miner-fs-3.service
+    tracker-miner-rss-3.service
+    tracker-extract-3.service
+    tracker-writeback-3.service
+
+    # PackageKit — TMJStore usa apt direto, não precisa do daemon
+    packagekit.service
+    packagekit-offline-update.service
+
+    # Auto-upgrade — manter apt-daily.timer (só CHECK) mas mascarar
+    # o upgrade automático. User atualiza via TMJStore ou apt manual.
+    apt-daily-upgrade.service
+    apt-daily-upgrade.timer
+
+    # Plymouth quit wait — bloqueia boot 1-2s esperando animação
+    plymouth-quit-wait.service
+)
+
+for svc in "${MASK_SERVICES[@]}"; do
+    $SUDO systemctl mask "$svc" 2>/dev/null || true
+done
+
+# zram-tools: cria swap comprimido em RAM (3-4x compressão).
+# Crítico pra sistemas 2GB — em vez de hit no disco SSD, comprime
+# memória inativa em si.
+# preload: pre-carrega apps usados frequentemente.
+$SUDO apt install -y zram-tools preload || true
 
 # ===========================================
 # CLEANUP
@@ -187,12 +229,6 @@ $SUDO apt clean
 $SUDO apt autoclean -y
 $SUDO rm -rf /tmp/* /var/tmp/* 2>/dev/null || true
 $SUDO rm -rf /var/lib/apt/lists/* 2>/dev/null || true
-
-# Sockets/cookies do PulseAudio em /root/.config/pulse fazem o
-# ubiquity quebrar com "permission denied" no rsync pro target disk.
-# tmjos-installer postinst já cuida disso, mas garantir aqui também
-# protege contra qualquer pacote que rode pulseaudio depois.
-$SUDO rm -rf /root/.config/pulse /root/.cache/pulse 2>/dev/null || true
 
 # ===========================================
 # VERIFICAÇÃO
@@ -215,45 +251,19 @@ check_pkg() {
 check_pkg "TMJOs meta"        "tmjos"
 check_pkg "tmjos-branding"    "tmjos-branding"
 check_pkg "tmjos-os-identity" "tmjos-os-identity"
-check_pkg "tmjos-dock"        "tmjos-dock"
 check_pkg "tmjos-defaults"    "tmjos-defaults"
-check_pkg "tmjos-shell-tweaks" "tmjos-shell-tweaks"
-check_pkg "TMJPad"            "tmjpad"
+check_pkg "tmjmenu"           "tmjmenu"
+check_pkg "tmjpad"            "tmjpad"
+check_pkg "tmjstore"          "tmjstore"
 echo ""
+check_pkg "Calamares"         "calamares"
 check_pkg "VSCode"            "code"
 check_pkg "Git"               "git"
-check_pkg "Docker"            "docker.io"
-check_pkg "Plank"             "plank"
-check_pkg "GNOME Tweaks"      "gnome-tweaks"
-check_pkg "JetBrains Mono"    "fonts-jetbrains-mono"
-check_pkg "Python GI"         "python3-gi"
-check_pkg "GTK4"              "gir1.2-gtk-4.0"
-check_pkg "Adwaita"           "gir1.2-adw-1"
-check_pkg "spice-vdagent"     "spice-vdagent"
-check_pkg "zram-config"       "zram-config"
-
-echo -e "\n${BLUE}═══ IDENTIDADE TMJOS ═══${NC}\n"
-if grep -q '^NAME="TMJOs"' /etc/os-release 2>/dev/null; then
-    echo -e "  ${GREEN}✓${NC} /etc/os-release: $(grep '^PRETTY_NAME' /etc/os-release | cut -d= -f2)"
-else
-    echo -e "  ${RED}✗${NC} /etc/os-release: ainda Ubuntu"
-fi
-if grep -q '^DISTRIB_CODENAME=noble' /etc/lsb-release 2>/dev/null; then
-    echo -e "  ${GREEN}✓${NC} /etc/lsb-release: noble (compat scripts/PPAs)"
-else
-    echo -e "  ${RED}✗${NC} /etc/lsb-release: codename diferente — PPAs vão quebrar"
-fi
+check_pkg "Evolution"         "evolution"
+check_pkg "zram-tools"        "zram-tools"
+check_pkg "preload"           "preload"
 
 echo -e "\n${BLUE}╔═══════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║      ✓ TMJOs v1.3 customização completa!  ║${NC}"
+echo -e "${BLUE}║  ✓ TMJOs v2.0 alpha customização completa!║${NC}"
+echo -e "${BLUE}║  Debian-based · Slim · Sem Canonical      ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════════╝${NC}\n"
-
-echo -e "${YELLOW}Próximos passos:${NC}"
-echo -e "  1. Volte ao Cubic GUI"
-echo -e "  2. Clique Next nas telas seguintes"
-echo -e "  3. Generate ISO (xz pra release final, lz4 pra teste)"
-echo -e "  4. Teste em VM com qemu-system-x86_64 -m 4G -accel kvm\n"
-
-echo -e "${YELLOW}Killer feature v1.3:${NC} usuários instalados rodam"
-echo -e "  ${GREEN}sudo apt upgrade tmjos${NC} pra atualizar todo o core"
-echo -e "  sem precisar regenerar ISO. Welcome to v1.3 🐉\n"

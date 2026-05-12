@@ -184,9 +184,6 @@ CORE_PACKAGES = frozenset({
     "tmjos-branding",
     "tmjos-os-identity",
     "tmjos-defaults",
-    "tmjos-dock",
-    "tmjos-shell-tweaks",
-    "tmjos-installer",
     "tmjos-hello",            # pipeline smoke test
     # TMJMenu/TMJDock é o launcher proprietário — core UX da distro,
     # mesma categoria de tmjos-defaults. Remover quebra a experiência.

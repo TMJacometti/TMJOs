@@ -5,7 +5,7 @@
 //
 // Plymouth's scripting language is a small custom DSL — Math.Int and
 // Image.Text DO NOT exist there. If the script fails to parse, Plymouth
-// silently falls back to the previous theme (Ubuntu). Keep it minimal.
+// silently falls back to the previous theme. Keep it minimal.
 
 // === Background — TMJOs dark navy ===========================================
 Window.SetBackgroundTopColor(0.039, 0.055, 0.165);    // #0a0e2a

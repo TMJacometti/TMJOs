@@ -9,12 +9,9 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Package: tmjos
 Architecture: all
 Depends: ${misc:Depends},
-         tmjos-branding (>= 1.3.0),
-         tmjos-os-identity (>= 1.3.0),
-         tmjos-dock (>= 1.3.0),
-         tmjos-defaults (>= 1.3.0),
-         tmjos-shell-tweaks (>= 1.3.0),
-         tmjos-installer (>= 1.3.0),
+         tmjos-branding (>= 2.0.0),
+         tmjos-os-identity (>= 2.0.0),
+         tmjos-defaults (>= 2.0.0),
          tmjmenu (>= 1.3.4),
          tmjpad (>= 0.1.2)
 Recommends: tmjstore,
@@ -23,18 +20,18 @@ Recommends: tmjstore,
             git-flow,
             docker.io,
             docker-compose,
+            calamares,
+            calamares-settings-debian,
             gnome-tweaks,
             dconf-editor,
-            gnome-shell-extensions,
-            gnome-shell-extension-manager,
             python3-gi,
             gir1.2-gtk-4.0,
             gir1.2-adw-1,
-            spice-vdagent,
-            qemu-guest-agent,
-            zram-config,
+            zram-tools,
             preload,
+            evolution,
             curl,
+            wget,
             htop,
             neofetch,
             vim,
@@ -42,20 +39,19 @@ Recommends: tmjstore,
             net-tools,
             traceroute
 Description: TMJOs metapackage — pulls in the entire TMJOs experience
- Installing this package on a base Ubuntu 24.04 noble system gives
+ Installing this package on a base Debian 13 (trixie) system gives
  you the complete TMJOs setup:
    * Branding (wallpapers, logos, Plymouth)
    * System identity (/etc/os-release etc.)
-   * TMJMenu (popup search) + TMJDock (proprietary dock) — Plank
-     autostart is disabled by tmjmenu postinst.
-   * tmjos-dock scripts (first-run, dock-sync) kept for compatibility
-   * dconf system-wide overrides (dark mode, fonts, X11 force)
-   * Shell tweaks (Activities button hidden)
+   * TMJMenu (popup search) + TMJDock (proprietary dock)
+   * dconf system-wide overrides (dark mode, fonts)
    * TMJPad text editor
  .
  The Recommends list mirrors what the ISO ships preinstalled —
- VSCode, Docker, Git, GNOME Tweaks, dev fonts, network tools, etc.
+ VSCode, Docker, Git, Calamares installer, GNOME Tweaks, Evolution
+ (Exchange mail), zram-tools / preload (RAM efficiency), dev fonts,
+ network tools, etc.
  .
  On TMJOs systems, `sudo apt upgrade tmjos` will pull the latest
  versions of every component package, providing the post-release
- update mechanism that v1.3 introduces.
+ update mechanism inherited from v1.3.

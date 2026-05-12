@@ -87,33 +87,16 @@ jobs:
           # auto-populates the Custom Domain field in repo Settings → Pages.
           # Let's Encrypt cert provisioning takes ~15min after first publish.
           echo 'packages.tmjos.com.br' > apt-repo/CNAME
-          # Importa as .debs no reprepro pras duas suites:
-          # - noble (Ubuntu 24.04 v1.x legacy)
-          # - trixie (Debian 13 v2.0+)
-          # Mesmos pacotes vão pras duas — apps GTK4 são distro-agnostic.
-          # Pacotes Ubuntu-specific (tmjos-installer com ubiquity divert)
-          # vão failhar no install em Debian — TODO: skip esses no trixie.
+          # Importa as .debs no reprepro pra suite trixie (Debian 13, v2.0+).
+          # Em v2.1 vamos separar components (main/apps/extras) — por ora
+          # tudo vai pra `main`.
           for deb in packages/dist/*.deb; do
-              echo "Adding $deb to reprepro (noble)..."
-              reprepro --basedir apt-repo includedeb noble "$deb"
-              # Pacotes Ubuntu-only ficam só em noble.
-              # Componentwise, todos vão pra main por padrão; em v2.1 vamos
-              # separar apps/extras como components.
-              case "$(basename "$deb")" in
-                  tmjos-installer_*|tmjos-shell-tweaks_*|tmjos-dock_*)
-                      echo "  (skip trixie — Ubuntu-specific)"
-                      ;;
-                  *)
-                      echo "Adding $deb to reprepro (trixie)..."
-                      # --ignore=wrongdistribution: packages têm "noble"
-                      # no debian/changelog mas são distro-agnostic (apps
-                      # GTK4/Python). Em v2.0 stable, vamos refatorar
-                      # changelog dual-target.
-                      reprepro --basedir apt-repo --ignore=wrongdistribution \
-                          includedeb trixie "$deb" || \
-                          echo "  warning: trixie include falhou"
-                      ;;
-              esac
+              echo "Adding $deb to reprepro (trixie)..."
+              # --ignore=wrongdistribution: packages podem ter codename
+              # diferente em debian/changelog mas são distro-agnostic
+              # (apps GTK4/Python). Em v2.0 stable vamos uniformizar.
+              reprepro --basedir apt-repo --ignore=wrongdistribution \
+                  includedeb trixie "$deb"
           done
           # Copia a public key pro repo (user adiciona como signed-by)
           mkdir -p apt-repo/keys
@@ -132,16 +115,16 @@ jobs:
           <body>
           <h1>🐉 TMJOs APT Repo</h1>
           <p>Pacotes oficiais TMJOs assinados com GPG.</p>
-          <h2>Setup</h2>
+          <h2>Setup (Debian 13 trixie)</h2>
           <pre><code>curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg \
             | sudo tee /usr/share/keyrings/tmjos-archive-keyring.gpg > /dev/null
           echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] \
-            https://packages.tmjos.com.br/ noble main' \
+            https://packages.tmjos.com.br/ trixie main apps' \
             | sudo tee /etc/apt/sources.list.d/tmjos.list
           sudo apt update
           sudo apt install tmjos</code></pre>
           <h2>Pacotes disponíveis</h2>
-          <p>Veja <a href="dists/noble/main/binary-amd64/Packages">Packages</a></p>
+          <p>Veja <a href="dists/trixie/main/binary-amd64/Packages">Packages</a></p>
           </body></html>
           HTML
           ls -R apt-repo/dists/ | head -30

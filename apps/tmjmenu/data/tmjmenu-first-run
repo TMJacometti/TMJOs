@@ -56,9 +56,9 @@ add_slot_to_list "$MENU_SLOT"
 configure_slot "$MENU_SLOT" 'TMJMenu' 'tmjmenu' '<Super>space'
 
 # 2. Super+Shift+H → tmjdock --toggle-hide
-# Super+H sozinho conflita com o atalho "minimize window" do GNOME
-# em Ubuntu — quando user pressed Super+H, minimiza a janela ativa
-# em vez de toggle dock. Super+Shift+H não tem default binding.
+# Super+H sozinho conflita com o default "minimize window" do GNOME —
+# quando user pressed Super+H, minimiza a janela ativa em vez de
+# toggle dock. Super+Shift+H não tem default binding.
 add_slot_to_list "$HIDE_SLOT"
 configure_slot "$HIDE_SLOT" 'TMJDock Toggle Hide' 'tmjdock --toggle-hide' '<Super><Shift>h'
 

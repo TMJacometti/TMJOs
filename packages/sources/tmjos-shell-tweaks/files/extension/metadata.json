@@ -1,8 +1,0 @@
-{
-    "uuid": "tmjos-tweaks@tmjos.local",
-    "name": "TMJOs Tweaks",
-    "description": "TMJOs UI tweaks — hides the Activities button (TMJOs uses Plank's 'Todos os Apps' as the apps entry point).",
-    "shell-version": ["45", "46", "47"],
-    "url": "https://github.com/TMJacometti/TMJOs",
-    "version": 1
-}

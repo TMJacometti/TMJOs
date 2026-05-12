@@ -2,13 +2,15 @@
 
 > **OS DA TMJSistemas · OS MELHORES · OS INSANOS**
 >
-> Distribuição Linux baseada em Ubuntu 24.04 LTS pra devs hardcore — slim, dark, neon, com stack proprietária de apps.
+> Distribuição Linux baseada em **Debian 13 trixie** pra devs hardcore — slim, dark, neon, com stack proprietária de apps GTK4 nativos.
 
-> ⚠️ **Status: Preview interno (v1.x)** — em uso pessoal do dev. Launch oficial vai sair com **v2.0** (rebase em Debian 13 trixie, ~Q3 2026). Estável o suficiente pra usar, mas sem promessa de polish ou suporte público enquanto v1.x.
+> ⚠️ **Status: v2.0 alpha** — em uso pessoal do dev. Launch oficial vai sair quando v2.0 estabilizar. Estável o suficiente pra usar, mas sem promessa de polish ou suporte público enquanto alpha.
+>
+> ℹ️ **Histórico**: v1.x era baseado em Ubuntu 24.04 (noble) — foi preview interno, nunca released publicamente. v2.0+ é rebase em Debian 13 (trixie) sem Canonical, sem snap, sem ubiquity.
 
-![Version](https://img.shields.io/badge/version-1.3.4-cyan)
+![Version](https://img.shields.io/badge/version-2.0--alpha-cyan)
 ![License](https://img.shields.io/badge/license-GPLv3-green)
-![Base](https://img.shields.io/badge/based%20on-Ubuntu%2024.04%20LTS-orange)
+![Base](https://img.shields.io/badge/based%20on-Debian%2013%20trixie-red)
 ![APT](https://img.shields.io/badge/APT%20repo-packages.tmjos.com.br-blueviolet)
 
 ---
@@ -23,25 +25,25 @@ Codename: **insano**.
 
 - **🐉 Identidade própria**: branding completo (wallpaper TMJOs, Plymouth, logo dragão+gear, dark mode, paleta neon)
 - **📦 APT repo oficial**: [packages.tmjos.com.br](https://packages.tmjos.com.br) com Let's Encrypt. `sudo apt upgrade tmjos` atualiza todo o core sem ISO nova
-- **🏪 TMJStore**: software center proprietário descobre apps TMJOs via AppStream, instala via apt+pkexec, com visual neon (sem capitalismo Ubuntu)
+- **🏪 TMJStore**: software center proprietário descobre apps TMJOs via AppStream, instala via apt+pkexec, com visual neon
 - **🚀 TMJMenu + TMJDock**: launcher GTK4 nativo. Popup search (Super+Space) + dock bottom-center estilo Win11 Start com botão TMJOs gradient cyan/magenta. Auto-hide adaptativo, Super+Shift+H toggle pinned
 - **📝 TMJPad**: editor de texto com **persistência total** de sessão — fechou e reabriu, todas abas voltam (incluindo não salvas)
-- **⚡ Slim Aggressive**: RAM idle ~700MB. Remove snapd, evolution, thunderbird, gnome-software, telemetria. Mascarado plymouth-quit-wait + unattended-upgrades pra zero travas
-- **💻 Pré-instalado pra devs**: VSCode, Docker, Git, Plank, GNOME Tweaks, JetBrains Mono
-- **🔧 X11 forçado**: sessão GDM em X11 (Wayland fica pra v2.0 com TMJDock layer-shell)
+- **🧰 Calamares installer**: instalador gráfico Debian-native (sem ubiquity, sem WebKit2 baggage)
+- **💻 Pré-instalado pra devs**: VSCode, Docker, Git, GNOME Tweaks, JetBrains Mono
+- **🆓 Zero Canonical**: sem snapd, sem unattended-upgrades, sem telemetria Ubuntu
 
 ---
 
 ## 🚀 Quick Start
 
-### Instalar TMJOs em sistema Ubuntu 24.04 existente
+### Adicionar TMJOs APT repo num Debian 13 (trixie) existente
 
 ```bash
 # 1. Adiciona o repo TMJOs
 curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg \
   | sudo tee /usr/share/keyrings/tmjos-archive-keyring.gpg > /dev/null
 
-echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br/ noble main' \
+echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br trixie main apps' \
   | sudo tee /etc/apt/sources.list.d/tmjos.list > /dev/null
 
 # 2. Update + install
@@ -49,7 +51,7 @@ sudo apt update
 sudo apt install -y tmjos
 ```
 
-Reboot pra Plymouth + sessão X11 pegarem. Pronto.
+Reboot pra Plymouth + GDM pegarem. Pronto.
 
 ### Instalar ISO oficial
 
@@ -59,7 +61,7 @@ Baixa do [latest release](https://github.com/TMJacometti/TMJOs/releases/latest) 
 # Criar LiveUSB
 sudo dd if=tmjos-*.iso of=/dev/sdX bs=4M status=progress && sync
 
-# Boot pela USB, sessão live carrega, clicar no installer (Ubiquity)
+# Boot pela USB → sessão live → clicar no installer (Calamares)
 ```
 
 ### Updates contínuos (sem re-instalar)
@@ -68,7 +70,7 @@ sudo dd if=tmjos-*.iso of=/dev/sdX bs=4M status=progress && sync
 sudo apt update && sudo apt upgrade tmjos
 ```
 
-Killer feature da v1.3: atualiza TODO o core (branding, dock, identity, shell tweaks, installer, TMJPad, TMJMenu) via apt. Sem regen de ISO.
+Killer feature do TMJOs: atualiza TODO o core (branding, identity, defaults, TMJMenu, TMJDock, TMJPad, TMJStore) via apt. Sem regen de ISO.
 
 ---
 
@@ -80,10 +82,7 @@ Killer feature da v1.3: atualiza TODO o core (branding, dock, identity, shell tw
 |---|---|
 | `tmjos-branding` | Wallpapers, logos, Plymouth boot splash |
 | `tmjos-os-identity` | `/etc/os-release`, `/etc/lsb-release` (dpkg-divert) |
-| `tmjos-defaults` | dconf overrides (dark mode, fonts, X11 force, slim runtime mask) |
-| `tmjos-shell-tweaks` | Activities button escondido via GJS extension |
-| `tmjos-installer` | ubiquity sem WebKit2 slideshow + imagem "Installation complete" TMJOs |
-| `tmjos-dock` | Plank config legacy + scripts (mantido como fallback) |
+| `tmjos-defaults` | dconf overrides (dark mode, fonts, slim runtime mask) |
 | `tmjmenu` | TMJMenu popup + TMJDock |
 | `tmjpad` | Editor de texto com session persistence |
 | `tmjstore` *(Recommends)* | Software center proprietário TMJOs |
@@ -91,12 +90,11 @@ Killer feature da v1.3: atualiza TODO o core (branding, dock, identity, shell tw
 ### Stack de dev (Recommends)
 
 - VSCode (do repo oficial Microsoft), Git, git-flow, Docker + compose
-- GNOME Tweaks, dconf-editor, gnome-shell-extensions
+- GNOME Tweaks, dconf-editor
 - Python 3 + GTK4 + libadwaita
-- spice-vdagent + qemu-guest-agent (VM integration)
-- zram-config + preload (RAM efficiency)
-- Fontes: JetBrains Mono, Cantarell, Noto Color Emoji
-- CLI: curl, htop, neofetch, vim, dnsutils, net-tools, traceroute
+- Calamares (installer gráfico)
+- Fontes: JetBrains Mono, Cantarell
+- CLI: curl, wget, htop, neofetch, vim
 
 ---
 
@@ -129,9 +127,9 @@ Killer feature da v1.3: atualiza TODO o core (branding, dock, identity, shell tw
 
 ```bash
 # Hardware: 30GB disco, 4GB RAM
-# Software:
-sudo add-apt-repository ppa:cubic-wizard/release
-sudo apt update && sudo apt install -y cubic
+# Software (host Debian 12+ ou derivada):
+sudo apt install -y live-build debootstrap xorriso \
+    debian-archive-keyring squashfs-tools
 ```
 
 ### Build process
@@ -141,34 +139,37 @@ sudo apt update && sudo apt install -y cubic
 git clone https://github.com/TMJacometti/TMJOs.git
 cd TMJOs
 
-# 2. Cubic — novo projeto
-cubic
-# Project dir: ~/tmjos-build/projects
-# Source ISO: ubuntu-24.04.*-desktop-amd64.iso
+# 2. Prepara build dir + roda lb config (mirrors Debian)
+mkdir -p ~/tmjos-debian-build
+cd ~/tmjos-debian-build
+sudo lb config \
+    --distribution trixie \
+    --architectures amd64 \
+    --binary-images iso-hybrid \
+    --mirror-bootstrap http://deb.debian.org/debian/ \
+    --mirror-chroot http://deb.debian.org/debian/ \
+    --mirror-binary http://deb.debian.org/debian/ \
+    --parent-mirror-bootstrap http://deb.debian.org/debian/ \
+    --apt-recommends true
 
-# 3. Na page Terminal (chroot) do Cubic, baixa o customize.sh
-wget -O /tmp/customize.sh https://raw.githubusercontent.com/TMJacometti/TMJOs/main/scripts/tmjos_customize.sh
-bash /tmp/customize.sh
+# 3. Popula config/ com archives/hooks/package-lists TMJOs
+sudo /caminho/pra/TMJOs/tools/tmjos-live-build-setup.sh
 
-# 4. Cubic Next > Next > Generate ISO
+# 4. Build
+sudo lb build 2>&1 | tee build.log
 
-# 5. Testar em VM (recomendado: virt-manager com virtio-gpu-gl pra 3D)
-virt-manager
+# ISO sai em ~/tmjos-debian-build/*.iso (~30-60min)
 ```
 
-O `tmjos_customize.sh` faz 6 fases:
-1. apt update + upgrade
-2. Slim aggressive (remove ~25 pacotes desnecessários)
-3. Adiciona repo VSCode (Microsoft)
-4. Adiciona repo TMJOs (`packages.tmjos.com.br`)
-5. `apt install tmjos` (puxa todos os componentes + Recommends)
-6. Upgrade final (pacotes recém-instalados)
+Detalhes em [`docs/BUILD.md`](docs/BUILD.md).
 
 ---
 
 ## 📚 Documentação
 
 - **[CHANGELOG.md](CHANGELOG.md)** — Histórico + backlog detalhado
+- **[docs/BUILD.md](docs/BUILD.md)** — Guia de build via live-build
+- **[docs/CHECKLIST.md](docs/CHECKLIST.md)** — Checklist de release
 - **[apps/tmjpad/README.md](apps/tmjpad/README.md)** — TMJPad
 - **[apps/tmjmenu/README.md](apps/tmjmenu/README.md)** — TMJMenu/TMJDock
 - **[apps/tmjstore/README.md](apps/tmjstore/README.md)** — TMJStore
@@ -190,46 +191,41 @@ git push origin feature/sua-feature
 
 ### Política de versionamento
 
-- **MAJOR** (1.x → 2.x): rebase de Ubuntu base, mudança de stack significativa
-- **MINOR** (1.3 → 1.4): mudança UX/feature substancial **do core da distro** (não apps)
-- **PATCH** (1.3.0 → 1.3.4): bug fixes, point releases
+- **MAJOR** (1.x → 2.x): rebase de distro base, mudança de stack significativa
+- **MINOR** (2.0 → 2.1): mudança UX/feature substancial **do core da distro** (não apps)
+- **PATCH** (2.0.0 → 2.0.1): bug fixes, point releases
 
-**Apps TMJOs** (TMJPad, TMJMenu, TMJStore, TMJCode, TMJNotes) têm versionamento **independente**. Lançam como `.deb` no APT repo a qualquer momento — não exigem bump da distro.
+**Apps TMJOs** (TMJPad, TMJMenu, TMJStore, TMJCode, TMJNotes, TMJMoney, TMJCriptoBot, TMJRestApi) têm versionamento **independente**. Lançam como `.deb` no APT repo a qualquer momento — não exigem bump da distro.
 
 ---
 
 ## 📋 Roadmap
 
-### ✅ v1.3 — APT repo + apps proprietários
+### 🚧 v2.0 alpha (atual) — Migração pra Debian 13
 
-- [x] **APT repo oficial** `packages.tmjos.com.br` (Let's Encrypt, GH Pages, GH Actions CI)
-- [x] **9 pacotes Debian assinados** (GPG)
-- [x] **Killer feature**: `sudo apt upgrade tmjos` atualiza core sem ISO nova
-- [x] **Custom domain** com cert auto-renewed
-- [x] **TMJMenu + TMJDock**: launcher proprietário GTK4 nativo (Super+Space, auto-hide, pin/unpin, context menu, Super+Shift+H)
-- [x] **TMJStore**: software center com 3 abas + AppStream + detail view + cache + busy feedback verde + toast
-- [x] **TMJPad** repackaged como `.deb` (com session persistence)
-- [x] **Plymouth boot splash** + watermark TMJSistemas
-- [x] **Slim Aggressive**: RAM idle ~700MB, mascarado plymouth-quit-wait + unattended-upgrades + packagekit
-- [x] **Ubiquity branding**: imagem "Installation complete" TMJOs (dpkg-divert)
-- [x] **VM detection**: auto-hide adaptativo via systemd-detect-virt
+- [x] Rebase de Ubuntu 24.04 → **Debian 13 trixie**
+- [x] APT repo suite `trixie` no [packages.tmjos.com.br](https://packages.tmjos.com.br)
+- [x] Script de customização `tmjos_customize.sh` para chroot Debian
+- [x] Setup pra `live-build` (substitui Cubic Ubuntu-only)
+- [ ] Primeira ISO alpha gerada + testada em virt-manager
+- [ ] Calamares branding básico (tmjos-calamares-branding package)
 
-### 🔜 Apps independentes (durante v1.3.x, sem bump da distro)
+### 🔜 v2.0 stable
 
-- [ ] **TMJCode** — VSCode customizado com tema/extensões TMJOs
+- [ ] **Calamares branding completo**: slideshow QML, partition assets, logo full
+- [ ] **TMJDock Wayland-native** via gtk4-layer-shell (sem X11 force)
+- [ ] **APT components**: separar `main` / `apps` / `extras` (granularidade)
+- [ ] **ISO size target**: 2-3GB
+
+### 🌟 Apps independentes (durante v2.0.x, sem bump da distro)
+
 - [ ] **TMJNotes** — sticky notes GTK4 com persistência total
+- [ ] **TMJMoney** — controle financeiro pessoal
+- [ ] **TMJRestApi** — REST client tipo Postman, GTK4
+- [ ] **TMJCriptoBot** — bot de trading cripto (educacional)
+- [ ] **TMJCode** — VSCode customizado com tema/extensões TMJOs
 - [ ] **TMJStore v0.2**: DEP-11 no APT repo + update check daemon + search + filtro categoria
 - [ ] **TMJStore v0.3**: reviews + botão Donate por dev
-
-### 🚀 v2.0 "Insano 2" (futuro)
-
-- [ ] Rebase em **Ubuntu 26.04 LTS** (suporte até 2031)
-- [ ] **Wayland-native** com TMJDock via gtk4-layer-shell (sem X11 force)
-- [ ] **APT repo components**: `noble main apps extras` + `noble-dev` testing suite
-- [ ] **Reduzir ISO** (atual 6GB → target 2-3GB via single-squashfs no 26.04)
-- [ ] **TMJOs slideshow** próprio no installer (substitui Ubuntu marketing)
-- [ ] GRUB visual theme TMJOs (não só nome)
-- [ ] GDM login screen com wallpaper TMJOs
 
 ---
 
@@ -252,11 +248,12 @@ Copyright (C) 2026 TMJOs Contributors
 
 ## 🌟 Créditos
 
-- **Ubuntu Team** — base da distribuição
+- **Debian Project** — base da distribuição
 - **GNOME Project** — desktop environment
+- **Calamares** — installer
 - **TMJSistemas** — branding, design, dev
 - **Contribuidores** — ❤️
 
 ---
 
-*Last updated: 2026-05-11 · TMJOs v1.3.4 · Made with 🐉 by TMJSistemas*
+*TMJOs v2.0 alpha · Debian 13 trixie · Made with 🐉 by TMJSistemas*

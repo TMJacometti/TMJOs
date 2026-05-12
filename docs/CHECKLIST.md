@@ -1,16 +1,16 @@
-# ✅ TMJOS - Checklist de Criação
+# ✅ TMJOs — Checklist de Release (v2.0+ Debian)
 
 ## 🎯 OBJETIVO FINAL
+
 ```
 ┌─────────────────────────────────────┐
 │         TMJOs Linux Distro          │
 ├─────────────────────────────────────┤
-│ Base: Ubuntu 24.04 LTS              │
-│ Desktop: GNOME Clean                │
-│ Dock: Tipo Mac (Plank)              │
-│ Apps: VSCode, Git, Docker           │
-│ Tamanho: ~2-3GB (slim)              │
-│ Output: ISO Bootável                │
+│ Base: Debian 13 (trixie)            │
+│ Desktop: GNOME + TMJDock            │
+│ Installer: Calamares                │
+│ Apps: TMJOs stack + VSCode/Git      │
+│ ISO target: ~3-4GB                  │
 └─────────────────────────────────────┘
 ```
 
@@ -20,350 +20,150 @@
 
 ### ✅ ANTES DE COMEÇAR
 
-- [ ] Ubuntu 24.04 LTS instalado no notebook
-- [ ] Mínimo 30GB de espaço em disco livre
-- [ ] Conexão internet estável
-- [ ] Pen drive 8GB+ (para LiveUSB)
+- [ ] Host Debian/Ubuntu/derivada (testado em Ubuntu 24.04 e Debian 12)
+- [ ] Mínimo 30GB livres em `$HOME`
+- [ ] Conexão internet estável (ISO baixa ~2GB de pacotes)
+- [ ] Pen drive 8GB+ pra LiveUSB
 - [ ] Backup de dados importantes
 
-### ✅ FASE 1: INSTALAR CUBIC
+### ✅ FASE 1 — DEPS DO HOST
 
 ```bash
-# [1] Adicionar PPA do Cubic
-sudo add-apt-repository ppa:cubic-wizard/release
-
-# [2] Atualizar repositórios
 sudo apt update
-
-# [3] Instalar Cubic
-sudo apt install cubic
-
-# [4] Verificar instalação
-cubic --version
+sudo apt install -y \
+    live-build debootstrap xorriso \
+    squashfs-tools debian-archive-keyring git
 ```
 
-- [ ] Cubic instalado com sucesso
-- [ ] Terminal mostra versão do Cubic
+- [ ] `lb --version` mostra >= 1:20230502 (a57 ou superior funciona)
+- [ ] `debootstrap --version` ok
 
-### ✅ FASE 2: CRIAR PROJETO NO CUBIC
+### ✅ FASE 2 — `lb config`
 
-**Executar:**
 ```bash
-cubic
+mkdir -p ~/tmjos-debian-build
+cd ~/tmjos-debian-build
+
+sudo lb config \
+    --distribution trixie \
+    --architectures amd64 \
+    --binary-images iso-hybrid \
+    --mirror-bootstrap http://deb.debian.org/debian/ \
+    --mirror-chroot http://deb.debian.org/debian/ \
+    --mirror-binary http://deb.debian.org/debian/ \
+    --parent-mirror-bootstrap http://deb.debian.org/debian/ \
+    --apt-recommends true
 ```
 
-**No Cubic GUI - Preenchimento de Formulário:**
+- [ ] `config/` dir criado
+- [ ] `grep -r 'archive.ubuntu' config/` retorna vazio
+- [ ] `grep -r 'deb.debian.org' config/` retorna entries
 
-| Campo | Valor |
-|-------|-------|
-| **Project Name** | `TMJOs` |
-| **Project Version** | `1.0` |
-| **Base ISO** | `Ubuntu 24.04 LTS 64-bit` |
-| **Output Directory** | `~/tmjos-build/output` |
-| **Project Directory** | `~/tmjos-build/project` |
+### ✅ FASE 3 — POPULA CONFIG TMJOS
 
-- [ ] Projeto criado no Cubic
-- [ ] Cubic entrou no terminal de chroot (aviso: você está em chroot)
-- [ ] Pasta de trabalho criada
-
-### ✅ FASE 3: EXECUTAR SCRIPT DE CUSTOMIZAÇÃO
-
-**COPIE O SCRIPT `tmjos_customize.sh` para:**
 ```bash
-# Dentro do terminal do Cubic (chroot)
-nano ~/customize.sh
-# Cole o conteúdo do script
-# Salve: CTRL+O → ENTER → CTRL+X
+sudo ~/Projetos/GitHub/TMJOs/tools/tmjos-live-build-setup.sh
 ```
 
-**OU Execute direto:**
+- [ ] `config/archives/tmjos.list.chroot` existe
+- [ ] `config/archives/microsoft.list.chroot` existe
+- [ ] `config/package-lists/tmjos.list.chroot` lista pacotes TMJOs
+- [ ] `config/hooks/normal/0900-tmjos-setup.hook.chroot` é executável
+
+### ✅ FASE 4 — BUILD
+
 ```bash
-# Se o arquivo está no seu home
-bash ~/tmjos_customize.sh
+sudo lb build 2>&1 | tee build.log
 ```
 
-- [ ] Script executado sem erros
-- [ ] VSCode instalado ✓
-- [ ] Git instalado ✓
-- [ ] Docker instalado ✓
-- [ ] Plank instalado ✓
-- [ ] Apps desnecessários removidos ✓
-- [ ] Limpeza de cache feita ✓
+- [ ] Bootstrap completa sem erro
+- [ ] Chroot phase: apt install -y tmjos resolve
+- [ ] Binary phase: squashfs gerado
+- [ ] `*.hybrid.iso` aparece em `~/tmjos-debian-build/`
+- [ ] ISO < 5GB (ideal: 3-4GB)
 
-### ✅ FASE 4: CUSTOMIZAÇÕES MANUAIS (DENTRO DO CHROOT)
+### ✅ FASE 5 — TESTE EM VM
 
-#### 4.1 Configurar GNOME
+**virt-manager (recomendado):**
+
 ```bash
-# Abrir GNOME Tweaks para customizar
-gnome-tweaks
-
-# Ou via dconf (configuração avançada)
-dconf-editor
+virt-manager
+# New VM → Local install media → live-image-amd64.hybrid.iso
+# RAM 4G · CPUs 2 · Disco 30G
 ```
 
-**Ajustes recomendados:**
-- [ ] Tema: `Adwaita-dark` (ou preferência)
-- [ ] Ícones: `Adwaita` (padrão clean)
-- [ ] Wallpaper: `Padrão GNOME` (limpo)
-- [ ] Dock visível na barra inferior
-- [ ] Animações ativadas (smooth)
-- [ ] Hot corners desativados
+- [ ] VM boota via GRUB
+- [ ] GNOME live session carrega
+- [ ] Wallpaper TMJOs aparece
+- [ ] Plymouth boot splash mostra branding TMJOs
+- [ ] TMJMenu abre via Super+Space
+- [ ] TMJDock visível no bottom
+- [ ] TMJPad abre e persiste abas
+- [ ] TMJStore lista pacotes TMJOs
+- [ ] Sessão sem crashes / rendering ok
 
-#### 4.2 Configurar Plank (Dock)
+### ✅ FASE 6 — INSTALL (Calamares)
+
+- [ ] Ícone "Install TMJOs" no desktop live
+- [ ] Calamares abre sem WebKit error
+- [ ] Particionamento manual funciona
+- [ ] Usuário criado com sucesso
+- [ ] Instalação completa sem erro
+- [ ] Reboot pro sistema instalado funciona
+- [ ] GDM mostra logo TMJOs
+- [ ] Login → desktop TMJOs completo
+- [ ] `apt update && apt upgrade tmjos` funciona no instalado
+
+### ✅ FASE 7 — LIVEUSB FINAL
+
 ```bash
-# Iniciar Plank
-plank &
-
-# Clique DIREITO no Dock → Preferências
-# Configure:
-```
-
-**Configurações Plank:**
-- [ ] Position: `Bottom` (inferior)
-- [ ] Icon Size: `48px` (médio)
-- [ ] Hide Mode: `Window Dodge` (some ao focar janelas)
-- [ ] Theme: `Transparent` (fundo transparente)
-- [ ] Alignment: `Center`
-
-#### 4.3 Customizar Apps no Dock
-```bash
-# Ver arquivos .dockitem disponíveis
-ls /usr/share/applications/ | grep -E "(code|nautilus|gnome-control)"
-
-# Adicionar à configuração do Plank (opcional)
-# Editar: ~/.config/plank/dock1/settings
-```
-
-**Apps recomendados no Dock:**
-- [ ] GNOME Control Center (configurações)
-- [ ] Files (Nautilus - gerenciador)
-- [ ] VSCode
-- [ ] Terminal (opcional)
-
-#### 4.4 Configurar Terminal (opcional mas recomendado)
-```bash
-# Deixar terminal mais limpo
-gsettings set org.gnome.Terminal.Legacy.Settings default-show-menubar false
-
-# Tema escuro automático
-gsettings set org.gnome.desktop.interface gtk-application-prefer-dark-style true
-```
-
-- [ ] Customizações concluídas
-- [ ] Interface limpa e clean ✓
-- [ ] Dock funcionando como esperado ✓
-
-### ✅ FASE 5: VERIFICAÇÃO FINAL NO CHROOT
-
-**Sair do editor nano (se ainda estiver):**
-```bash
-exit  # (se necessário)
-```
-
-**Rodar testes finais:**
-```bash
-# Verificar espaço
-df -h /
-
-# Listar pacotes instalados (extras)
-dpkg -l | grep -E "(code|docker|git|plank)"
-
-# Teste rápido de cada app
-code --version
-git --version
-docker --version
-plank --version
-
-# Limpeza final
-sudo apt clean
-sudo apt autoclean
-sudo apt autoremove -y
-```
-
-- [ ] VSCode → responde com versão
-- [ ] Git → responde com versão
-- [ ] Docker → responde com versão
-- [ ] Plank → responde com versão
-- [ ] Sem erros de dependência
-- [ ] Tamanho estimado: ~2-3GB
-
-### ✅ FASE 6: GERAR ISO NO CUBIC
-
-**No terminal do Cubic (ou GUI):**
-1. Clique botão: **`Generate ISO`**
-2. Espere processamento (20-40 minutos, depende do PC)
-3. Progresso será exibido em tempo real
-
-- [ ] ISO iniciada com sucesso
-- [ ] Progresso > 50%
-- [ ] Progresso > 90%
-- [ ] **ISO gerada em:** `~/tmjos-build/output/tmjos-1.0-amd64.iso`
-
-**Verificar tamanho:**
-```bash
-# No seu terminal normal (fora do Cubic)
-ls -lh ~/tmjos-build/output/tmjos-1.0-amd64.iso
-
-# Esperado: ~2.5-3.0 GB
-```
-
-- [ ] Arquivo ISO existe
-- [ ] Tamanho entre 2-3GB
-- [ ] Sem corrupção (hash check opcional)
-
-### ✅ FASE 7: CRIAR LIVUSB
-
-**Identificar pen drive:**
-```bash
-# Listar dispositivos
-lsblk
-
-# Ou com mais detalhes
-sudo fdisk -l | grep "Disk /dev/sd"
-
-# Esperado algo como: /dev/sdb (NÃO /dev/sda!)
-```
-
-- [ ] Pen drive identificado (ex: `/dev/sdb`)
-- [ ] Pen drive de 8GB+ confirmado
-- [ ] Pen drive desmontado
-
-**Gravar ISO na pen:**
-```bash
-# ⚠️ CUIDADO: Substitua 'sdX' pela sua pen (lsblk confirma)
-# ⚠️ AVISO: Isso APAGA o conteúdo da pen!
-
-# Desmontar se montado
+# Substituir sdX pela pen correta (lsblk pra conferir)
 sudo umount /dev/sdX*
-
-# Gravar com dd
-sudo dd if=~/tmjos-build/output/tmjos-1.0-amd64.iso of=/dev/sdX bs=4M status=progress
-
-# Sincronizar (esperar finalizar!)
-sudo sync
-
-# Ejetar seguramente (Linux)
+sudo dd if=~/tmjos-debian-build/live-image-amd64.hybrid.iso \
+    of=/dev/sdX bs=4M status=progress conv=fsync
+sync
 sudo eject /dev/sdX
-
-# Ou (macOS - se usar Mac)
-diskutil eject /dev/diskX
 ```
 
-- [ ] DD iniciado com `status=progress`
-- [ ] Progresso mostra 100%
-- [ ] Sem mensagem de erro
-- [ ] Sync concluído
-- [ ] Pen ejetada com segurança
+- [ ] DD termina sem erro
+- [ ] Sync completo
+- [ ] Pen ejetada
+- [ ] Boot real em hardware funciona
 
-### ✅ FASE 8: TESTAR LIVUSB
+### ✅ FASE 8 — RELEASE
 
-**Opção A: Em máquina virtual (RECOMENDADO - seguro)**
-```bash
-# Instalar QEMU se não tiver
-sudo apt install qemu-system-x86
-
-# Testar ISO antes de booting real
-qemu-system-x86_64 -cdrom ~/tmjos-build/output/tmjos-1.0-amd64.iso \
-  -m 4G \
-  -smp 4 \
-  -accel kvm \
-  -monitor stdio
-```
-
-- [ ] VM inicia
-- [ ] GRUB (boot menu) aparece
-- [ ] Ubuntu carrega
-- [ ] GNOME desktop aparece
-- [ ] Dock (Plank) visível na base
-- [ ] Sem travamento
-
-**Opção B: Booting real na pen (CUIDADOSO)**
-1. Rebootar notebook
-2. Entrar em BIOS/UEFI (geralmente `F2`, `F12`, `DEL`)
-3. Selecionar boot por USB
-4. Aguardar carregar
-
-- [ ] Boot pela pen drive funciona
-- [ ] GRUB carrega
-- [ ] Desktop TMJOs aparece corretamente
-- [ ] Todos apps funcionam
-
-### ✅ FASE 9: TESTES DE INTERFACE
-
-**Teste cada elemento:**
-
-```
-┌─────────────────────────────────────┐
-│ Teste de Interface TMJOs            │
-├─────────────────────────────────────┤
-│ [ ] Wallpaper carrega               │
-│ [ ] GNOME top bar visível           │
-│ [ ] Dock (Plank) na base            │
-│ [ ] Ícones dos apps visíveis        │
-│ [ ] Click no Dock abre apps         │
-│ [ ] VSCode funciona                 │
-│ [ ] Terminal funciona               │
-│ [ ] Configurações GNOME abrem       │
-│ [ ] WiFi conecta                    │
-│ [ ] Shutdown funciona               │
-└─────────────────────────────────────┘
-```
-
-- [ ] Visual clean e minimalista ✓
-- [ ] Sem elementos desnecessários ✓
-- [ ] Dock tipo Mac presente ✓
-- [ ] Responsividade OK ✓
-- [ ] Apps principais funcionam ✓
+- [ ] SHA256 da ISO computado: `sha256sum *.iso > tmjos.iso.sha256`
+- [ ] Upload pro Cloudflare R2 (`tmjos-v2.0.0-alpha-amd64.iso`)
+- [ ] Tag git (`v2.0.0-alpha`)
+- [ ] CHANGELOG.md atualizado
+- [ ] GitHub release publicado com link R2 + checksum
 
 ---
 
-## 🚀 PÓS-GERAÇÃO
-
-### Para Compartilhar TMJOs
-
-- [ ] ISO testada e funcional
-- [ ] Criar README.md com instruções
-- [ ] Documentar customizações especiais
-- [ ] Considerar criar repositório GitHub
-- [ ] Versionar releases
-
-### Próximos Passos
-
-- [ ] **TMJCode**: VSCode customizado com TMJOs branding
-- [ ] **Documentação oficial** do TMJOs
-- [ ] **Suporte a contribuições** da comunidade
-- [ ] **Atualizações periódicas** do kernel/apps
-
----
-
-## 📞 TROUBLESHOOTING RÁPIDO
+## 🔧 TROUBLESHOOTING
 
 | Problema | Solução |
-|----------|---------|
-| Cubic não abre | `sudo cubic` (precisa root) |
-| "sem espaço em disco" | Limpar `/tmp`: `sudo rm -rf /tmp/*` |
-| Dock não aparece | `plank --replace &` |
-| VSCode lento | Desabilitar extensões desnecessárias |
-| ISO > 3GB | Remover mais apps com script |
-| Boot USB não funciona | Tentar `CTRL+ALT+DEL` ou resetar BIOS |
+|---|---|
+| `lb config` falha | Confira flags `--mirror-*` explícitos |
+| Build trava em bootstrap | Mirror down? Tenta `http://ftp.br.debian.org/debian/` |
+| Hook falha | Ver `build.log`, hook precisa ser `/bin/sh` portable |
+| Pacote `tmjos` não resolve | APT repo trixie ainda não publicou? Conferir CI no GitHub Actions |
+| ISO não boota | Confere se `--binary-images iso-hybrid` foi passado |
+| GRUB ok mas live falha | Falta `live-boot` + `live-config` na package-list |
 
 ---
 
-## 🎯 STATUS FINAL
+## 📞 STATUS FINAL ESPERADO
 
 ```
-✅ TMJOS v1.0 - PRONTO PARA USAR!
+✅ TMJOs v2.0.0-alpha — PRONTO PARA TEST!
 
 Estatísticas:
-├─ ISO Size: 2.5-3.0 GB
-├─ Apps Removidos: ~15
-├─ Apps Inclusos: VSCode, Git, Docker + essenciais
-├─ Desktop: GNOME Limpo
-├─ Dock: Plank (tipo Mac)
-├─ Boot Time: ~15-20 seg
-└─ Experiência: CLEAN & BEAUTIFUL 🎨
+├─ ISO Size: 3-4 GB
+├─ Base: Debian 13 (trixie)
+├─ Desktop: GNOME + TMJMenu/TMJDock
+├─ Installer: Calamares
+├─ APT repo: packages.tmjos.com.br (trixie main apps)
+├─ Boot Time: ~10-15 seg
+└─ Experiência: NEON, DARK, INSANO 🐉
 ```
-
----
-
-**Parabéns! TMJOs está pronto para o mundo! 🚀🐧**

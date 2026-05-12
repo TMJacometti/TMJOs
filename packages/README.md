@@ -3,25 +3,21 @@
 Este diretório contém os **sources** dos pacotes `.deb` do TMJOs.
 Cada subpasta em `sources/` vira um `.deb` no APT repo público.
 
-> **Pra entender a arquitetura completa**, leia
-> [`docs/v1.3/ROADMAP.md`](../docs/v1.3/ROADMAP.md).
-
 ## 📂 Estrutura
 
 ```
 packages/
-├── conf/              # reprepro/aptly config
+├── conf/              # reprepro config (trixie suite)
 ├── keys/              # GPG public key (TMJOs archive keyring)
 ├── sources/           # source dir de cada pacote
+│   ├── tmjos/         # meta-package
 │   ├── tmjos-branding/
 │   ├── tmjos-os-identity/
-│   ├── tmjos-dock/
 │   ├── tmjos-defaults/
-│   ├── tmjos-shell-tweaks/
+│   ├── tmjos-hello/   # smoke test
+│   ├── tmjmenu/       # TMJMenu + TMJDock
 │   ├── tmjpad/
-│   ├── tmjos-store/
-│   ├── tmjcode/
-│   └── tmjos/         # meta-package
+│   └── tmjstore/
 └── README.md          # este arquivo
 ```
 
@@ -46,12 +42,12 @@ Push pra `main` que toca em `packages/sources/<pkg>/` dispara
 
 ## 📦 Como user instala/atualiza
 
-ISO TMJOs v1.3+ já vem com o repo pré-configurado:
+ISO TMJOs v2.0+ já vem com o repo pré-configurado:
 
 ```bash
 # /etc/apt/sources.list.d/tmjos.list
 deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] \
-  https://tmjacometti.github.io/TMJOs/ noble main
+  https://packages.tmjos.com.br trixie main apps
 ```
 
 Daí o user roda:
@@ -59,10 +55,10 @@ Daí o user roda:
 ```bash
 sudo apt update
 sudo apt upgrade tmjos       # atualiza todo o core
-sudo apt install tmjcode     # instala app individual
+sudo apt install tmjpad      # instala app individual
 ```
 
 ## 🚧 Status atual
 
-**v1.3 em desenvolvimento.** Esta estrutura ainda está sendo populada.
-Acompanhe progresso em [`docs/v1.3/ROADMAP.md`](../docs/v1.3/ROADMAP.md).
+**v2.0 alpha** — migração Ubuntu (noble) → Debian (trixie) em andamento.
+Repo APT publica apenas suite `trixie`. v1.x (noble) está congelado.

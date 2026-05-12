@@ -49,8 +49,8 @@ chore:    tarefas de manutenção (deps, build, etc)
 
 Exemplos:
 - `feat: adiciona wallpaper TMJOs blue`
-- `fix: corrige caminho do skel do plank`
-- `docs: atualiza guia de build com nova versão do Cubic`
+- `fix: corrige hook de live-build`
+- `docs: atualiza guia de build com nova versão do live-build`
 
 ### Estrutura de Pastas
 
@@ -89,14 +89,14 @@ tmjos/
 
 ## Build Local
 
-Pra testar suas mudanças no script de customização sem refazer toda ISO, dá pra rodar em uma VM Ubuntu 24.04 limpa:
+Pra testar suas mudanças no script de customização sem refazer toda ISO, dá pra rodar em uma VM Debian 13 (trixie) limpa OU em um container `debian:trixie`:
 
 ```bash
-# Em uma VM Ubuntu 24.04 (NÃO no seu host!)
+# Em uma VM/container Debian 13 (NÃO no seu host!)
 sudo bash scripts/tmjos_customize.sh
 ```
 
-⚠️ **Não rode esse script no seu host de trabalho** — ele remove apps. Use VM ou container.
+⚠️ **Não rode esse script no seu host de trabalho** — ele adiciona repos extras e instala stack completa do TMJOs. Use VM ou container.
 
 ---
 
