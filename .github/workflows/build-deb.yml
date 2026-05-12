@@ -87,10 +87,33 @@ jobs:
           # auto-populates the Custom Domain field in repo Settings → Pages.
           # Let's Encrypt cert provisioning takes ~15min after first publish.
           echo 'packages.tmjos.com.br' > apt-repo/CNAME
-          # Importa as .debs no reprepro
+          # Importa as .debs no reprepro pras duas suites:
+          # - noble (Ubuntu 24.04 v1.x legacy)
+          # - trixie (Debian 13 v2.0+)
+          # Mesmos pacotes vão pras duas — apps GTK4 são distro-agnostic.
+          # Pacotes Ubuntu-specific (tmjos-installer com ubiquity divert)
+          # vão failhar no install em Debian — TODO: skip esses no trixie.
           for deb in packages/dist/*.deb; do
-              echo "Adding $deb to reprepro..."
+              echo "Adding $deb to reprepro (noble)..."
               reprepro --basedir apt-repo includedeb noble "$deb"
+              # Pacotes Ubuntu-only ficam só em noble.
+              # Componentwise, todos vão pra main por padrão; em v2.1 vamos
+              # separar apps/extras como components.
+              case "$(basename "$deb")" in
+                  tmjos-installer_*|tmjos-shell-tweaks_*|tmjos-dock_*)
+                      echo "  (skip trixie — Ubuntu-specific)"
+                      ;;
+                  *)
+                      echo "Adding $deb to reprepro (trixie)..."
+                      # --ignore=wrongdistribution: packages têm "noble"
+                      # no debian/changelog mas são distro-agnostic (apps
+                      # GTK4/Python). Em v2.0 stable, vamos refatorar
+                      # changelog dual-target.
+                      reprepro --basedir apt-repo --ignore=wrongdistribution \
+                          includedeb trixie "$deb" || \
+                          echo "  warning: trixie include falhou"
+                      ;;
+              esac
           done
           # Copia a public key pro repo (user adiciona como signed-by)
           mkdir -p apt-repo/keys
