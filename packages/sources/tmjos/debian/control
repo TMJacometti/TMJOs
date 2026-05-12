@@ -55,4 +55,4 @@ Description: TMJOs metapackage — pulls in the entire TMJOs experience
  .
  On TMJOs systems, `sudo apt upgrade tmjos` will pull the latest
  versions of every component package, providing the post-release
- update mechanism inherited from v1.3.
+ update mechanism for the Debian-based v2.0 line.

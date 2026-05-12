@@ -147,7 +147,7 @@ $SUDO curl -fsSL "$TMJOS_REPO_URL/keys/tmjos-archive-keyring.gpg" \
 
 # Usa codename `trixie` (não noble como em v1.x)
 # Components main + apps + extras (granularidade v2.0)
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] $TMJOS_REPO_URL trixie main apps" \
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] $TMJOS_REPO_URL trixie main apps extras" \
     | $SUDO tee /etc/apt/sources.list.d/tmjos.list > /dev/null
 
 $SUDO apt update

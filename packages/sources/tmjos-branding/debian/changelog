@@ -1,3 +1,11 @@
+tmjos-branding (2.0.0-1) trixie; urgency=medium
+
+  * Rebuild para a linha TMJOs v2.0 em Debian 13 trixie.
+  * Mantém wallpapers, logos e Plymouth como pacote core versionado
+    em 2.0.0 para satisfazer o metapackage tmjos v2.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Tue, 12 May 2026 23:00:00 -0300
+
 tmjos-branding (1.3.0-1) noble; urgency=low
 
   * Initial .deb release. Contains the visual assets that v1.2 ISO

@@ -18,8 +18,8 @@ Description: TMJOs system-wide dconf defaults (dark mode, fonts, dock-off)
   * Dark color scheme (color-scheme=prefer-dark, gtk-theme=Adwaita-dark)
   * TMJOs wallpaper as the desktop background
   * JetBrains Mono as the monospace font
-  * Disables Ubuntu Dock + appindicators + ding (desktop icons) so
-    Plank is the only dock and the desktop stays clean
+  * Disables distro dock/appindicator/desktop-icon extensions when
+    present, so TMJDock owns the desktop shell experience
   * GNOME shell favorite-apps preset (TMJPad included)
  .
  The override file lives at /etc/dconf/db/local.d/00-tmjos-defaults.

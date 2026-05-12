@@ -43,7 +43,7 @@ Codename: **insano**.
 curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg \
   | sudo tee /usr/share/keyrings/tmjos-archive-keyring.gpg > /dev/null
 
-echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br trixie main apps' \
+echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br trixie main apps extras' \
   | sudo tee /etc/apt/sources.list.d/tmjos.list > /dev/null
 
 # 2. Update + install
@@ -83,6 +83,7 @@ Killer feature do TMJOs: atualiza TODO o core (branding, identity, defaults, TMJ
 | `tmjos-branding` | Wallpapers, logos, Plymouth boot splash |
 | `tmjos-os-identity` | `/etc/os-release`, `/etc/lsb-release` (dpkg-divert) |
 | `tmjos-defaults` | dconf overrides (dark mode, fonts, slim runtime mask) |
+| `tmjos-calamares-branding` *(Recommends)* | Branding e slideshow TMJOs para o Calamares |
 | `tmjmenu` | TMJMenu popup + TMJDock |
 | `tmjpad` | Editor de texto com session persistence |
 | `tmjstore` *(Recommends)* | Software center proprietário TMJOs |
@@ -208,11 +209,11 @@ git push origin feature/sua-feature
 - [x] Script de customização `tmjos_customize.sh` para chroot Debian
 - [x] Setup pra `live-build` (substitui Cubic Ubuntu-only)
 - [ ] Primeira ISO alpha gerada + testada em virt-manager
-- [ ] Calamares branding básico (tmjos-calamares-branding package)
+- [x] Calamares branding básico (`tmjos-calamares-branding` package)
 
 ### 🔜 v2.0 stable
 
-- [ ] **Calamares branding completo**: slideshow QML, partition assets, logo full
+- [ ] **Calamares branding completo**: partition assets, logo full e polish final do slideshow QML
 - [ ] **TMJDock Wayland-native** via gtk4-layer-shell (sem X11 force)
 - [ ] **APT components**: separar `main` / `apps` / `extras` (granularidade)
 - [ ] **ISO size target**: 2-3GB

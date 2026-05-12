@@ -1,3 +1,10 @@
+tmjos-hello (0.1.0-2) trixie; urgency=medium
+
+  * No-change rebuild para validar publicação no repo trixie da linha
+    TMJOs v2.0.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Tue, 12 May 2026 23:00:00 -0300
+
 tmjos-hello (0.1.0-1) noble; urgency=low
 
   * Initial release.

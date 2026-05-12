@@ -119,7 +119,7 @@ jobs:
           <pre><code>curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg \
             | sudo tee /usr/share/keyrings/tmjos-archive-keyring.gpg > /dev/null
           echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] \
-            https://packages.tmjos.com.br/ trixie main apps' \
+            https://packages.tmjos.com.br/ trixie main apps extras' \
             | sudo tee /etc/apt/sources.list.d/tmjos.list
           sudo apt update
           sudo apt install tmjos</code></pre>
@@ -132,9 +132,9 @@ jobs:
       - name: Deploy to gh-pages
         # Publica de main, qualquer feature/** branch (pra permitir
         # testes via apt upgrade durante dev), ou trigger manual.
-        # Quando uma feature stabilizar e for pra release, restringir
-        # pra só main pode fazer sentido — mas durante o ciclo de uma
-        # release maior (ex: v1.3.4), permitir deploy de feature acelera
+        # Quando uma feature estabilizar e for pra release, restringir
+        # pra só main pode fazer sentido — mas durante o ciclo v2.0,
+        # permitir deploy de feature acelera
         # o feedback loop drasticamente (testar fix imediatamente em
         # sistema instalado, em vez de esperar merge).
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/feature/') || github.event_name == 'workflow_dispatch'

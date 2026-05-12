@@ -1,3 +1,10 @@
+tmjpad (0.1.2-2) trixie; urgency=medium
+
+  * No-change rebuild para publicar o TMJPad no repo trixie da linha
+    TMJOs v2.0.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Tue, 12 May 2026 23:00:00 -0300
+
 tmjpad (0.1.2-1) noble; urgency=medium
 
   * Fix: TMJPad icon not appearing in v1.3.0-1 ISO despite gtk-update-icon-cache.

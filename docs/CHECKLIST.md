@@ -65,9 +65,9 @@ sudo lb config \
 sudo ~/Projetos/GitHub/TMJOs/tools/tmjos-live-build-setup.sh
 ```
 
-- [ ] `config/archives/tmjos.list.chroot` existe
-- [ ] `config/archives/microsoft.list.chroot` existe
-- [ ] `config/package-lists/tmjos.list.chroot` lista pacotes TMJOs
+- [ ] `config/package-lists/tmjos.list.chroot` existe e lista apenas pacotes Debian main
+- [ ] `config/hooks/normal/0500-tmjos-apt-install.hook.chroot` adiciona os repos TMJOs/Microsoft e instala `tmjos code`
+- [ ] `config/hooks/normal/0700-tmjos-slim.hook.chroot` remove bloat e mascara serviços pesados
 - [ ] `config/hooks/normal/0900-tmjos-setup.hook.chroot` é executável
 
 ### ✅ FASE 4 — BUILD
@@ -163,7 +163,7 @@ Estatísticas:
 ├─ Base: Debian 13 (trixie)
 ├─ Desktop: GNOME + TMJMenu/TMJDock
 ├─ Installer: Calamares
-├─ APT repo: packages.tmjos.com.br (trixie main apps)
+├─ APT repo: packages.tmjos.com.br (trixie main apps extras)
 ├─ Boot Time: ~10-15 seg
 └─ Experiência: NEON, DARK, INSANO 🐉
 ```

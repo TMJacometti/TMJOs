@@ -1,3 +1,11 @@
+tmjos (2.0.0-3) trixie; urgency=medium
+
+  * Atualiza descrição do metapackage para a linha Debian-based v2.0.
+  * Mantém tmjos-calamares-branding em Recommends para a ISO com
+    Calamares branded.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Tue, 12 May 2026 23:00:00 -0300
+
 tmjos (2.0.0-2) trixie; urgency=medium
 
   * Add tmjos-calamares-branding em Recommends — branding TMJOs pro

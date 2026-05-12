@@ -1,3 +1,10 @@
+tmjmenu (1.3.4-15) trixie; urgency=medium
+
+  * No-change rebuild para publicar o TMJMenu/TMJDock no repo trixie
+    da linha TMJOs v2.0.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Tue, 12 May 2026 23:00:00 -0300
+
 tmjmenu (1.3.4-14) noble; urgency=medium
 
   * Fix: apps TMJ recém-instalados (TMJStore, TMJCode futuro) não

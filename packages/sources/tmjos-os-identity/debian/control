@@ -11,18 +11,13 @@ Architecture: all
 Depends: ${misc:Depends},
          dpkg
 Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
- Replaces the Ubuntu identity files with TMJOs-branded versions:
-  * /etc/os-release    — TMJOs 1.x (insano), shows in GNOME About
-                         and modern tools that read PRETTY_NAME / ID
-  * /etc/lsb-release   — KEPT AS UBUNTU NOBLE intentionally so that
-                         add-apt-repository, NodeJS install scripts,
-                         Docker get.docker.com, k8s setup and every
-                         other "lsb_release -cs"-based script
-                         continues to find a valid Ubuntu codename.
-                         Identity is shown via /etc/os-release; lsb
-                         is for compat.
+ Replaces the Debian identity files with TMJOs-branded versions:
+  * /etc/os-release    — TMJOs 2.0 alpha on Debian 13 trixie, shown in
+                         GNOME About and tools that read PRETTY_NAME / ID
+  * /etc/lsb-release   — TMJOs 2.0 alpha, codename trixie, for legacy
+                         scripts that still read lsb_release output
   * /etc/issue         — "TMJOs <ver> \n \l" banner shown at TTY login
-  * /etc/issue.net     — same content for telnet/ssh banner
+  * /etc/issue.net     — same content for remote login banners
  .
  Implementation: uses dpkg-divert to take ownership of the four
  files from the upstream base-files package. Originals are renamed

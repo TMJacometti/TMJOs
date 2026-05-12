@@ -12,6 +12,7 @@ packages/
 ├── sources/           # source dir de cada pacote
 │   ├── tmjos/         # meta-package
 │   ├── tmjos-branding/
+│   ├── tmjos-calamares-branding/
 │   ├── tmjos-os-identity/
 │   ├── tmjos-defaults/
 │   ├── tmjos-hello/   # smoke test
@@ -47,7 +48,7 @@ ISO TMJOs v2.0+ já vem com o repo pré-configurado:
 ```bash
 # /etc/apt/sources.list.d/tmjos.list
 deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] \
-  https://packages.tmjos.com.br trixie main apps
+  https://packages.tmjos.com.br trixie main apps extras
 ```
 
 Daí o user roda:

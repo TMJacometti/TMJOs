@@ -17,7 +17,7 @@
 
 ### Passo 1.1: Instalar dependências
 
-Host pode ser Debian 12+, Ubuntu 22.04+, ou qualquer derivada que tenha `live-build` (>= 1:20230502) nos repos.
+Host pode ser Debian 12+, Ubuntu 24.04+, ou qualquer derivada que tenha `live-build` (>= 1:20230502) nos repos.
 
 ```bash
 sudo apt update

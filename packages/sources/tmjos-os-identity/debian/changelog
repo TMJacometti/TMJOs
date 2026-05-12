@@ -1,3 +1,14 @@
+tmjos-os-identity (2.0.0-1) trixie; urgency=medium
+
+  * Rebase da identidade do sistema para TMJOs 2.0 alpha em Debian 13
+    trixie.
+  * /etc/os-release agora usa ID_LIKE=debian, DEBIAN_CODENAME=trixie
+    e TMJOS_CODENAME=insano.
+  * /etc/lsb-release, /etc/issue e /etc/issue.net atualizados para
+    v2.0 alpha, removendo os valores Ubuntu noble da linha v1.x.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Tue, 12 May 2026 23:00:00 -0300
+
 tmjos-os-identity (1.3.0-2) noble; urgency=high
 
   * Fix install conflict with base-files. Previous version (1.3.0-1)
