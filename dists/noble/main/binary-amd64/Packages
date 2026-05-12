@@ -314,20 +314,20 @@ Description: TMJOs text editor with full session persistence
    * GTK4 + libadwaita native
 
 Package: tmjstore
-Version: 0.1.5-1
+Version: 0.1.6-1
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Installed-Size: 5163
+Installed-Size: 5171
 Depends: python3 (>= 3.10), python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1, policykit-1 | polkitd, apt
 Recommends: tmjos-branding
 Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjstore
 Priority: optional
 Section: admin
-Filename: pool/main/t/tmjstore/tmjstore_0.1.5-1_all.deb
-Size: 1303408
-SHA256: 1ca8c911e2bf43314e17a5aa6bc5e67e89db291150f4cbd83313a7f697245b58
-SHA1: 283b3f8cea7aee43905466ebb3bc2aa9b2bbb38c
-MD5sum: 0b0a9b33226dc7f11199f63856fbcace
+Filename: pool/main/t/tmjstore/tmjstore_0.1.6-1_all.deb
+Size: 1305740
+SHA256: 78ce652b67783568bf1d3d1a6b5e1580278cd9964f4a00aa7ac405333c2fd42e
+SHA1: bbb912acf175c328715300c98001312d10a39e0d
+MD5sum: c40336477931231f77a7e3d3d11c2e3b
 Description: TMJOs Software Center — apps proprietários TMJOs
  Descobre apps proprietários TMJOs no APT repo via AppStream
  metadata e instala/remove/atualiza via apt + pkexec.
