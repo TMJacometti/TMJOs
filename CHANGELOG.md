@@ -232,6 +232,12 @@ estiver pronto.
     repo (proxy hosting OR custom CGI no GH Pages — não-trivial).
   - **Search bar** dentro da store.
   - **Filtro por categoria**.
+  - **Update check daemon**: autostart entry roda
+    `tmjstore-check-updates` no login. Faz `apt list --upgradable`
+    filtrado por origin TMJOs. Se tem updates, envia `notify-send`
+    com action "Abrir TMJStore" que abre direto na aba Updates.
+    Estilo macOS App Store "1 update available". Substitui o
+    unattended-upgrades que removemos.
 - **v0.3 backlog**:
   - **Reviews / ratings**: avaliações de usuários TMJOs. Requer
     backend (Supabase free tier? GH Discussions API hack?).
