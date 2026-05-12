@@ -1,3 +1,16 @@
+tmjstore (0.1.1-1) noble; urgency=medium
+
+  * Fix AttributeError 'Viewport' object has no attribute 'remove'
+    quando _refresh tentava limpar children das views. GTK4
+    ScrolledWindow envolve o child num Viewport interno —
+    scrolled.get_child() retorna o Viewport, não a Box que
+    queríamos manipular.
+  * Refactor: _build_list_view retorna tupla (scrolled, container)
+    e guardamos referência direta do container. _populate_box opera
+    na Box, não navega via scrolled.get_child().
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 21:45:00 -0300
+
 tmjstore (0.1.0-1) noble; urgency=low
 
   * Initial release. TMJOs proprietary software center.

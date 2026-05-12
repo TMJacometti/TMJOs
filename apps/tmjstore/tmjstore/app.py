@@ -110,12 +110,14 @@ class TMJStoreWindow(Adw.ApplicationWindow):
 
         toolbar.add_top_bar(header)
 
-        # ViewStack com 3 views (Apps / Installed / Updates)
+        # ViewStack com 3 views (Apps / Installed / Updates).
+        # _build_list_view retorna (scrolled, container) — scrolled
+        # vai pro stack, container guardamos pra popular depois.
         self._stack = Adw.ViewStack()
 
-        self._apps_view = self._build_list_view()
-        self._installed_view = self._build_list_view()
-        self._updates_view = self._build_list_view()
+        self._apps_view, self._apps_box = self._build_list_view()
+        self._installed_view, self._installed_box = self._build_list_view()
+        self._updates_view, self._updates_box = self._build_list_view()
 
         self._stack.add_titled_with_icon(
             self._apps_view, "apps", "Apps", "view-grid-symbolic")
@@ -136,7 +138,11 @@ class TMJStoreWindow(Adw.ApplicationWindow):
         # Populate inicial
         self._refresh()
 
-    def _build_list_view(self) -> Gtk.ScrolledWindow:
+    def _build_list_view(self) -> tuple[Gtk.ScrolledWindow, Gtk.Box]:
+        """Cria ScrolledWindow + Box interno. Retorna tupla (scrolled,
+        container) — scrolled vai pro Adw.ViewStack, container é onde
+        popular cards. GTK4 envolve a Box num Viewport interno, então
+        manter referência direta evita ter que navegar scrolled.get_child()."""
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scrolled.set_vexpand(True)
@@ -148,30 +154,24 @@ class TMJStoreWindow(Adw.ApplicationWindow):
         container.set_margin_end(16)
         scrolled.set_child(container)
 
-        return scrolled
+        return scrolled, container
 
     def _refresh(self) -> None:
         """Re-discover apps + popula as 3 views."""
         apps = discover_tmj_apps()
 
-        # Apps view: todos
-        self._populate_view(self._apps_view, apps)
-        # Installed: filtrados
-        self._populate_view(
-            self._installed_view, [a for a in apps if a.installed])
-        # Updates: com has_update
+        self._populate_box(self._apps_box, apps)
+        self._populate_box(self._installed_box,
+                           [a for a in apps if a.installed])
         updates = [a for a in apps if a.has_update]
-        self._populate_view(self._updates_view, updates)
+        self._populate_box(self._updates_box, updates)
+
         # Badge do tab Updates
         if hasattr(self._updates_view_page, "set_badge_number"):
             self._updates_view_page.set_badge_number(len(updates))
 
-    def _populate_view(
-        self,
-        scrolled: Gtk.ScrolledWindow,
-        apps: list[TMJApp],
-    ) -> None:
-        container = scrolled.get_child()
+    def _populate_box(self, container: Gtk.Box, apps: list[TMJApp]) -> None:
+        """Limpa + re-popula a Box com cards dos apps."""
         # Clear children
         child = container.get_first_child()
         while child:
