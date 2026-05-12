@@ -2,13 +2,13 @@ Origin: TMJOs
 Label: TMJOs
 Suite: stable
 Codename: trixie
-Date: Tue, 12 May 2026 18:40:09 UTC
+Date: Tue, 12 May 2026 19:31:58 UTC
 Architectures: amd64
 Components: main apps extras
 Description: TMJOs custom packages for Debian 13 trixie (v2.0+)
 MD5Sum:
- 81fecdd9070ad16055aa4d68b10541d6 10540 main/binary-amd64/Packages
- 54ac1c115a54824cce2910b5bc9eac18 4479 main/binary-amd64/Packages.gz
+ 6a97385aa769d216617d1fd0545cfed2 10329 main/binary-amd64/Packages
+ 6a01da2595cc297eee14dfc2355116bf 4444 main/binary-amd64/Packages.gz
  efea1cd09cfe036797b176741c33cebb 143 main/binary-amd64/Release
  d41d8cd98f00b204e9800998ecf8427e 0 main/source/Sources
  7029066c27ac6f5ef18d660d5741979a 20 main/source/Sources.gz
@@ -26,8 +26,8 @@ MD5Sum:
  7029066c27ac6f5ef18d660d5741979a 20 extras/source/Sources.gz
  7e99632d2b793ecc6f1ec572cbc9f97f 146 extras/source/Release
 SHA1:
- 7ae6ffb06b2bd0587803a0014173ccb46f3a0b0e 10540 main/binary-amd64/Packages
- 9b7a04465a2e826a8c2872c3f7d6088001dfe6a3 4479 main/binary-amd64/Packages.gz
+ 640c7c44560d718e02e837420bc55cfd3fb6edd9 10329 main/binary-amd64/Packages
+ 0d516bbe44459c900d41a6ea39dd449253f53d2c 4444 main/binary-amd64/Packages.gz
  4796e1294cd5090678f4bfc133250cfcfe4b123a 143 main/binary-amd64/Release
  da39a3ee5e6b4b0d3255bfef95601890afd80709 0 main/source/Sources
  46c6643f07aa7f6bfe7118de926b86defc5087c4 20 main/source/Sources.gz
@@ -45,8 +45,8 @@ SHA1:
  46c6643f07aa7f6bfe7118de926b86defc5087c4 20 extras/source/Sources.gz
  fbb6e46d13e2bba77b5238c9cc69b6eb913e4735 146 extras/source/Release
 SHA256:
- c6c706f7e74386f5b719e650feaeae72da510e7dd3723010d81a102cb1fe572d 10540 main/binary-amd64/Packages
- 13f77771a54271b8545822078ae1d99740a2db8e3c0f432d924cc97632cd82ba 4479 main/binary-amd64/Packages.gz
+ 05d2cf5725a5e5c0ce95258e5f3b5d344545edf74e0d830da4e82591f38445c7 10329 main/binary-amd64/Packages
+ d6b35cd2ef7b1f0197c1d663546a83fe5c76ab9769380971af368f18021168af 4444 main/binary-amd64/Packages.gz
  02dc5e3cfcd94ac776ac990f7d50406c5e9a5bab503b8a9b29de60c0f8671814 143 main/binary-amd64/Release
  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 main/source/Sources
  59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 main/source/Sources.gz
