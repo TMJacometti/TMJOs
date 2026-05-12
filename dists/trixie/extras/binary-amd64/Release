@@ -1,0 +1,6 @@
+Archive: stable
+Component: extras
+Origin: TMJOs
+Label: TMJOs
+Architecture: amd64
+Description: TMJOs custom packages for Debian 13 trixie (v2.0+)

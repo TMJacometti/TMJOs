@@ -4,5 +4,14 @@ Codename: noble
 Suite: stable
 Architectures: amd64 source
 Components: main
-Description: TMJOs custom packages for Ubuntu 24.04 noble
+Description: TMJOs custom packages for Ubuntu 24.04 noble (v1.x legacy)
+SignWith: 8691DF2D301C2C43401F5EB7754858E2A58C4363
+
+Origin: TMJOs
+Label: TMJOs
+Codename: trixie
+Suite: stable
+Architectures: amd64 source
+Components: main apps extras
+Description: TMJOs custom packages for Debian 13 trixie (v2.0+)
 SignWith: 8691DF2D301C2C43401F5EB7754858E2A58C4363

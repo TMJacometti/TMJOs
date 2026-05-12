@@ -3,4 +3,4 @@ Component: main
 Origin: TMJOs
 Label: TMJOs
 Architecture: amd64
-Description: TMJOs custom packages for Ubuntu 24.04 noble (v1.x legacy)
+Description: TMJOs custom packages for Debian 13 trixie (v2.0+)

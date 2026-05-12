@@ -1,0 +1,84 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Origin: TMJOs
+Label: TMJOs
+Suite: stable
+Codename: trixie
+Date: Tue, 12 May 2026 18:32:11 UTC
+Architectures: amd64
+Components: main apps extras
+Description: TMJOs custom packages for Debian 13 trixie (v2.0+)
+MD5Sum:
+ 81fecdd9070ad16055aa4d68b10541d6 10540 main/binary-amd64/Packages
+ 54ac1c115a54824cce2910b5bc9eac18 4479 main/binary-amd64/Packages.gz
+ efea1cd09cfe036797b176741c33cebb 143 main/binary-amd64/Release
+ d41d8cd98f00b204e9800998ecf8427e 0 main/source/Sources
+ 7029066c27ac6f5ef18d660d5741979a 20 main/source/Sources.gz
+ 39c46dacb106097c2080285d06e844ef 144 main/source/Release
+ d41d8cd98f00b204e9800998ecf8427e 0 apps/binary-amd64/Packages
+ 7029066c27ac6f5ef18d660d5741979a 20 apps/binary-amd64/Packages.gz
+ b1836ce78c9f9c5e00da250072ecdff9 143 apps/binary-amd64/Release
+ d41d8cd98f00b204e9800998ecf8427e 0 apps/source/Sources
+ 7029066c27ac6f5ef18d660d5741979a 20 apps/source/Sources.gz
+ 5dad525aeac211480e1575374ada3177 144 apps/source/Release
+ d41d8cd98f00b204e9800998ecf8427e 0 extras/binary-amd64/Packages
+ 7029066c27ac6f5ef18d660d5741979a 20 extras/binary-amd64/Packages.gz
+ ae04ead6df3790c3262c0461bc6d7083 145 extras/binary-amd64/Release
+ d41d8cd98f00b204e9800998ecf8427e 0 extras/source/Sources
+ 7029066c27ac6f5ef18d660d5741979a 20 extras/source/Sources.gz
+ 7e99632d2b793ecc6f1ec572cbc9f97f 146 extras/source/Release
+SHA1:
+ 7ae6ffb06b2bd0587803a0014173ccb46f3a0b0e 10540 main/binary-amd64/Packages
+ 9b7a04465a2e826a8c2872c3f7d6088001dfe6a3 4479 main/binary-amd64/Packages.gz
+ 4796e1294cd5090678f4bfc133250cfcfe4b123a 143 main/binary-amd64/Release
+ da39a3ee5e6b4b0d3255bfef95601890afd80709 0 main/source/Sources
+ 46c6643f07aa7f6bfe7118de926b86defc5087c4 20 main/source/Sources.gz
+ 14daf1ba55425dc752c7f6531d5766ea9c97b6b2 144 main/source/Release
+ da39a3ee5e6b4b0d3255bfef95601890afd80709 0 apps/binary-amd64/Packages
+ 46c6643f07aa7f6bfe7118de926b86defc5087c4 20 apps/binary-amd64/Packages.gz
+ f21eb3bc914aa68e242a2221e846381e42487483 143 apps/binary-amd64/Release
+ da39a3ee5e6b4b0d3255bfef95601890afd80709 0 apps/source/Sources
+ 46c6643f07aa7f6bfe7118de926b86defc5087c4 20 apps/source/Sources.gz
+ e3828e16e26ac6e5852dbecff39d6a6ca167b9ad 144 apps/source/Release
+ da39a3ee5e6b4b0d3255bfef95601890afd80709 0 extras/binary-amd64/Packages
+ 46c6643f07aa7f6bfe7118de926b86defc5087c4 20 extras/binary-amd64/Packages.gz
+ 2c2e753c34f156dd54b0506c5defc1d137320bab 145 extras/binary-amd64/Release
+ da39a3ee5e6b4b0d3255bfef95601890afd80709 0 extras/source/Sources
+ 46c6643f07aa7f6bfe7118de926b86defc5087c4 20 extras/source/Sources.gz
+ fbb6e46d13e2bba77b5238c9cc69b6eb913e4735 146 extras/source/Release
+SHA256:
+ c6c706f7e74386f5b719e650feaeae72da510e7dd3723010d81a102cb1fe572d 10540 main/binary-amd64/Packages
+ 13f77771a54271b8545822078ae1d99740a2db8e3c0f432d924cc97632cd82ba 4479 main/binary-amd64/Packages.gz
+ 02dc5e3cfcd94ac776ac990f7d50406c5e9a5bab503b8a9b29de60c0f8671814 143 main/binary-amd64/Release
+ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 main/source/Sources
+ 59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 main/source/Sources.gz
+ 48d76a255898b70c659319d3d5ef628d06dbfe4c74818823d5bb32f04fcf0aad 144 main/source/Release
+ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 apps/binary-amd64/Packages
+ 59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 apps/binary-amd64/Packages.gz
+ b0cf62e41b7760e48096a6a81b72195cb769858b838b33ac541fec6bd4c917a6 143 apps/binary-amd64/Release
+ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 apps/source/Sources
+ 59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 apps/source/Sources.gz
+ 1338cb229a0a2a3f3e6097754ed51faf05fbf7098c3227442d8ef32c661ddac5 144 apps/source/Release
+ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 extras/binary-amd64/Packages
+ 59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 extras/binary-amd64/Packages.gz
+ 463bd1651f6b2e9bfcabf434e046d37b35bd0400f9811f5c3e0e9b0e7241f093 145 extras/binary-amd64/Release
+ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 extras/source/Sources
+ 59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 extras/source/Sources.gz
+ baf4507701ff099ab291690e5b29eb64f5d18413dc6c65f2d8db37f8a7bd9b81 146 extras/source/Release
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCgAdFiEEhpHfLTAcLENAH163dUhY4qWMQ2MFAmoDcisACgkQdUhY4qWM
+Q2Nmqw//ar/BGj2lVGVHBZVqLOO/9JAuYbkIVmWUC4zp22FC1dKZ8TDU2NyiRpaV
+mIxgidr4nJhn8JBobc/cAWJqvigcAMn3ywE0wC6Id+DPQRRMvDP98dkHd/jlvV1g
+miQIQSID8CN6eZYMKcAmTyPKKx393+ruwDGgBe1xsqkdfH0YkjLh2ecoOehstH7t
+M1ZDyPduKRlzlmBlwrUuSZbtuEluxLt+Bvgt7eUTafbg8Ts+YgM/d2c5OB9MS2T1
+WSrGT8APT/Q43TrDtMJSBpdKxbh4zT/KOh9FDmTcY/FDZxo1QsrEslTWuWWTza4B
+8FZzSUKpJ402hdSfyzrzum76//L4nunRz4Izgw3zkVqClaUKiKkkcpsJl1uv5WMj
+Y5VA2noRFpxpSdr7pFU5UfLWRGC6eoN+UANGubjy0laYlbEH9MsTixJOLkYN0xxX
+JRaivkrO4GtYaP/eAX+csgINL+p0Fc3voa8Sr5DiCI8wyMOv98C2LQ0S6YcyYiuY
+rbxZGYvpYzPof8V6n/4BKnQwpzB1m4cGJQbyIX+PX3I3IUMJwHHErbvwtLfefbIf
+ui3i8Auc//adlx7y/mHpiycz1YEOuAqe/y6imPZFvIvwuja4c/PGGVCxpTUu63w/
+mXS4hdgKh++kJN+1BwxOj2J+GR3n1cPFEQcrCxC54g0pye5LiOI=
+=6+uB
+-----END PGP SIGNATURE-----

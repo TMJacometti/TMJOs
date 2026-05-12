@@ -123,44 +123,6 @@ Description: TMJOs system-wide dconf defaults (dark mode, fonts, dock-off)
  so installing this package is enough to make the defaults render
  correctly without extra steps.
 
-Package: tmjos-dock
-Version: 1.3.0-2
-Architecture: all
-Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Installed-Size: 34
-Depends: plank, xdotool, desktop-file-utils
-Homepage: https://github.com/TMJacometti/TMJOs
-Priority: optional
-Section: x11
-Filename: pool/main/t/tmjos-dock/tmjos-dock_1.3.0-2_all.deb
-Size: 5114
-SHA256: 9823713ef43995dd9c7c873e0d50278681744cbe925df1529b39401ee249ec88
-SHA1: 10513112760b0877dd90a78d34862d8748a6327d
-MD5sum: a85698ef4aed238ea6602ef35cab162f
-Description: TMJOs Plank dock pre-configured with sticky launchers
- Pre-configured Plank dock for TMJOs:
-  * /etc/skel/.config/plank/dock1/settings — bottom dock, transparent
-    theme, 48px icons, 4 pinned launchers (Todos os Apps + VSCode +
-    TMJPad + Terminal)
-  * /etc/skel/.config/plank/dock1/launchers/*.dockitem — INI files
-    Plank reads to render each launcher
-  * /etc/xdg/autostart/plank.desktop — starts Plank on every login
-    system-wide
-  * /etc/xdg/autostart/tmjos-first-run.desktop — copies the skel
-    config to the user's home if missing (needed for live-CD users
-    or users that predate the package)
-  * /etc/xdg/autostart/tmjos-dock-sync.desktop — runs the daemon
-    that mirrors GNOME favorite-apps into Plank dock-items
-  * /usr/bin/tmjos-show-apps — wrapper invoked by the All Apps
-    launcher; opens the GNOME Apps overview via xdotool Super+A
-    with toggle behavior (state file in $XDG_RUNTIME_DIR)
-  * /usr/bin/tmjos-first-run — every-login script: copies skel,
-    re-injects tmjos-show-apps as the first dock item if removed
-  * /usr/bin/tmjos-dock-sync — daemon: gsettings monitor on
-    org.gnome.shell.favorite-apps + writes to plank settings
-  * /usr/share/applications/tmjos-show-apps.desktop — Name="Todos
-    os Apps", Icon=view-app-grid-symbolic
-
 Package: tmjos-hello
 Version: 0.1.0-1
 Architecture: all
@@ -181,37 +143,6 @@ Description: TMJOs pipeline smoke test package
  .
  Provides a single command `tmjos-hello` that prints a banner.
  Safe to keep installed; safe to remove.
-
-Package: tmjos-installer
-Version: 1.3.4-3
-Architecture: all
-Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Installed-Size: 2352
-Depends: ubiquity, ubiquity-frontend-gtk
-Homepage: https://github.com/TMJacometti/TMJOs
-Priority: optional
-Section: admin
-Filename: pool/main/t/tmjos-installer/tmjos-installer_1.3.4-3_all.deb
-Size: 2378716
-SHA256: ac00502aa29b2581f79e38156a5c20c138b2ab08ab6cb2ee2343350cf3e2b69d
-SHA1: 4719a4f6c066f4fccb5b2fb8b5309df90884e853
-MD5sum: 811594dd7e9b5a66a2a03d2679bac918
-Description: Ubuntu graphical installer (ubiquity) configured for TMJOs
- Ensures the TMJOs live-CD ships with a working graphical installer.
- Ubuntu 24.04's default install path is snapd-based, which TMJOs
- removes via "Slim Aggressive". This package pulls in the classic
- deb-based ubiquity installer + GTK frontend, plus a desktop entry
- (delegated to ubiquity's own) so users can install TMJOs to disk
- from the live session.
- .
- Slideshow component (ubiquity-slideshow-ubuntu) is intentionally
- NOT a dependency: it requires WebKit2GTK, which TMJOs slims out.
- The installer works fine without it (just no marketing carousel
- during the copy phase).
- .
- Postinst cleans /root/.config/pulse and /root/.cache: stray
- PulseAudio runtime sockets there cause permission-denied errors
- when ubiquity rsyncs the live filesystem to the target disk.
 
 Package: tmjos-os-identity
 Version: 1.3.0-2
@@ -246,41 +177,6 @@ Description: TMJOs system identity (/etc/os-release, lsb-release, issue)
  with .tmjos-orig suffix and restored cleanly on package removal.
  base-files is "essential" so we can't Conflicts/Replaces it; divert
  is the policy-friendly way.
-
-Package: tmjos-shell-tweaks
-Version: 1.3.0-3
-Architecture: all
-Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Installed-Size: 13
-Depends: gnome-shell (>= 45), dpkg
-Homepage: https://github.com/TMJacometti/TMJOs
-Priority: optional
-Section: gnome
-Filename: pool/main/t/tmjos-shell-tweaks/tmjos-shell-tweaks_1.3.0-3_all.deb
-Size: 3166
-SHA256: 2567de803aeb807b71ee481870db3ca5614a1a97b1fc41cf74e0d3b840b4dac3
-SHA1: bf0f6669a129b00bde53a2069742faf88a9246b1
-MD5sum: cb67c331d59543cab1a0f76b0d7f9cf5
-Description: TMJOs GNOME Shell extension (hide Activities button)
- Ships a GNOME Shell extension at
- /usr/share/gnome-shell/extensions/tmjos-tweaks@tmjos.local/ that
- hides the Activities button from the top-left of the panel.
- TMJOs uses Plank's "Todos os Apps" launcher as the apps entry
- point, so the Activities button is redundant.
- .
- Implementation: extension.js calls
- Main.panel.statusArea.activities.hide() on enable() and restores
- visibility on disable(). ~4 functional lines of GJS code, sandboxed
- inside gnome-shell (no network, no filesystem, no exec — only
- Main.* APIs).
- .
- The extension is enabled by tmjos-defaults's dconf override
- (enabled-extensions includes "tmjos-tweaks@tmjos.local").
- .
- The postinst also performs a cleanup migration: if version 1.3.0-1
- was installed before, it left a dpkg-divert on Yaru theme files
- (CSS hack that didn't work on GNOME 46). The migration removes
- those diverts so the upstream Yaru bytes return.
 
 Package: tmjpad
 Version: 0.1.2-1
