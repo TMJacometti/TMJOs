@@ -220,8 +220,63 @@ estiver pronto.
   APT repo TMJOs. UX mais bonita que `apt search`. Lança quando tiver
   4+ apps proprietários publicados.
 
+- **TMJMoney** — visualização de indicadores financeiros + criptomoedas.
+  - Dashboard com cards por ativo (ações BR/US, crypto)
+  - User escolhe indicadores favoritos (RSI, MACD, médias, market cap, etc)
+  - Refresh automático via APIs: Alpha Vantage / Yahoo Finance (ações),
+    CoinGecko (crypto)
+  - Persistência da watchlist em `~/.config/tmjmoney/watchlist.json`
+  - Charts via cairo (GTK4 não tem chart nativo) ou matplotlib embeddable
+  - Tema dark TMJOs neon — cyan pra alta, magenta pra baixa
+  - Comando: `tmjmoney`
+
+- **TMJCriptoBot** — bot de trades simples em criptomoedas.
+  - Código pronto de projetos anteriores (TMJSistemas)
+  - Não é app desktop convencional — daemon/service via systemd
+  - UI minimal pra monitoring: status, P&L, ordens abertas, logs
+  - Configuração via `~/.config/tmjcriptobot/config.toml`
+  - Empacotado como `tmjcriptobot.deb` (instala service + UI launcher)
+  - Comando: `tmjcriptobot` (UI) / `systemctl --user start tmjcriptobot`
+
+- **TMJRestApi** — cliente HTTP estilo Postman + SoapUI, sem o bloat.
+  - **Killer feature potencial** — Postman bloat é universal entre devs.
+  - Combina o melhor: speed/UX do Postman + projects/organização do SoapUI.
+  - Features mínimas:
+    - Múltiplos métodos (GET/POST/PUT/PATCH/DELETE/HEAD/OPTIONS)
+    - Headers, body (JSON/form/raw), params, auth (basic/bearer/api-key)
+    - Response viewer: JSON pretty print + headers + status + tempo
+    - **Projetos** (collections) — salva grupos de requests organizados
+    - Environments (dev/staging/prod com vars)
+    - Persistência em `~/.config/tmjrestapi/projects/*.json`
+  - Stack: GTK4 + libadwaita + libsoup3 (HTTP)
+  - Comando: `tmjrestapi`
+
+- **TMJCode** — VSCode com setup TMJOs opinionated (NÃO fork).
+  - Estratégia: wrapper sobre VSCode upstream, não rebuild custom.
+  - `tmjcode.deb` Depends `code` (do repo Microsoft).
+  - `/usr/bin/tmjcode` script que na primeira run:
+    - Cria profile "TMJOs" via `code --user-data-dir`
+    - Instala extension pack: Prettier, ESLint, GitLens, Better Comments,
+      Material Icon Theme, Code Spell Checker (pt-BR), TODO Highlight,
+      Bookmarks, Path Intellisense, Live Server, Docker, Python + Pylance,
+      REST Client, Markdown All in One
+    - Aplica settings.json: JetBrains Mono, format-on-save, tab=4,
+      bracket colorization, files.autoSave
+    - Tema dark TMJOs (cyan/magenta accents — custom theme.json)
+  - Próximas runs: `code --profile TMJOs` direto.
+  - Zero manutenção — segue VSCode upstream.
+  - Comando: `tmjcode`
+
 - **Outros apps idealizados durante uso real** — sem precisar bumpar
   a distro pra cada um.
+
+### Ordem de implementação sugerida (apps livres)
+
+1. **TMJNotes** (escopo conhecido, stack já provada com TMJPad)
+2. **TMJMoney** (escopo médio, apela público mais amplo)
+3. **TMJRestApi** (big bet, killer level máximo — 1-2 semanas)
+4. **TMJCriptoBot** (código pronto facilita)
+5. **TMJCode** (wrapper simples — 1 dia)
 
 ### TMJStore roadmap (app independente, lançado durante v1.3.x)
 
