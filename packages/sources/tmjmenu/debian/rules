@@ -35,6 +35,14 @@ override_dh_auto_install:
 	cp vendor/tmjmenu.appdata.xml \
 		debian/tmjmenu/usr/share/metainfo/br.com.tmjsistemas.tmjmenu.appdata.xml
 
+	# Icon nos 3 paths padrão (fallback robusto)
+	mkdir -p debian/tmjmenu/usr/share/icons/hicolor/512x512/apps
+	cp vendor/tmjmenu.png debian/tmjmenu/usr/share/icons/hicolor/512x512/apps/
+	mkdir -p debian/tmjmenu/usr/share/icons/hicolor/256x256/apps
+	cp vendor/tmjmenu.png debian/tmjmenu/usr/share/icons/hicolor/256x256/apps/
+	mkdir -p debian/tmjmenu/usr/share/pixmaps
+	cp vendor/tmjmenu.png debian/tmjmenu/usr/share/pixmaps/tmjmenu.png
+
 	# Autostart (system-wide):
 	#   tmjdock.desktop — sobe a dock no login
 	#   tmjmenu-first-run.desktop — configura Super+Space keybinding

@@ -1,3 +1,14 @@
+tmjmenu (1.3.4-13) noble; urgency=low
+
+  * Logo próprio do TMJMenu (1024x1024 PNG) — antes usava fallback
+    "tmjos" theme icon, agora tem identidade visual dedicada.
+    Instalado em hicolor 512+256 + /usr/share/pixmaps/ pra fallback
+    robusto (mesmo approach do TMJPad).
+  * TMJStore agora mostra TMJMenu na listagem com ícone próprio
+    (não mais fallback genérico).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 22:10:00 -0300
+
 tmjmenu (1.3.4-12) noble; urgency=high
 
   * Auto-hide condicional via systemd-detect-virt:

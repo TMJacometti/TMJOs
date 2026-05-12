@@ -34,3 +34,6 @@ Repository = "https://github.com/TMJacometti/TMJOs"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["tmjstore*"]
+
+[tool.setuptools.package-data]
+tmjstore = ["assets/*.png"]

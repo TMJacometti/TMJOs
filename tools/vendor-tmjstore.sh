@@ -17,12 +17,15 @@ echo "Vendoring TMJStore → packages/sources/tmjstore/vendor/"
 rm -rf "$VENDOR"
 mkdir -p "$VENDOR"
 
-# 1. Python module
+# 1. Python module (com assets embedded — fallback de dev)
 cp -r "$SRC/tmjstore" "$VENDOR/tmjstore"
 
 # 2. Desktop entry + AppStream
 cp "$SRC/data/tmjstore.desktop"                       "$VENDOR/tmjstore.desktop"
 cp "$SRC/data/br.com.tmjsistemas.tmjstore.appdata.xml" "$VENDOR/tmjstore.appdata.xml"
+
+# 2b. Icon (PNG 1024x1024, será instalado em hicolor 512 + pixmaps)
+cp "$SRC/assets/logo/tmjstore.png" "$VENDOR/tmjstore.png"
 
 # 3. Wrapper script
 cat > "$VENDOR/tmjstore-launcher.sh" << 'LAUNCHER'

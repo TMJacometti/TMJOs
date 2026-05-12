@@ -1,3 +1,66 @@
+tmjstore (0.1.5-1) noble; urgency=medium
+
+  * Nova tela de detalhe ao clicar num app na listagem.
+    Adw.NavigationView push/pop entre lista principal e detalhe.
+  * Detail page mostra:
+      - Header grande: icon 96px + nome + summary + action button
+      - Descrição completa (parseada do AppStream XML, com
+        suporte a <p> e <ul><li> com bullets)
+      - Chips de categorias
+      - Tabela de informações: versão atual, pacote, desenvolvedor,
+        licença, homepage, bug tracker (links clicáveis)
+      - Histórico de versões: lista cards com versão · data +
+        release notes (parseadas do XML)
+  * discover.py: novo TMJRelease dataclass + parsing completo de
+    todos os campos AppStream (developer, license, urls, releases).
+  * Backlog v0.2: download count (precisa analytics no APT repo).
+  * Backlog v0.3: reviews + botão Donate na detail view (Pix /
+    GitHub Sponsors / liberapay — esquema doido por dev).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 22:40:00 -0300
+
+tmjstore (0.1.5-1) noble; urgency=medium
+
+  * Tela de detalhe ao clicar num app (Adw.NavigationView push/pop).
+    Detail page tem própria HeaderBar com back button auto-injetado
+    pelo NavigationView + título do app. Mostra:
+      - Header grande: icon 96px + nome + summary + action button
+      - Descrição completa (parseada do AppStream XML com bullets)
+      - Chips de categorias
+      - Tabela de informações (versão, dev, licença, homepage, etc)
+      - Histórico de versões com release notes
+  * discover.py — melhorias:
+      - METAINFO_DIRS robusto: lê de ambos $XDG_DATA_HOME/metainfo,
+        ~/.local/share/metainfo, /usr/share/metainfo. Cobre snap-confined
+        VSCode (que seta XDG_DATA_HOME pra path sandboxed).
+      - Parsing completo do AppStream XML: developer, license, urls
+        (bugtracker, vcs-browser), keywords, releases com history.
+      - Não exige mais app instalado pra ler appdata.
+  * set_app_icon() helper: tenta theme → /usr/share/pixmaps/ →
+    embedded asset (pra dev mode rodar antes de install).
+  * Logo próprio do TMJStore (1024x1024 PNG). Instalado em hicolor
+    512+256 + pixmaps + embedded.
+  * Makefile install também copia appdata.xml pra
+    ~/.local/share/metainfo/ (TMJStore se descobre em dev mode).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 22:10:00 -0300
+
+tmjstore (0.1.4-1) noble; urgency=high
+
+  * SEGURANÇA: filtrar pacotes "core" da distro da listagem.
+    Antes, TMJStore mostrava tudo do repo TMJOs incluindo tmjos-defaults,
+    tmjos-installer, tmjos-branding, tmjos-os-identity, etc. User
+    clicando "Remover" em qualquer um quebrava a instalação (perda
+    de X11 force, dconf overrides, branding, integração ubiquity).
+  * Fix: nova lista CORE_PACKAGES em discover.py. Pacotes nessa lista
+    NÃO aparecem em nenhuma das 3 abas. Apps user-facing (TMJPad,
+    TMJMenu, TMJStore, TMJCode/TMJNotes futuros) listam normalmente.
+  * Core é managed pelo meta `tmjos` via `apt upgrade tmjos` — fora
+    do escopo do software center, igual a Ubuntu Settings não mostra
+    glibc ou systemd pra "remover".
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 22:25:00 -0300
+
 tmjstore (0.1.3-1) noble; urgency=medium
 
   * Fix: _is_from_tmj_repo() só aceitava packages.tmjos.com.br.

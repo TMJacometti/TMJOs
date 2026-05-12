@@ -21,6 +21,29 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
+# Paths onde procurar AppStream metadata. Ordem importa — primeiro
+# user-local (override possível), depois system. Os pacotes .deb
+# instalam em /usr/share/metainfo/; dev mode via `make install` em
+# ~/.local/share/metainfo/.
+#
+# Incluímos AMBOS XDG_DATA_HOME E o literal ~/.local/share porque
+# alguns ambientes (VSCode snap-confined, Flatpak portals) setam
+# XDG_DATA_HOME pra um path sandboxed que NÃO bate com o user real.
+def _metainfo_dirs() -> list[Path]:
+    paths: list[Path] = []
+    xdg_home = os.environ.get("XDG_DATA_HOME")
+    if xdg_home:
+        paths.append(Path(xdg_home) / "metainfo")
+    home_local = Path.home() / ".local/share/metainfo"
+    if home_local not in paths:
+        paths.append(home_local)
+    paths.append(Path("/usr/share/metainfo"))
+    return paths
+
+
+METAINFO_DIRS = _metainfo_dirs()
+
+
 # Origens válidas do APT repo TMJOs. Lista pra cobrir:
 #   - packages.tmjos.com.br (custom domain atual)
 #   - tmjacometti.github.io/TMJOs (URL legacy GH Pages, ainda válida)
@@ -30,7 +53,31 @@ TMJ_REPO_ORIGINS = [
     "packages.tmjos.com.br",
     "tmjacometti.github.io/tmjos",
 ]
-METAINFO_DIR = Path("/usr/share/metainfo")
+# Pacotes "core" da distro — NÃO devem aparecer no TMJStore.
+# User clicando "Remover" em qualquer um destes quebra a instalação
+# (perde branding, identity, dconf overrides, X11 force, installer
+# integration, etc). São managed pelo meta `tmjos` via apt upgrade.
+#
+# TMJStore é pra apps USER-FACING (TMJPad, TMJMenu, TMJStore, TMJCode,
+# TMJNotes futuros). Core fica invisível — limpa UX, evita acidentes.
+CORE_PACKAGES = frozenset({
+    "tmjos",                  # metapackage
+    "tmjos-branding",
+    "tmjos-os-identity",
+    "tmjos-defaults",
+    "tmjos-dock",
+    "tmjos-shell-tweaks",
+    "tmjos-installer",
+    "tmjos-hello",            # pipeline smoke test
+})
+
+
+@dataclass
+class TMJRelease:
+    """Uma entrada de release history do AppStream XML."""
+    version: str
+    date: str         # "2026-05-10"
+    description: str  # multi-line
 
 
 @dataclass
@@ -45,7 +92,13 @@ class TMJApp:
     installed_version: str = ""
     candidate_version: str = ""
     homepage: str = ""
+    bugtracker: str = ""
+    vcs: str = ""
+    developer: str = ""
+    license: str = ""
     categories: list[str] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
+    releases: list[TMJRelease] = field(default_factory=list)
     has_update: bool = False
 
 
@@ -70,9 +123,12 @@ def _list_tmj_packages() -> list[str]:
     except (subprocess.TimeoutExpired, FileNotFoundError):
         pass
 
-    # Filtra só pacotes com nossa origin
+    # Filtra: do nosso repo + não-core (core fica invisível —
+    # protegido contra acidente de uninstall).
     tmj_pkgs = []
     for name in pkg_names:
+        if name in CORE_PACKAGES:
+            continue
         if _is_from_tmj_repo(name):
             tmj_pkgs.append(name)
     return sorted(tmj_pkgs)
@@ -96,19 +152,25 @@ def _is_from_tmj_repo(pkg_name: str) -> bool:
         return False
 
 
-def _parse_appdata_xml(path: Path) -> dict[str, str | list[str]]:
-    """Parse simple do AppStream XML — nome, descrição, ícone, categorias.
+def _parse_appdata_xml(path: Path) -> dict:
+    """Parse completo do AppStream XML.
 
     Não usa libappstream-glib (dep extra) pra manter v0.1 simple.
-    Schema parsing manual de elementos chave.
+    Pega: nome, summary, description (multi-paragraph + lists),
+    categories, keywords, urls, developer, releases.
     """
-    out: dict[str, str | list[str]] = {
+    out: dict = {
         "display_name": "",
         "summary": "",
         "description": "",
         "categories": [],
+        "keywords": [],
         "homepage": "",
-        "icon": "",
+        "bugtracker": "",
+        "vcs": "",
+        "developer": "",
+        "license": "",
+        "releases": [],
     }
     try:
         tree = ET.parse(path)
@@ -120,28 +182,78 @@ def _parse_appdata_xml(path: Path) -> dict[str, str | list[str]]:
         def tag(elem):
             return ns_pattern.sub('', elem.tag)
 
+        def get_lang(elem):
+            return elem.get("{http://www.w3.org/XML/1998/namespace}lang", "")
+
+        def parse_description(elem) -> str:
+            """Description pode ter <p>, <ul><li>, <ol><li>. Renderiza
+            como texto plain com bullets pra UI."""
+            parts = []
+            for child in elem:
+                t = tag(child)
+                if t == "p" and child.text:
+                    parts.append(child.text.strip())
+                elif t in ("ul", "ol"):
+                    bullets = []
+                    for li in child:
+                        if tag(li) == "li" and li.text:
+                            bullets.append(f"  • {li.text.strip()}")
+                    if bullets:
+                        parts.append("\n".join(bullets))
+            return "\n\n".join(parts)
+
         for child in root:
             t = tag(child)
             if t == "name" and child.text and not out["display_name"]:
-                out["display_name"] = child.text.strip()
+                if not get_lang(child):
+                    out["display_name"] = child.text.strip()
             elif t == "summary" and child.text and not out["summary"]:
-                # primeiro sem xml:lang (locale default)
-                if "lang" not in child.attrib:
+                if not get_lang(child):
                     out["summary"] = child.text.strip()
             elif t == "description":
-                parts = []
-                for p in child:
-                    if tag(p) == "p" and p.text:
-                        parts.append(p.text.strip())
-                out["description"] = "\n\n".join(parts)
+                out["description"] = parse_description(child)
             elif t == "categories":
                 out["categories"] = [
                     c.text.strip() for c in child
                     if tag(c) == "category" and c.text
                 ]
+            elif t == "keywords":
+                out["keywords"] = [
+                    k.text.strip() for k in child
+                    if tag(k) == "keyword" and k.text
+                ]
             elif t == "url":
-                if child.get("type") == "homepage" and child.text:
-                    out["homepage"] = child.text.strip()
+                kind = child.get("type", "")
+                if child.text:
+                    if kind == "homepage":
+                        out["homepage"] = child.text.strip()
+                    elif kind == "bugtracker":
+                        out["bugtracker"] = child.text.strip()
+                    elif kind == "vcs-browser":
+                        out["vcs"] = child.text.strip()
+            elif t == "developer":
+                for c in child:
+                    if tag(c) == "name" and c.text:
+                        out["developer"] = c.text.strip()
+                        break
+            elif t == "project_license" and child.text:
+                out["license"] = child.text.strip()
+            elif t == "releases":
+                releases = []
+                for r in child:
+                    if tag(r) == "release":
+                        ver = r.get("version", "")
+                        date = r.get("date", "")
+                        desc = ""
+                        for c in r:
+                            if tag(c) == "description":
+                                desc = parse_description(c)
+                                break
+                        if ver:
+                            releases.append(TMJRelease(
+                                version=ver, date=date, description=desc,
+                            ))
+                out["releases"] = releases
     except (ET.ParseError, OSError):
         pass
     return out
@@ -179,11 +291,20 @@ def discover_tmj_apps() -> list[TMJApp]:
         installed, inst_ver, cand_ver = _pkg_versions(pkg)
         has_update = installed and inst_ver != cand_ver and cand_ver != ""
 
-        # Tenta achar appdata.xml correspondente
-        appdata: dict[str, str | list[str]] = {}
-        if installed and METAINFO_DIR.is_dir():
-            for xml in METAINFO_DIR.glob(f"*{pkg}*.appdata.xml"):
+        # Tenta achar appdata.xml correspondente em qualquer dos paths
+        # XDG (user + system). Não exige que o app esteja instalado —
+        # se o XML existe (ex: dev mode após `make install` no host),
+        # lê metadata mesmo assim.
+        appdata: dict = {}
+        for metainfo_dir in METAINFO_DIRS:
+            if not metainfo_dir.is_dir():
+                continue
+            found = False
+            for xml in metainfo_dir.glob(f"*{pkg}*.appdata.xml"):
                 appdata = _parse_appdata_xml(xml)
+                found = True
+                break
+            if found:
                 break
 
         # Fallback: nome capitalizado se não tem appdata
@@ -195,12 +316,18 @@ def discover_tmj_apps() -> list[TMJApp]:
             display_name=str(display_name),
             summary=str(summary),
             description=str(appdata.get("description", "")),
-            icon_name=pkg,  # ícone tem nome igual do pacote por convenção
+            icon_name=pkg,
             installed=installed,
             installed_version=inst_ver,
             candidate_version=cand_ver,
             homepage=str(appdata.get("homepage", "")),
+            bugtracker=str(appdata.get("bugtracker", "")),
+            vcs=str(appdata.get("vcs", "")),
+            developer=str(appdata.get("developer", "")),
+            license=str(appdata.get("license", "")),
             categories=list(appdata.get("categories", []) or []),
+            keywords=list(appdata.get("keywords", []) or []),
+            releases=list(appdata.get("releases", []) or []),
             has_update=has_update,
         ))
 

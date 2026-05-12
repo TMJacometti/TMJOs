@@ -223,6 +223,24 @@ estiver pronto.
 - **Outros apps idealizados durante uso real** — sem precisar bumpar
   a distro pra cada um.
 
+### TMJStore roadmap (app independente, lançado durante v1.3.x)
+
+- **v0.1.x (atual)**: 3 abas + AppStream metadata + install/remove/upgrade
+  via pkexec + detail view com release history.
+- **v0.2 backlog**:
+  - **Download count**: contador por app. Requer analytics no APT
+    repo (proxy hosting OR custom CGI no GH Pages — não-trivial).
+  - **Search bar** dentro da store.
+  - **Filtro por categoria**.
+- **v0.3 backlog**:
+  - **Reviews / ratings**: avaliações de usuários TMJOs. Requer
+    backend (Supabase free tier? GH Discussions API hack?).
+  - **Botão Donate** na detail view: cada dev pode ter seu próprio
+    link (Pix / GitHub Sponsors / Liberapay) declarado no
+    `appdata.xml` (<url type="donation">). TMJStore renderiza
+    botão se existir. Esquema doido pra fomentar dev de apps TMJOs
+    pela comunidade.
+
 ## [1.2.x] — patches via apt (depende do APT repo da v1.3)
 
 - **TMJPad usa o logo geral do TMJOs em vez do ícone próprio**

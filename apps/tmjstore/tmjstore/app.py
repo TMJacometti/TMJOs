@@ -33,6 +33,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, GLib, Gtk  # noqa: E402
 
 from . import installer
+from .detail import build_detail_page
 from .discover import TMJApp, discover_tmj_apps
 
 
@@ -73,6 +74,21 @@ STORE_CSS = b"""
     color: #00d4ff;
     font-weight: bold;
 }
+
+.tmjstore-chip {
+    background-color: rgba(0, 212, 255, 0.15);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.85em;
+}
+
+.tmjstore-release {
+    background-color: rgba(20, 24, 60, 0.4);
+    border-left: 3px solid rgba(0, 212, 255, 0.5);
+    border-radius: 6px;
+    padding: 8px 12px;
+}
 """
 
 
@@ -88,20 +104,62 @@ def _install_css() -> None:
         )
 
 
+def set_app_icon(image: Gtk.Image, pkg_name: str, size: int = 64) -> None:
+    """Seta o icon de um app. Tenta:
+    1. Icon name no theme (instalado via hicolor)
+    2. /usr/share/pixmaps/<pkg>.png
+    3. Asset embedded no Python module (apps/<pkg>/tmjstore/assets/<pkg>.png)
+       — fallback dev mode.
+    """
+    from pathlib import Path
+    from gi.repository import Gdk
+
+    image.set_pixel_size(size)
+
+    display = Gdk.Display.get_default()
+    if display is not None:
+        theme = Gtk.IconTheme.get_for_display(display)
+        if theme.has_icon(pkg_name):
+            image.set_from_icon_name(pkg_name)
+            return
+
+    pixmap = Path(f"/usr/share/pixmaps/{pkg_name}.png")
+    if pixmap.is_file():
+        image.set_from_file(str(pixmap))
+        return
+
+    # Dev mode: embedded asset (só pra apps próprios — tmjstore)
+    if pkg_name == "tmjstore":
+        embedded = Path(__file__).parent / "assets" / "tmjstore.png"
+        if embedded.is_file():
+            image.set_from_file(str(embedded))
+            return
+
+    image.set_from_icon_name("application-x-executable")
+
+
 class TMJStoreWindow(Adw.ApplicationWindow):
     def __init__(self, app: Adw.Application) -> None:
         super().__init__(application=app)
         self.set_title("TMJStore")
         self.set_default_size(WINDOW_WIDTH, WINDOW_HEIGHT)
 
-        # Adw.ToolbarView com header + content
-        toolbar = Adw.ToolbarView()
-        self.set_content(toolbar)
+        # NavigationView pra push/pop entre lista e detalhe
+        self._nav = Adw.NavigationView()
+        self.set_content(self._nav)
 
-        # Header bar com title custom
+        # Página principal (lista com 3 tabs)
+        self._main_page = self._build_main_page()
+        self._nav.add(self._main_page)
+
+        # Populate inicial
+        self._refresh()
+
+    def _build_main_page(self) -> Adw.NavigationPage:
+        """Constrói a página principal com 3 tabs."""
+        toolbar = Adw.ToolbarView()
+
         header = Adw.HeaderBar()
-        title = Adw.WindowTitle.new("TMJStore", "Apps proprietários TMJOs")
-        header.set_title_widget(title)
 
         refresh_btn = Gtk.Button.new_from_icon_name("view-refresh-symbolic")
         refresh_btn.set_tooltip_text("Atualizar lista")
@@ -110,9 +168,6 @@ class TMJStoreWindow(Adw.ApplicationWindow):
 
         toolbar.add_top_bar(header)
 
-        # ViewStack com 3 views (Apps / Installed / Updates).
-        # _build_list_view retorna (scrolled, container) — scrolled
-        # vai pro stack, container guardamos pra popular depois.
         self._stack = Adw.ViewStack()
 
         self._apps_view, self._apps_box = self._build_list_view()
@@ -134,9 +189,7 @@ class TMJStoreWindow(Adw.ApplicationWindow):
         header.set_title_widget(switcher)
 
         toolbar.set_content(self._stack)
-
-        # Populate inicial
-        self._refresh()
+        return Adw.NavigationPage.new(toolbar, "TMJStore")
 
     def _build_list_view(self) -> tuple[Gtk.ScrolledWindow, Gtk.Box]:
         """Cria ScrolledWindow + Box interno. Retorna tupla (scrolled,
@@ -189,14 +242,20 @@ class TMJStoreWindow(Adw.ApplicationWindow):
         for app in apps:
             container.append(self._build_app_row(app))
 
-    def _build_app_row(self, app: TMJApp) -> Gtk.Box:
+    def _build_app_row(self, app: TMJApp) -> Gtk.Widget:
+        """Card clicável de app. Wrappa num Gtk.Button pra ficar
+        clickable inteiro — click navega pra tela de detalhe."""
+        btn = Gtk.Button()
+        btn.add_css_class("tmjstore-app-row")
+        btn.set_has_frame(False)
+        btn.connect("clicked", lambda _b: self._open_detail(app))
+
         row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        row.add_css_class("tmjstore-app-row")
+        btn.set_child(row)
 
         # Icon
         icon = Gtk.Image()
-        icon.set_pixel_size(64)
-        icon.set_from_icon_name(app.icon_name)
+        set_app_icon(icon, app.icon_name, size=64)
         row.append(icon)
 
         # Text column
@@ -221,15 +280,24 @@ class TMJStoreWindow(Adw.ApplicationWindow):
             ver_label.add_css_class("tmjstore-installed-tag")
             text_col.append(ver_label)
 
-        # Action button
-        action_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        action_box.set_valign(Gtk.Align.CENTER)
-        row.append(action_box)
-
+        # Action button (não propaga click pra row pra evitar abrir
+        # detail quando user clica "Install" direto da lista).
         action_btn = self._build_action_button(app)
-        action_box.append(action_btn)
+        action_btn.set_valign(Gtk.Align.CENTER)
+        row.append(action_btn)
 
-        return row
+        return btn
+
+    def _open_detail(self, app: TMJApp) -> None:
+        """Push de uma detail page na NavigationView."""
+        detail = build_detail_page(
+            app=app,
+            on_install=lambda a: self._do_action("install", a),
+            on_remove=lambda a: self._do_action("remove", a),
+            on_upgrade=lambda a: self._do_action("upgrade", a),
+        )
+        page = Adw.NavigationPage.new(detail, app.display_name)
+        self._nav.push(page)
 
     def _build_action_button(self, app: TMJApp) -> Gtk.Button:
         if app.has_update:

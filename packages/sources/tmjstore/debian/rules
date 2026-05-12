@@ -30,3 +30,11 @@ override_dh_auto_install:
 	mkdir -p debian/tmjstore/usr/share/metainfo
 	cp vendor/tmjstore.appdata.xml \
 		debian/tmjstore/usr/share/metainfo/br.com.tmjsistemas.tmjstore.appdata.xml
+
+	# Icon nos 3 paths padrão (mesmo approach do TMJPad pra fallback robusto)
+	mkdir -p debian/tmjstore/usr/share/icons/hicolor/512x512/apps
+	cp vendor/tmjstore.png debian/tmjstore/usr/share/icons/hicolor/512x512/apps/
+	mkdir -p debian/tmjstore/usr/share/icons/hicolor/256x256/apps
+	cp vendor/tmjstore.png debian/tmjstore/usr/share/icons/hicolor/256x256/apps/
+	mkdir -p debian/tmjstore/usr/share/pixmaps
+	cp vendor/tmjstore.png debian/tmjstore/usr/share/pixmaps/tmjstore.png
