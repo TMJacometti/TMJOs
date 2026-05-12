@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>br.com.tmjsistemas.tmjmenu</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>TMJMenu</name>
+  <summary>Menu de aplicações + dock proprietária do TMJOs</summary>
+  <summary xml:lang="en">TMJOs proprietary application menu + dock</summary>
+
+  <description>
+    <p>
+      TMJMenu é o launcher nativo do TMJOs. Substitui o Activities Overview
+      do GNOME e o Plank por dois componentes integrados:
+    </p>
+    <ul>
+      <li>
+        <b>TMJMenu popup</b>: search-based launcher acionado por Super+Space.
+        Lê todos os .desktop entries do sistema, fuzzy match no nome/comment/
+        keywords. Right-click pra fixar/desfixar apps na dock.
+      </li>
+      <li>
+        <b>TMJDock</b>: barra bottom-center estilo Windows Start. Botão TMJOs
+        (gradiente cyan/magenta) à esquerda, separador, apps pinados. Auto-hide
+        com hover. Super+Shift+H toggle pinned mode (sempre visível).
+      </li>
+    </ul>
+    <p>Features:</p>
+    <ul>
+      <li>Persistência de pinados em ~/.config/tmjmenu/pinned.json</li>
+      <li>Auto-hide condicional (off em VM, on em hardware real)</li>
+      <li>Context menu Pin/Unpin compartilhado dock + popup</li>
+      <li>GTK4 + libadwaita nativo, X11 hints proper</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">tmjmenu.desktop</launchable>
+
+  <categories>
+    <category>System</category>
+    <category>Utility</category>
+  </categories>
+
+  <keywords>
+    <keyword>menu</keyword>
+    <keyword>launcher</keyword>
+    <keyword>dock</keyword>
+    <keyword>tmjos</keyword>
+  </keywords>
+
+  <url type="homepage">https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjmenu</url>
+  <url type="bugtracker">https://github.com/TMJacometti/TMJOs/issues</url>
+  <url type="vcs-browser">https://github.com/TMJacometti/TMJOs</url>
+
+  <developer id="br.com.tmjsistemas">
+    <name>TMJSistemas</name>
+  </developer>
+
+  <provides>
+    <binary>tmjmenu</binary>
+    <binary>tmjdock</binary>
+    <binary>tmjmenu-first-run</binary>
+  </provides>
+
+  <content_rating type="oars-1.1" />
+
+  <releases>
+    <release version="1.3.4-12" date="2026-05-11">
+      <description>
+        <p>Auto-hide condicional via systemd-detect-virt. Off em VM, on em metal.</p>
+      </description>
+    </release>
+    <release version="1.3.4-10" date="2026-05-11">
+      <description>
+        <p>Super+Shift+H toggles PIN mode (era force-hide). Badge cyan glow + notify-send feedback.</p>
+      </description>
+    </release>
+    <release version="1.3.4-1" date="2026-05-11">
+      <description>
+        <p>Initial release. TMJMenu popup + TMJDock unified package.</p>
+      </description>
+    </release>
+  </releases>
+</component>

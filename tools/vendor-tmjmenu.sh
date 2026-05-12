@@ -27,6 +27,9 @@ cp "$SRC/data/tmjdock.desktop"              "$VENDOR/tmjdock.desktop"
 cp "$SRC/data/tmjmenu-first-run.desktop"    "$VENDOR/tmjmenu-first-run.desktop"
 cp "$SRC/data/tmjmenu-first-run"            "$VENDOR/tmjmenu-first-run"
 
+# 2b. AppStream metadata
+cp "$SRC/data/br.com.tmjsistemas.tmjmenu.appdata.xml" "$VENDOR/tmjmenu.appdata.xml"
+
 # 3. Wrapper scripts — gerados aqui pra rules apenas `cp`.
 cat > "$VENDOR/tmjmenu-launcher.sh" << 'LAUNCHER'
 #!/bin/sh

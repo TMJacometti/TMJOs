@@ -30,6 +30,11 @@ override_dh_auto_install:
 	mkdir -p debian/tmjmenu/usr/share/applications
 	cp vendor/tmjmenu.desktop debian/tmjmenu/usr/share/applications/
 
+	# AppStream metadata pra TMJStore descobrir o app
+	mkdir -p debian/tmjmenu/usr/share/metainfo
+	cp vendor/tmjmenu.appdata.xml \
+		debian/tmjmenu/usr/share/metainfo/br.com.tmjsistemas.tmjmenu.appdata.xml
+
 	# Autostart (system-wide):
 	#   tmjdock.desktop — sobe a dock no login
 	#   tmjmenu-first-run.desktop — configura Super+Space keybinding

@@ -32,6 +32,11 @@ override_dh_auto_install:
 	mkdir -p debian/tmjpad/usr/share/applications
 	cp vendor/tmjpad.desktop debian/tmjpad/usr/share/applications/
 
+	# AppStream metadata → /usr/share/metainfo/ (TMJStore + gnome-software)
+	mkdir -p debian/tmjpad/usr/share/metainfo
+	cp vendor/tmjpad.appdata.xml \
+		debian/tmjpad/usr/share/metainfo/br.com.tmjsistemas.tmjpad.appdata.xml
+
 	# Icon — installed in multiple paths for maximum fallback coverage:
 	#   1. hicolor 512x512 (real PNG size is 1024x1024, but 512 is the
 	#      largest standard hicolor bucket — GTK downscales).
