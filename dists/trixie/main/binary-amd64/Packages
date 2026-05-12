@@ -30,20 +30,20 @@ Description: TMJOs proprietary application menu + dock
  of X11 hints).
 
 Package: tmjos
-Version: 2.0.0-1
+Version: 2.0.0-2
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Installed-Size: 7
+Installed-Size: 8
 Depends: tmjos-branding (>= 2.0.0), tmjos-os-identity (>= 2.0.0), tmjos-defaults (>= 2.0.0), tmjmenu (>= 1.3.4), tmjpad (>= 0.1.2)
-Recommends: tmjstore, code, git, git-flow, docker.io, docker-compose, calamares, calamares-settings-debian, gnome-tweaks, dconf-editor, python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1, zram-tools, preload, evolution, curl, wget, htop, fastfetch, vim, dnsutils, net-tools, traceroute
+Recommends: tmjstore, code, git, git-flow, docker.io, docker-compose, calamares, calamares-settings-debian, tmjos-calamares-branding, gnome-tweaks, dconf-editor, python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1, zram-tools, preload, evolution, curl, wget, htop, fastfetch, vim, dnsutils, net-tools, traceroute
 Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: metapackages
-Filename: pool/main/t/tmjos/tmjos_2.0.0-1_all.deb
-Size: 2378
-SHA256: 28c7005c62c34bb1376ca35510bba95121a3b0764a1c8d215b330aef6b29019b
-SHA1: ae6c767807dbd8a1ccc7907111f89607d534d5c8
-MD5sum: f68fc9816993f9f59389e6c69987e67e
+Filename: pool/main/t/tmjos/tmjos_2.0.0-2_all.deb
+Size: 2452
+SHA256: 9b25830d2d9f18d79eb739f5379f1548b6174e8a99d198544733e0de5889ca56
+SHA1: 17c71be6bf657ac7b5d75e16b557cb273ab45656
+MD5sum: 6b327cbc1ad1f2281957946fc9bbb8e1
 Description: TMJOs metapackage — pulls in the entire TMJOs experience
  Installing this package on a base Debian 13 (trixie) system gives
  you the complete TMJOs setup:
@@ -91,6 +91,35 @@ Description: TMJOs branding assets (wallpapers, logos, Plymouth theme)
   * gtk-update-icon-cache so the system "tmjos" icon resolves
   * update-alternatives sets default.plymouth → tmjos
   * update-initramfs -u so the new theme is embedded in the initrd
+
+Package: tmjos-calamares-branding
+Version: 2.0.0-1
+Architecture: all
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Installed-Size: 1003
+Depends: calamares, calamares-settings-debian
+Homepage: https://github.com/TMJacometti/TMJOs
+Priority: optional
+Section: misc
+Filename: pool/main/t/tmjos-calamares-branding/tmjos-calamares-branding_2.0.0-1_all.deb
+Size: 994380
+SHA256: 854ee56d1d9e67b85d563fa9ef358b419c78552bd4f14c405987da29f952434e
+SHA1: 9a90cef33234e17c3eb2d7964fe902e66ab99a47
+MD5sum: 2c23ca8d867097957ed7cb92123dcf37
+Description: TMJOs branding for Calamares installer
+ Calamares branding component "tmjos" — provê:
+  * branding.desc com strings TMJOs, paleta neon (cyan/magenta/dark navy)
+    e referências pros assets locais
+  * show.qml — slideshow com 3 slides (boas-vindas, manifesto, slogan)
+    exibido durante a instalação
+  * logo.png + welcome.png em /usr/share/calamares/branding/tmjos/
+ .
+ Pra ativar o branding tmjos no installer, edita
+ /etc/calamares/settings.conf adicionando ou alterando a linha:
+   branding: tmjos
+ .
+ (O hook live-build do TMJOs faz isso automaticamente na ISO.
+ Pra sistema instalado, scripts/tmjos_customize.sh roda o sed.)
 
 Package: tmjos-defaults
 Version: 1.3.4-1
