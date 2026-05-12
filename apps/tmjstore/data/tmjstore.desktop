@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=TMJStore
+GenericName=Software Center
+Comment=Descobre e instala apps proprietários TMJOs
+Comment[en]=Discover and install proprietary TMJOs apps
+Exec=tmjstore
+Terminal=false
+Categories=System;Settings;PackageManager;
+Keywords=store;software;apps;install;tmjos;
+Icon=tmjstore
+StartupNotify=true

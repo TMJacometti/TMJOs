@@ -1,21 +1,85 @@
 #!/bin/sh
-# postinst do tmjos-installer — limpa estado runtime do PulseAudio
-# que o ubiquity tenta copiar (e falha) durante o install do live-CD.
+# postinst do tmjos-installer
+#   1. limpa estado runtime do PulseAudio (Cubic build hygiene)
+#   2. dpkg-divert da imagem "Installation complete" do ubiquity
+#      pela versão TMJOs (logo TMJOs Rounded)
 
 set -e
 
+UBIQUITY_PNG=/usr/share/ubiquity/pixmaps/ubuntu_installed.png
+TMJOS_PNG=/usr/share/tmjos-installer/tmjos_installed.png
+DIVERT_DEST=/usr/share/ubiquity/pixmaps/ubuntu_installed.png.tmjos-orig
+
+# ubiquity icon nos 6 sizes hicolor (top bar/launcher logo)
+UBIQUITY_SVG_SIZES="16 22 24 32 48 64"
+TMJOS_SVG=/usr/share/tmjos-installer/tmjos-ubiquity.svg
+
+# Partitioner icons (4 PNGs na tela de particionamento do ubiquity)
+PARTITIONER_ICONS="install manual reinstall sidebyside"
+TMJOS_PARTITIONER_DIR=/usr/share/tmjos-installer/partitioner
+
 case "$1" in
     configure)
+        # === 1) PulseAudio cleanup ===
         # /root/.config/pulse contém socket + cookie do PulseAudio,
         # criado quando o daemon roda como root (acontece em alguns
         # passos do Cubic). O ubiquity rsync-a o live filesystem
         # pro target disk e quebra com permission denied nesses
         # arquivos (modos 700, owner=root).
-        #
-        # Limpar aqui (no postinst, durante o build dentro do Cubic)
-        # garante que o squashfs final não tenha esses arquivos.
         rm -rf /root/.config/pulse 2>/dev/null || true
         rm -rf /root/.cache/pulse 2>/dev/null || true
+
+        # === 2) Replace ubiquity "Installation complete" image ===
+        # dpkg-divert torna o swap reversível: se tmjos-installer
+        # for removido, postrm restaura o original. Idempotente.
+        if [ -f "$TMJOS_PNG" ] && [ -d "$(dirname "$UBIQUITY_PNG")" ]; then
+            if ! dpkg-divert --list "$UBIQUITY_PNG" | grep -q "$DIVERT_DEST"; then
+                dpkg-divert --package tmjos-installer --rename \
+                    --divert "$DIVERT_DEST" --add "$UBIQUITY_PNG"
+            fi
+            # symlink (não cp) — upgrade do tmjos-installer com nova
+            # imagem reflete sem precisar rerun postinst manual
+            ln -sf "$TMJOS_PNG" "$UBIQUITY_PNG"
+        fi
+
+        # === 3) Replace ubiquity icon (top bar logo) ===
+        # /usr/share/icons/hicolor/<size>/apps/ubiquity.svg em 6 sizes.
+        # Mesma estratégia: dpkg-divert + symlink pro nosso SVG TMJOs.
+        if [ -f "$TMJOS_SVG" ]; then
+            for size in $UBIQUITY_SVG_SIZES; do
+                target="/usr/share/icons/hicolor/${size}x${size}/apps/ubiquity.svg"
+                divert_dest="${target}.tmjos-orig"
+                if [ -f "$target" ] || [ -L "$target" ]; then
+                    if ! dpkg-divert --list "$target" 2>/dev/null | grep -q "$divert_dest"; then
+                        dpkg-divert --package tmjos-installer --rename \
+                            --divert "$divert_dest" --add "$target" || true
+                    fi
+                    ln -sf "$TMJOS_SVG" "$target"
+                fi
+            done
+            # Refresh icon cache pra GNOME pegar o novo icon imediato
+            if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+                gtk-update-icon-cache --quiet --force \
+                    /usr/share/icons/hicolor 2>/dev/null || true
+            fi
+        fi
+
+        # === 4) Replace partitioner icons (tela "Onde instalar?") ===
+        # /usr/share/ubiquity/pixmaps/partitioner/{install,manual,reinstall,sidebyside}.png
+        if [ -d "$TMJOS_PARTITIONER_DIR" ]; then
+            for icon in $PARTITIONER_ICONS; do
+                target="/usr/share/ubiquity/pixmaps/partitioner/${icon}.png"
+                divert_dest="${target}.tmjos-orig"
+                tmjos_icon="${TMJOS_PARTITIONER_DIR}/${icon}.png"
+                if [ -f "$tmjos_icon" ] && { [ -f "$target" ] || [ -L "$target" ]; }; then
+                    if ! dpkg-divert --list "$target" 2>/dev/null | grep -q "$divert_dest"; then
+                        dpkg-divert --package tmjos-installer --rename \
+                            --divert "$divert_dest" --add "$target" || true
+                    fi
+                    ln -sf "$tmjos_icon" "$target"
+                fi
+            done
+        fi
         ;;
     *)
         ;;

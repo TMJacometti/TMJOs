@@ -1,0 +1,220 @@
+tmjmenu (1.3.4-14) noble; urgency=medium
+
+  * Fix: apps TMJ recém-instalados (TMJStore, TMJCode futuro) não
+    apareciam na dock após pin via popup TMJMenu. Causa: _all_apps
+    era cacheado no __init__ do tmjdock; apps instalados depois
+    nunca entravam no cache. _build_bar() agora re-roda
+    discover_apps() em todo rebuild, pegando apps novos.
+  * Super+Shift+H em VM mostra toast "Auto-hide indisponível em VM"
+    em vez de toggle silencioso e confuso (auto-hide hardcoded
+    off em VM via systemd-detect-virt).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 22:50:00 -0300
+
+tmjmenu (1.3.4-13) noble; urgency=low
+
+  * Logo próprio do TMJMenu (1024x1024 PNG) — antes usava fallback
+    "tmjos" theme icon, agora tem identidade visual dedicada.
+    Instalado em hicolor 512+256 + /usr/share/pixmaps/ pra fallback
+    robusto (mesmo approach do TMJPad).
+  * TMJStore agora mostra TMJMenu na listagem com ícone próprio
+    (não mais fallback genérico).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 22:10:00 -0300
+
+tmjmenu (1.3.4-12) noble; urgency=high
+
+  * Auto-hide condicional via systemd-detect-virt:
+      - Hardware real (metal): auto-hide ATIVO (polling 400ms +
+        cached X11 display).
+      - VM (qemu/kvm/Boxes/virtualbox/etc): auto-hide DESATIVADO
+        por default. Dock fica sempre visível, sem polling, sem
+        strut churn. Pinned mode implicit.
+  * Razão: strut churn (mudanças de _NET_WM_STRUT_PARTIAL a cada
+    show/hide) cascateia re-layout do Mutter compositor. Em GPU
+    real custa ~1ms; em virtio-gpu sem aceleração custa 50-100ms
+    por mudança, causando travas periódicas observadas nos testes
+    da v1.3.4. macOS Dock e Dash to Dock têm comportamento similar
+    (intellihide off por default em virt).
+  * Super+Shift+H continua funcional em VM: toggle pinned mode
+    serve como "esconder/mostrar" manualmente, sem cascata Mutter
+    (single strut update vs polling contínuo).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 21:00:00 -0300
+
+tmjmenu (1.3.4-11) noble; urgency=high
+
+  * Performance crítico: tmjdock estava travando VMs/hardware sem
+    aceleração GPU. Causa raiz: query_pointer_y() criava e fechava
+    conexão X11 a cada poll (~4x/seg). Cada handshake X11 em
+    virtio-gpu sem GPU custa 10-50ms (vs 0.5ms com conexão cached).
+  * Fix:
+      - x11.query_pointer_y agora cacheia o display global, reusa
+        entre chamadas. Reset automático se conexão morrer.
+      - AUTO_HIDE_POLL_MS 250 → 400 (menos overhead, ainda
+        responsivo pra hover).
+      - Auto-hide tick pausa completamente quando pinned (Super+Shift+H)
+        — sem X11 round-trips se a dock tá fixa.
+  * Bench dev: 50 polls em 28.8ms (0.58ms/poll). Antes: cada poll
+    abria nova connection com handshake X11 = throttling visível.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 20:30:00 -0300
+
+tmjmenu (1.3.4-10) noble; urgency=medium
+
+  * Super+Shift+H agora alterna PINNED em vez de force-hide:
+      - Off (default): comportamento auto-hide normal.
+      - On (pinned): auto-hide desligado, dock sempre visível,
+        border cyan glow visual indicator.
+  * Feedback de toggle via notify-send (1500ms timeout):
+      - "TMJDock — Dock fixa" quando ativa pinned.
+      - "TMJDock — Auto-hide ativo" quando desativa.
+  * Razão da mudança: a semantics anterior (force-hide) era confusa
+    porque user pressava Super+Shift+H mostrando a dock, mas como o
+    mouse estava longe, ela sumia logo. PINNED resolve isso — user
+    aperta Super+Shift+H quando quer trabalhar com a dock sempre
+    visível (ex: fazendo pin/unpin de vários apps em sequência),
+    e desativa quando volta ao workflow normal.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 19:50:00 -0300
+
+tmjmenu (1.3.4-9) noble; urgency=medium
+
+  * Fix: botão "Mostrar todos os apps" não fazia nada quando clicado.
+    Razão: GNOME 46+ bloqueou org.gnome.Shell.ShowApplications via
+    D-Bus por segurança (AccessDenied pra apps unprivileged).
+  * Solução: simula keypress da Super key via `xdotool key Super_L`.
+    Super sozinha é o overlay-key default do GNOME (abre Activities
+    Overview). Nossa config só bind Super+Space e Super+Shift+H,
+    então Super sozinha continua intocada.
+  * Nova dep: xdotool (já era recommended pelo tmjos meta-package via
+    tmjos-dock, agora é Depends direto do tmjmenu).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 19:35:00 -0300
+
+tmjmenu (1.3.4-8) noble; urgency=high
+
+  * Fix: tmjmenu-first-run crashava com `sed: unknown option to s`
+    porque o $SLOT_PATH contém múltiplos "/" e quebrava o sed quando
+    usado como delimitador padrão. Trocado pra "|" como delimitador.
+    Sem isso, custom keybindings Super+Space e Super+Shift+H nunca
+    eram criados após o slot inicial.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 19:25:00 -0300
+
+tmjmenu (1.3.4-7) noble; urgency=medium
+
+  * Hotkey Super+H trocado por Super+Shift+H. Razão: Super+H em
+    Ubuntu já é o atalho de "minimize window" (definido em
+    org.gnome.desktop.wm.keybindings minimize), causando conflito —
+    user reportou que ao pressionar Super+H pra esconder a dock,
+    a janela ativa minimizava em vez de toggle da dock.
+  * Auto-hide muito agressivo:
+      - AUTO_HIDE_REVEAL_PX 4 → 8 (área maior pra hover trigger,
+        mais fácil acertar a borda).
+      - Hide com debounce de 600ms (AUTO_HIDE_HIDE_DELAY_MS): mouse
+        que sai por uma fração de segundo NÃO esconde imediatamente.
+      - Auto-hide tick agora respeita popovers abertos: context
+        menu de pin/unpin mantém a dock visível até o user clicar
+        ou fechar fora. Antes, dock sumia no meio do menu.
+  * Fix: gdk_monitor_get_geometry assertion quando lista de monitores
+    fica inconsistente durante resize (n_items() > 0 mas get_item(0)
+    retorna None). Guards defensivos em _apply_x11_dock_hints.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 19:15:00 -0300
+
+tmjmenu (1.3.4-6) noble; urgency=medium
+
+  * Mitigação de flicker quando VM (Boxes/virtio-gpu) redimensiona
+    a resolução dinamicamente após idle/reboot:
+      - Escuta GDK monitors-changed + notify::geometry no primary
+        monitor → re-cacheia geometry e re-aplica X11 hints
+        (re-centraliza dock + restore strut com novas dimensões).
+      - Auto-hide polling reduzido de 150ms pra 250ms (menos
+        overhead, suficiente pra hover responsivo).
+  * Workaround recomendado pro user: rodar Boxes em fullscreen
+    (Ctrl+Alt+F) — resolução fica fixa, sem redimensionamento
+    dinâmico do compositor host.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 18:20:00 -0300
+
+tmjmenu (1.3.4-5) noble; urgency=medium
+
+  * Hotkey Super+H — force toggle hide/show da dock.
+      - User pressed Super+H → dock some imediatamente, fica oculta
+        até próximo toggle (auto-hide ignorado neste estado).
+      - Press de novo → retorna ao comportamento auto-hide normal.
+      - Implementado via Gio.Action "toggle-hide" + cmdline handler
+        em TMJDockApp (flags HANDLES_COMMAND_LINE). `tmjdock --toggle-hide`
+        roda no secondary process, passa a action pra primary via D-Bus,
+        e exits.
+  * tmjmenu-first-run agora seta 2 custom keybindings:
+      - <Super>space → tmjmenu
+      - <Super>h     → tmjdock --toggle-hide
+    Helpers add_slot_to_list/configure_slot refatorados pra DRY.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 18:05:00 -0300
+
+tmjmenu (1.3.4-4) noble; urgency=medium
+
+  * Auto-hide com hover:
+      - Dock fica visível só quando o mouse está nos últimos 4px
+        do bottom edge da tela OU sobre a dock (não esconde enquanto
+        user interage).
+      - Polling cada 150ms via GLib.timeout_add + Xlib query_pointer.
+      - Quando hidden, dock move pra fora da tela (y = screen_height+10)
+        e _NET_WM_STRUT_PARTIAL é zerado — janelas maximizadas ganham
+        o espaço de volta.
+      - Quando show, restaura position bottom-center + strut.
+  * Centralização horizontal: fix de timing — hint application
+    agora roda via GLib.idle_add (depois do measure+allocate do GTK).
+    Antes a dock aparecia deslocada à esquerda porque allocation.width
+    vinha parcial no evento "map".
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 17:50:00 -0300
+
+tmjmenu (1.3.4-3) noble; urgency=medium
+
+  * Right-click agora mostra context menu com "Fixar na Dock" /
+    "Desfixar da Dock" em vez de toggle silencioso. UX mais clara —
+    user vê a ação antes de confirmar.
+  * Helper widgets.show_pin_context_menu() compartilhado entre dock
+    e popup search (mesma UX em ambos os lugares).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 17:30:00 -0300
+
+tmjmenu (1.3.4-2) noble; urgency=medium
+
+  * Pin/Unpin runtime via right-click:
+      - Dock: right-click num app pinado → desafixa imediatamente.
+      - Popup search: right-click numa row → toggle pin (estrela
+        aparece pra apps pinados).
+  * Persistência em ~/.config/tmjmenu/pinned.json (atomic write).
+  * Dock auto-reload via GFileMonitor: mudanças no JSON refletem
+    sem precisar restart do tmjdock (pin do popup atualiza a dock
+    automaticamente).
+  * Novo botão "Show all apps" (view-app-grid-symbolic) entre o
+    botão TMJOs e o separador. Click abre o Activities Overview do
+    GNOME Shell via D-Bus (org.gnome.Shell.ShowApplications).
+  * Super+Space keybinding configurado pelo /usr/bin/tmjmenu-first-run
+    (autostart). gsettings custom-keybinding pra abrir tmjmenu.
+    Idempotente — re-rodar não duplica.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 17:15:00 -0300
+
+tmjmenu (1.3.4-1) noble; urgency=low
+
+  * Initial .deb release of TMJMenu + TMJDock — the TMJOs proprietary
+    application launcher stack.
+  * Two binaries shipped in one package:
+      - tmjmenu: popup search launcher (Super key trigger)
+      - tmjdock: bottom-center dock with TMJOs central button
+  * GTK4 + libadwaita + python-xlib (X11 dock hints: type=DOCK,
+    strut_partial, monitor positioning).
+  * Postinst disables /etc/xdg/autostart/plank.desktop if present,
+    enables /etc/xdg/autostart/tmjdock.desktop. Plank package itself
+    is left installed (tmjos-dock scripts like tmjos-first-run keep
+    working).
+  * Wayland deferred to v2.0 (gtk4-layer-shell).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 16:30:00 -0300

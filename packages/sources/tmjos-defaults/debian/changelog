@@ -1,3 +1,23 @@
+tmjos-defaults (1.3.4-1) noble; urgency=medium
+
+  * Slim aggressive runtime: postinst agora mascara services que
+    causam travas periódicas em VM e overhead em hardware real,
+    descobertos em testing da v1.3.4:
+      - plymouth-quit-wait.service (bug 20+s no boot)
+      - unattended-upgrades.service (auto-updates background)
+      - packagekit.service (apt indexing — combinado com gnome-software
+        já removido pelo slim, inútil)
+      - kerneloops.service (telemetria de kernel crashes pra Ubuntu)
+    Conservador: NÃO mascara cups/bluetooth/avahi/upower (mantém
+    compat com hardware real — usuário que tem impressora/BT/etc
+    continua funcionando).
+  * Re-purga snapd: customize.sh remove durante build mas Ubuntu
+    installer no disco pode trazer de volta. Postinst confirma
+    remoção permanente.
+  * Idempotente: re-rodar não causa side-effects.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 20:45:00 -0300
+
 tmjos-defaults (1.3.0-3) noble; urgency=medium
 
   * Force X11 session via /etc/gdm3/custom.conf (WaylandEnable=false).

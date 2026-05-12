@@ -1,0 +1,37 @@
+#!/bin/sh
+# postinst do tmjmenu — desabilita Plank autostart (substituído por
+# tmjdock) e atualiza icon cache.
+
+set -e
+
+PLANK_AUTOSTART=/etc/xdg/autostart/plank.desktop
+PLANK_DISABLED=/etc/xdg/autostart/plank.desktop.disabled-by-tmjmenu
+
+case "$1" in
+    configure)
+        # Disable Plank autostart se ainda existir.
+        # Renomeia em vez de remove pra ser reversível em postrm.
+        if [ -f "$PLANK_AUTOSTART" ] && [ ! -L "$PLANK_AUTOSTART" ]; then
+            mv "$PLANK_AUTOSTART" "$PLANK_DISABLED" 2>/dev/null || true
+        fi
+
+        # Icon cache refresh (caso o asset tmjos.png embedded seja
+        # registrado em algum theme cache — paranoia, mas baixo custo).
+        if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+            gtk-update-icon-cache --quiet --force \
+                /usr/share/icons/hicolor 2>/dev/null || true
+        fi
+
+        # Update desktop database pra entries .desktop novos
+        if command -v update-desktop-database >/dev/null 2>&1; then
+            update-desktop-database --quiet /usr/share/applications \
+                2>/dev/null || true
+        fi
+        ;;
+    *)
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

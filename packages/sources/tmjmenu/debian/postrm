@@ -1,0 +1,22 @@
+#!/bin/sh
+# postrm do tmjmenu — restaura Plank autostart se foi disabled.
+
+set -e
+
+PLANK_AUTOSTART=/etc/xdg/autostart/plank.desktop
+PLANK_DISABLED=/etc/xdg/autostart/plank.desktop.disabled-by-tmjmenu
+
+case "$1" in
+    purge|remove)
+        # Restaura Plank autostart se nosso disable estiver vigente.
+        if [ -f "$PLANK_DISABLED" ] && [ ! -f "$PLANK_AUTOSTART" ]; then
+            mv "$PLANK_DISABLED" "$PLANK_AUTOSTART" 2>/dev/null || true
+        fi
+        ;;
+    *)
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

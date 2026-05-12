@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tmjmenu"
+version = "0.1.0"
+description = "Menu de aplicações proprietário do TMJOs — search + pinados + recentes."
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "GPL-3.0-or-later"}
+authors = [{name = "TMJOs Contributors"}]
+keywords = ["menu", "launcher", "tmjos", "gtk4", "linux"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: X11 Applications :: GTK",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Desktop Environment",
+]
+
+# Runtime: PyGObject + GTK4 + libadwaita são fornecidos pelo sistema
+# (instalar via apt: python3-gi gir1.2-gtk-4.0 gir1.2-adw-1).
+
+[project.scripts]
+tmjmenu = "tmjmenu.app:main"
+tmjdock = "tmjmenu.dock:main"
+
+[project.urls]
+Homepage = "https://github.com/TMJacometti/TMJOs"
+Repository = "https://github.com/TMJacometti/TMJOs"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tmjmenu*"]
+
+[tool.setuptools.package-data]
+tmjmenu = ["assets/*.png"]

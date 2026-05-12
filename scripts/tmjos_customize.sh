@@ -101,6 +101,11 @@ APPS_TO_REMOVE=(
     "evolution-data-server"   # ~150MB RAM cache email
     "update-notifier"         # popup chato
     "thunderbird"              # ~350MB RAM
+    # Ubuntu marketing slideshow (Spotify/GIMP/etc com "Enhance
+    # your creative"). Não somos OS de influencer.
+    # tmjos-installer postinst já evita Depend do slideshow, mas
+    # squashfs base do Ubuntu trazia mesmo assim — remove na fonte.
+    "ubiquity-slideshow-ubuntu"
 )
 
 for app in "${APPS_TO_REMOVE[@]}"; do

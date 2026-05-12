@@ -5,6 +5,74 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.3.4-final-ubuntu] - 2026-05-12 — última geração Ubuntu
+
+**Fim do ciclo Ubuntu.** v1.3.4 é a última release sobre Ubuntu 24.04.
+ISO oficial **não foi gerada nem subida pro R2** — v1.x ficou como
+preview interno (single dev).
+
+A partir de v2.0, TMJOs migra pra **Debian 13 (trixie)**:
+- Cubic → live-build
+- ubiquity → Calamares
+- noble → trixie
+- "Ubuntu modificado" → "Debian-based, sem Canonical"
+
+### Estado do APT repo após v1.3.4 (`packages.tmjos.com.br`)
+
+| Pacote | Versão | Status |
+|---|---|---|
+| `tmjos` (meta) | 1.3.4-1 | Estável |
+| `tmjmenu` (TMJMenu + TMJDock) | 1.3.4-14 | Estável |
+| `tmjstore` (software center) | 0.1.6-1 | MVP funcional |
+| `tmjpad` (editor) | 0.1.2-1 | Estável |
+| `tmjos-defaults` (slim runtime + X11 force) | 1.3.4-1 | Estável |
+| `tmjos-installer` (ubiquity branding TMJOs) | 1.3.4-3 | Estável (morre em v2.0) |
+| `tmjos-branding` | 1.3.0-1 | Estável |
+| `tmjos-os-identity` | 1.3.0-2 | Estável |
+| `tmjos-shell-tweaks` (GJS extension) | 1.3.0-3 | Estável (provavelmente desnecessário em v2.0) |
+| `tmjos-dock` (legacy Plank) | 1.3.0-2 | Legacy (morre em v2.0) |
+
+### O que porta pra Debian (v2.0)
+
+Apps GTK4 (TMJPad, TMJMenu, TMJDock, TMJStore) → 95-100% portáveis.
+APT repo + CI/CD GitHub Actions → reusa, só muda codename.
+Cloudflare R2 + DNS + LE → reusa.
+Logos, branding, identidade visual → 100% reusa.
+Políticas (versionamento independente de apps, etc) → reusa.
+
+### O que morre com Ubuntu
+
+- `customize.sh` estilo Cubic
+- `tmjos-installer` com dpkg-divert (vira `tmjos-calamares-branding`)
+- Ubuntu-slideshow fights (Calamares branding é nativo)
+- X11 force no GDM (Wayland direto via `gtk4-layer-shell`)
+- Slim aggressive (Debian já nasce slim)
+
+v2.0 começa fresh em `feature/v2.0-debian`.
+
+## Política de versionamento
+
+**TMJOs (a distro)** segue SemVer baseado em mudança de **stack/infra**,
+não em adição de apps:
+
+- **MAJOR (1.x → 2.x)** = rebase de Ubuntu base, mudança de stack
+  significativa, breakage proposital.
+- **MINOR (1.3 → 1.4)** = mudança de UX/feature substancial no core
+  da distro (não apps individuais).
+- **PATCH (1.3.0 → 1.3.4)** = bug fixes, point releases.
+
+**Apps TMJOs (TMJPad, TMJMenu, TMJCode, TMJNotes, ...)** têm
+**versionamento independente**. São lançados/atualizados como `.deb`
+no APT repo a qualquer momento — não exigem bump da distro.
+
+User existente roda `sudo apt install tmjcode` (app novo) ou
+`sudo apt upgrade tmjpad` (versão nova de app) sem precisar de ISO
+nova OU bump de versão da distro. Padrão Ubuntu/Debian — Firefox 122
+não vira "Ubuntu 24.05".
+
+Bumping a distro inteira pra adicionar um app é Apple-istão. TMJOs
+não faz isso.
+
 ## [Backlog v1.3.4] — release combinada: menu proprietário + cleanups
 
 Bundling de TMJMenu (feature grande) com correções v1.3.x acumuladas.
@@ -43,14 +111,11 @@ Próxima ISO pública. Esperar ~3-4 dias de trampo.
   confirmar via `dpkg -L ubiquity-frontend-gtk | grep -i png`).
   Patch aplicável via `apt upgrade` em sistemas v1.3.0 sem regen ISO.
 
-- **Tamanho da ISO** (atualmente 6 GB) reduzido pro target ~2.5 GB.
-  Investigar config Cubic: o ISO v1.3.0 tem 2 layers squashfs
-  separados (`minimal.squashfs` 2.9G + `minimal.standard.live.squashfs`
-  991M). Provável caminho: forçar single-squashfs merge OR remover
-  o minimal base intocado já que toda customização TMJOs vai pro
-  standard.live. Validar com `unsquashfs -s` em build.
-
 - **Bugs menores observados em v1.3.0** que surgirem no uso.
+
+**Removido do escopo:** redução do tamanho da ISO (6GB) — não vai
+caber aqui. Tema migrado pro backlog v2.0, junto com o rebase em
+26.04 (onde o issue do layered squashfs pode nem existir mais).
 
 ### Por que bundle
 
@@ -59,12 +124,135 @@ VM independente do número de mudanças. v1.3.0 já validou o pipeline
 apt-only — agora podemos consolidar 3-4 melhorias num único re-spin
 ISO + apt patches simultâneos.
 
-## [Backlog v1.4] — apps proprietários novos
+## [Backlog v2.0 "Insano 2"] — migração pra Debian puro
 
+**Major version bump filosófico**: TMJOs deixa de ser "Ubuntu modificado"
+e vira "Debian-based" com identidade independente. Slogan v2.0:
 
-Versão centrada em apps. Depende da v1.3 ter shipado APT repo +
-TMJOs Software Center, porque ambos os apps abaixo são distribuídos
-via apt e listados na store.
+> *"TMJOs 2.0 · Debian-based · Sem Canonical, sem snap, sem frescura"*
+
+### Motivação
+
+Ubuntu vai contra a filosofia "anti-bloat / OS INSANOS" do TMJOs:
+- snap forçado em pacotes core a cada release
+- ubiquity sendo deprecated (vira Flutter snap-based)
+- ubuntu-graphics empurra Spotify/Telegram via slideshow
+- Canonical impõe decisões corporativas (snap obrigatório, etc)
+
+Debian alinha:
+- **Zero Canonical**: sem snap, sem whoopsie, sem popularity-contest,
+  sem ubuntu-marketing
+- **Já nasce limpo**: TMJOs não precisa remover bloat — Debian é slim
+- **ubiquity → Calamares**: GTK4-native, controle total de branding
+- **Live-CD ~3GB** (vs 5-6GB do Ubuntu 24.04 layered)
+- **Sem hack `lsb-release codename=noble`**: TMJOs vira distro de verdade
+- **Community-only**: sem chefe corporativo decidindo features pra ti
+
+### Decisão base: Debian 13 "trixie"
+
+- Suporte até ~2030
+- GNOME 48
+- Estável a partir de Q3 2026
+- Single squashfs default
+
+### Trabalho envolvido (~3-5 dias)
+
+- **Migrar build**: Cubic (Ubuntu-only) → **live-build** (oficial Debian)
+- **Codename**: `noble` → `trixie` em todos os 11 changelogs +
+  `packages/conf/distributions` + `customize.sh`
+- **Installer**: ubiquity → Calamares (config branding TMJOs:
+  logo, slides, partitioner já bonitão)
+- **Re-test tudo**: ISO build, install, apt repo, dock, extensions,
+  TMJMenu/TMJDock/TMJStore/TMJPad
+- **Refactor `customize.sh`**: remove PPAs Ubuntu (Cubic etc),
+  ajusta apt sources pra Debian
+- **Documentar migração**: v1.x → v2.x é clean install (apt upgrade
+  não cruza bases distintas)
+
+### Pré-requisitos antes de começar
+
+- Debian 13 stable lançado (Q3 2026 ETA)
+- Validar TMJOs stack roda OK em VM Debian 13 base
+- Validar live-build produz ISO bootável + instalável
+- Verificar Calamares branding capability
+
+## [Backlog v2.1 "Polimento Debian"] — pós-rebase
+
+Pendências que estavam na v2.0 sobre Ubuntu 26.04, agora movidas
+pra v2.1 sobre Debian 13 (após migração concluída).
+
+### Sub-bonus
+
+- Refresh visual aproveitando GNOME 48 (acabamento polído)
+- **TMJDock Wayland-native** (libgtk4-layer-shell substitui X11 hints)
+- Refazer slim aggressive baseado em Debian 13 base
+- **APT repo dual-suite** (trixie stable + trixie-dev testing):
+  - `packages/conf/distributions`: adicionar `Codename: trixie-dev`
+  - Workflow detecta branch: `main` → trixie, `feature/**` → trixie-dev
+  - Users normais consumem só `trixie` (default no customize.sh)
+  - Dev testers adicionam `trixie-dev` source manualmente
+- **APT components** (`main`, `apps`, `extras`):
+  - `trixie main` = só core (conservador)
+  - `trixie main apps` = default TMJOs
+  - `trixie main apps extras` = power user / community apps
+  - Permite bump independente de TMJPad/TMJMenu/TMJCode sem mexer
+    no core
+- **Reduzir tamanho da ISO** (Debian 13 single squashfs default
+  provavelmente resolve sozinho — confirmar)
+
+## [Backlog dev workflow] — TMJOs Dev VM
+
+Investigação da v1.3.4 revelou que **GNOME Boxes** não é o ambiente
+ideal pra testar TMJOs:
+- spice-vdagent renegocia resolução constantemente (causa travas em
+  qualquer compositor com strut, não só TMJOs)
+- Sem aceleração 3D fácil (virtio-gpu sem GL)
+- Fullscreen quebra render sem GPU
+
+**Recomendação pra dev workflow**: **virt-manager + virtio-gpu-gl**.
+
+Setup:
+```bash
+sudo apt install -y virt-manager qemu-system-x86 libvirt-daemon-system
+sudo usermod -aG libvirt,kvm $USER
+# logout/login
+```
+
+VM TMJOs ótima:
+- Memory: 4-6 GB
+- vCPU: 4
+- Display: Spice + ☑ 3D acceleration
+- Video: virtio + 3D ON (driver virtio-gpu-gl)
+- Storage: 20-30GB qcow2
+
+Aceleração 3D → Mutter renderiza via GPU do host → strut churn
+vira ~1ms (igual metal) → tmjdock auto-hide funciona em VM como
+funciona em metal.
+
+Futuro: script `tools/tmjos-dev-vm.sh` que cria VM via virt-install
+com XML otimizado.
+
+## [Backlog v2.1] — TMJOs Installer Slideshow (Calamares)
+
+v1.3.4 e abaixo: install em silêncio (sem slideshow) — `ubiquity-slideshow-ubuntu`
+removido pelo customize.sh.
+
+Em v2.0 (rebase Debian), Calamares substitui ubiquity → branding
+de slides fica trivial (Calamares tem `branding.desc` com slideshow
+QML nativo). Slides com identidade TMJOs:
+- "OS DA TMJSistemas · OS MELHORES · OS INSANOS"
+- "Slim Aggressive · ~700MB RAM idle"
+- "TMJMenu + TMJDock · launcher proprietário"
+- "APT repo · `sudo apt upgrade tmjos`"
+- "TMJPad · text editor com persistência total"
+- Asset `tmjos-installing.png` (1024x1024) já empacotado no
+  tmjos-installer 1.3.4-3 — uso aqui.
+
+## [Backlog — apps TMJOs independentes]
+
+Lançados como `.deb` no APT repo durante o ciclo v1.3.x. Versões
+independentes da distro. Cada um vira `apt install <app>` quando
+estiver pronto.
 
 - **TMJCode** (VSCode customizado com tema/extensões TMJOs):
   - Wrapper sobre VSCode upstream que injeta `--extensions-dir`
@@ -86,6 +274,98 @@ via apt e listados na store.
   - Markdown leve no texto (negrito, itálico, listas)
   - Comando: `tmjnotes` ou `tmjsticky`
   - Empacotado como `tmjnotes.deb` no APT repo
+
+- **TMJOs Software Center**: GUI GTK4 listando + instalando apps do
+  APT repo TMJOs. UX mais bonita que `apt search`. Lança quando tiver
+  4+ apps proprietários publicados.
+
+- **TMJMoney** — visualização de indicadores financeiros + criptomoedas.
+  - Dashboard com cards por ativo (ações BR/US, crypto)
+  - User escolhe indicadores favoritos (RSI, MACD, médias, market cap, etc)
+  - Refresh automático via APIs: Alpha Vantage / Yahoo Finance (ações),
+    CoinGecko (crypto)
+  - Persistência da watchlist em `~/.config/tmjmoney/watchlist.json`
+  - Charts via cairo (GTK4 não tem chart nativo) ou matplotlib embeddable
+  - Tema dark TMJOs neon — cyan pra alta, magenta pra baixa
+  - Comando: `tmjmoney`
+
+- **TMJCriptoBot** — bot de trades simples em criptomoedas.
+  - Código pronto de projetos anteriores (TMJSistemas)
+  - Não é app desktop convencional — daemon/service via systemd
+  - UI minimal pra monitoring: status, P&L, ordens abertas, logs
+  - Configuração via `~/.config/tmjcriptobot/config.toml`
+  - Empacotado como `tmjcriptobot.deb` (instala service + UI launcher)
+  - Comando: `tmjcriptobot` (UI) / `systemctl --user start tmjcriptobot`
+
+- **TMJRestApi** — cliente HTTP estilo Postman + SoapUI, sem o bloat.
+  - **Killer feature potencial** — Postman bloat é universal entre devs.
+  - Combina o melhor: speed/UX do Postman + projects/organização do SoapUI.
+  - Features mínimas:
+    - Múltiplos métodos (GET/POST/PUT/PATCH/DELETE/HEAD/OPTIONS)
+    - Headers, body (JSON/form/raw), params, auth (basic/bearer/api-key)
+    - Response viewer: JSON pretty print + headers + status + tempo
+    - **Projetos** (collections) — salva grupos de requests organizados
+    - Environments (dev/staging/prod com vars)
+    - Persistência em `~/.config/tmjrestapi/projects/*.json`
+  - Stack: GTK4 + libadwaita + libsoup3 (HTTP)
+  - Comando: `tmjrestapi`
+
+- **TMJCode** — VSCode com setup TMJOs opinionated (NÃO fork).
+  - Estratégia: wrapper sobre VSCode upstream, não rebuild custom.
+  - `tmjcode.deb` Depends `code` (do repo Microsoft).
+  - `/usr/bin/tmjcode` script que na primeira run:
+    - Cria profile "TMJOs" via `code --user-data-dir`
+    - Instala extension pack: Prettier, ESLint, GitLens, Better Comments,
+      Material Icon Theme, Code Spell Checker (pt-BR), TODO Highlight,
+      Bookmarks, Path Intellisense, Live Server, Docker, Python + Pylance,
+      REST Client, Markdown All in One
+    - Aplica settings.json: JetBrains Mono, format-on-save, tab=4,
+      bracket colorization, files.autoSave
+    - Tema dark TMJOs (cyan/magenta accents — custom theme.json)
+  - Próximas runs: `code --profile TMJOs` direto.
+  - Zero manutenção — segue VSCode upstream.
+  - Comando: `tmjcode`
+
+- **Outros apps idealizados durante uso real** — sem precisar bumpar
+  a distro pra cada um.
+
+### Ordem de implementação sugerida (apps livres)
+
+1. **TMJNotes** (escopo conhecido, stack já provada com TMJPad)
+2. **TMJMoney** (escopo médio, apela público mais amplo)
+3. **TMJRestApi** (big bet, killer level máximo — 1-2 semanas)
+4. **TMJCriptoBot** (código pronto facilita)
+5. **TMJCode** (wrapper simples — 1 dia)
+
+### TMJStore roadmap (app independente, lançado durante v1.3.x)
+
+- **v0.1.x (atual)**: 3 abas + AppStream metadata + install/remove/upgrade
+  via pkexec + detail view com release history.
+- **v0.2 backlog**:
+  - **AppStream DEP-11 no APT repo**: CI roda `appstreamcli compose`
+    nos .debs gerados, gera `dists/noble/main/dep11/Components-amd64.yml.gz`
+    + icons cache. APT clients (TMJStore, gnome-software) leem
+    metadata + icons de **TODOS** apps no repo, mesmo nunca instalados.
+    Resolve fragilidade do cache local atual (que só funciona pra
+    apps já vistos). Padrão Linux, robusto.
+  - **Download count**: contador por app. Requer analytics no APT
+    repo (proxy hosting OR custom CGI no GH Pages — não-trivial).
+  - **Search bar** dentro da store.
+  - **Filtro por categoria**.
+  - **Update check daemon**: autostart entry roda
+    `tmjstore-check-updates` no login. Faz `apt list --upgradable`
+    filtrado por origin TMJOs. Se tem updates, envia `notify-send`
+    com action "Abrir TMJStore" que abre direto na aba Updates.
+    Estilo macOS App Store "1 update available". Substitui o
+    unattended-upgrades que removemos.
+- **v0.3 backlog**:
+  - **Reviews / ratings**: avaliações de usuários TMJOs. Requer
+    backend (Supabase free tier? GH Discussions API hack?).
+  - **Botão Donate** na detail view: cada dev pode ter seu próprio
+    link (Pix / GitHub Sponsors / Liberapay) declarado no
+    `appdata.xml` (<url type="donation">). TMJStore renderiza
+    botão se existir. Esquema doido pra fomentar dev de apps TMJOs
+    pela comunidade.
 
 ## [1.2.x] — patches via apt (depende do APT repo da v1.3)
 

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>br.com.tmjsistemas.tmjpad</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>TMJPad</name>
+  <summary>Editor de texto sem frescura, com persistência total</summary>
+  <summary xml:lang="en">No-frills text editor with full session persistence</summary>
+
+  <description>
+    <p>
+      TMJPad é o editor de texto nativo do TMJOs. Sem plugins, sem syntax
+      highlighting, apenas múltiplas abas e persistência total da sessão.
+    </p>
+    <p>
+      Fechar a janela salva o estado de cada aba (incluindo não salvas);
+      reabrir restaura tudo exatamente como estava. Auto-save de buffers
+      acontece em cada modificação (debounce de 500ms), então crashes e
+      kills forçados nunca perdem conteúdo.
+    </p>
+    <p>Features principais:</p>
+    <ul>
+      <li>Múltiplas abas (Ctrl+N / Ctrl+W / Ctrl+Tab)</li>
+      <li>Persistência total de sessão com atomic writes</li>
+      <li>Find &amp; Replace (Ctrl+F / Ctrl+H)</li>
+      <li>Tema dark only, fonte JetBrains Mono</li>
+      <li>GTK4 + libadwaita nativo</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">tmjpad.desktop</launchable>
+
+  <categories>
+    <category>Utility</category>
+    <category>TextEditor</category>
+    <category>Development</category>
+  </categories>
+
+  <keywords>
+    <keyword>text</keyword>
+    <keyword>editor</keyword>
+    <keyword>notepad</keyword>
+    <keyword>tmjos</keyword>
+  </keywords>
+
+  <url type="homepage">https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjpad</url>
+  <url type="bugtracker">https://github.com/TMJacometti/TMJOs/issues</url>
+  <url type="vcs-browser">https://github.com/TMJacometti/TMJOs</url>
+
+  <developer id="br.com.tmjsistemas">
+    <name>TMJSistemas</name>
+  </developer>
+
+  <provides>
+    <binary>tmjpad</binary>
+  </provides>
+
+  <content_rating type="oars-1.1" />
+
+  <releases>
+    <release version="0.1.2" date="2026-05-10">
+      <description>
+        <p>
+          Fix do icone TMJPad: instalação em /usr/share/pixmaps/ + hicolor
+          512x512 pra fallback robusto. Resolve "icone genérico" em live-CD.
+        </p>
+      </description>
+    </release>
+    <release version="0.1.1" date="2026-05-10">
+      <description>
+        <p>Primeira release como .deb. Fix do icon-cache no Plank.</p>
+      </description>
+    </release>
+    <release version="0.1.0" date="2026-05-10">
+      <description>
+        <p>Initial release. Find/Replace, multi-tab, session persistence.</p>
+      </description>
+    </release>
+  </releases>
+</component>

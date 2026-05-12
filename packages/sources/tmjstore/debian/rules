@@ -1,0 +1,40 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	@if [ ! -d vendor/tmjstore ]; then \
+		echo ""; \
+		echo "ERROR: vendor/tmjstore/ missing."; \
+		echo "Run tools/vendor-tmjstore.sh from repo root."; \
+		echo ""; \
+		exit 1; \
+	fi
+
+	# Python module → /opt/tmjstore/tmjstore/
+	mkdir -p debian/tmjstore/opt/tmjstore
+	cp -r vendor/tmjstore debian/tmjstore/opt/tmjstore/
+	chmod -R a+rX debian/tmjstore/opt/tmjstore
+
+	# Wrapper script → /usr/bin/tmjstore
+	mkdir -p debian/tmjstore/usr/bin
+	cp vendor/tmjstore-launcher.sh debian/tmjstore/usr/bin/tmjstore
+	chmod +x debian/tmjstore/usr/bin/tmjstore
+
+	# Desktop entry
+	mkdir -p debian/tmjstore/usr/share/applications
+	cp vendor/tmjstore.desktop debian/tmjstore/usr/share/applications/
+
+	# AppStream metadata (TMJStore lista a si mesmo também)
+	mkdir -p debian/tmjstore/usr/share/metainfo
+	cp vendor/tmjstore.appdata.xml \
+		debian/tmjstore/usr/share/metainfo/br.com.tmjsistemas.tmjstore.appdata.xml
+
+	# Icon nos 3 paths padrão (mesmo approach do TMJPad pra fallback robusto)
+	mkdir -p debian/tmjstore/usr/share/icons/hicolor/512x512/apps
+	cp vendor/tmjstore.png debian/tmjstore/usr/share/icons/hicolor/512x512/apps/
+	mkdir -p debian/tmjstore/usr/share/icons/hicolor/256x256/apps
+	cp vendor/tmjstore.png debian/tmjstore/usr/share/icons/hicolor/256x256/apps/
+	mkdir -p debian/tmjstore/usr/share/pixmaps
+	cp vendor/tmjstore.png debian/tmjstore/usr/share/pixmaps/tmjstore.png

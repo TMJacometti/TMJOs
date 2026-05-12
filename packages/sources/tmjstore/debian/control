@@ -1,0 +1,34 @@
+Source: tmjstore
+Section: admin
+Priority: optional
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjstore
+Vcs-Git: https://github.com/TMJacometti/TMJOs.git
+Vcs-Browser: https://github.com/TMJacometti/TMJOs
+
+Package: tmjstore
+Architecture: all
+Depends: ${misc:Depends},
+         python3 (>= 3.10),
+         python3-gi,
+         gir1.2-gtk-4.0,
+         gir1.2-adw-1,
+         policykit-1 | polkitd,
+         apt
+Recommends: tmjos-branding
+Description: TMJOs Software Center — apps proprietários TMJOs
+ Descobre apps proprietários TMJOs no APT repo via AppStream
+ metadata e instala/remove/atualiza via apt + pkexec.
+ .
+ Diferenças vs gnome-software / snap-store:
+   * Só apps TMJOs (filtra origin packages.tmjos.com.br)
+   * Visual neon TMJOs (cyan/magenta gradient)
+   * Zero capitalismo: sem promovidos, sem tracking, sem
+     Spotify/Telegram/etc
+   * 3 abas: Apps disponíveis, Instalados, Updates pendentes
+ .
+ Lança via APT repo TMJOs como app independente da distro
+ (versionamento separado). Adicionado a tmjos meta-package
+ como Recommends.

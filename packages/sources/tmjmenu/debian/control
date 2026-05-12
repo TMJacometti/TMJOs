@@ -1,0 +1,35 @@
+Source: tmjmenu
+Section: utils
+Priority: optional
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjmenu
+Vcs-Git: https://github.com/TMJacometti/TMJOs.git
+Vcs-Browser: https://github.com/TMJacometti/TMJOs
+
+Package: tmjmenu
+Architecture: all
+Depends: ${misc:Depends},
+         python3 (>= 3.10),
+         python3-gi,
+         python3-xlib,
+         gir1.2-gtk-4.0,
+         gir1.2-adw-1,
+         xdotool
+Recommends: tmjos-branding
+Description: TMJOs proprietary application menu + dock
+ Replaces Plank dock and GNOME Activities Overview with two integrated
+ components, both GTK4 + libadwaita native (same stack as TMJPad):
+ .
+   * tmjmenu — popup search launcher, opened by Super key
+   * tmjdock — bottom-centered dock with pinned apps + central TMJOs
+     button that opens tmjmenu
+ .
+ Postinst disables /etc/xdg/autostart/plank.desktop (if present) so
+ tmjdock takes over without two docks fighting for screen space.
+ The Plank package itself is left installed (tmjos-dock scripts like
+ tmjos-first-run remain functional).
+ .
+ Wayland support deferred to v2.0 (will use gtk4-layer-shell instead
+ of X11 hints).

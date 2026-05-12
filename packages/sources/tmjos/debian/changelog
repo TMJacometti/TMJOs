@@ -1,3 +1,14 @@
+tmjos (1.3.4-1) noble; urgency=medium
+
+  * Add tmjmenu (>= 1.3.4) to Depends — proprietary application
+    menu + dock that replaces the GNOME Activities Overview and the
+    Plank dock. tmjmenu postinst disables Plank autostart automatically.
+  * tmjos-dock package remains in Depends because its other scripts
+    (tmjos-first-run, tmjos-dock-sync, tmjos-show-apps) provide
+    backward-compat behavior used by some users / fallback.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 16:40:00 -0300
+
 tmjos (1.3.0-2) noble; urgency=medium
 
   * Add tmjos-installer (>= 1.3.0) to Depends — fixes "ISO ships

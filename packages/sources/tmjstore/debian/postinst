@@ -1,0 +1,23 @@
+#!/bin/sh
+# postinst do tmjstore — refresh icon cache + desktop database.
+
+set -e
+
+case "$1" in
+    configure)
+        if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+            gtk-update-icon-cache --quiet --force \
+                /usr/share/icons/hicolor 2>/dev/null || true
+        fi
+        if command -v update-desktop-database >/dev/null 2>&1; then
+            update-desktop-database --quiet /usr/share/applications \
+                2>/dev/null || true
+        fi
+        ;;
+    *)
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

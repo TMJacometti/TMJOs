@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=TMJDock
+GenericName=TMJOs Dock
+Comment=Dock de aplicações do TMJOs (autostart no login)
+Comment[en]=TMJOs application dock (autostart on login)
+Exec=tmjdock
+Terminal=false
+Categories=System;
+Icon=tmjos
+X-GNOME-Autostart-enabled=true
+StartupNotify=false
+NoDisplay=true

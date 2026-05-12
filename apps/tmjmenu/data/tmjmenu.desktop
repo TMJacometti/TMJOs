@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=TMJMenu
+GenericName=Application Menu
+Comment=Menu de aplicações do TMJOs
+Comment[en]=TMJOs application menu
+Exec=tmjmenu --toggle
+Terminal=false
+Categories=System;
+Keywords=menu;apps;launcher;
+Icon=tmjmenu
+NoDisplay=true
+StartupNotify=false

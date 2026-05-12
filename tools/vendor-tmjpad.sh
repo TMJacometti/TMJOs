@@ -33,6 +33,11 @@ cp "$SRC/data/tmjpad.desktop" "$VENDOR/tmjpad.desktop"
 # 3. Icon
 cp "$SRC/assets/logo/tmjpad.png" "$VENDOR/tmjpad.png"
 
+# 3b. AppStream metadata — TMJStore (e gnome-software se instalado)
+# usam pra descobrir e listar o app com metadata rica.
+cp "$SRC/data/br.com.tmjsistemas.tmjpad.appdata.xml" \
+   "$VENDOR/tmjpad.appdata.xml"
+
 # 4. Launcher wrapper script — generated here so it lives next to the
 # vendored files and the Debian rules can just `cp` it.
 cat > "$VENDOR/tmjpad-launcher.sh" << 'LAUNCHER'

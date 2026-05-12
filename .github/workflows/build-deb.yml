@@ -4,11 +4,13 @@ on:
   push:
     branches:
       - main
-      - feature/apt-repo
+      - 'feature/**'
     paths:
+      - 'apps/**'
       - 'packages/sources/**'
       - 'packages/conf/**'
       - 'packages/keys/**'
+      - 'tools/**'
       - '.github/workflows/build-deb.yml'
   workflow_dispatch:
 
@@ -30,7 +32,8 @@ jobs:
           sudo apt-get install -y \
               build-essential \
               devscripts debhelper dpkg-dev reprepro \
-              gnupg lintian fakeroot
+              gnupg lintian fakeroot \
+              imagemagick
 
       - name: Import GPG signing key
         env:
@@ -121,9 +124,14 @@ jobs:
           ls -R apt-repo/dists/ | head -30
 
       - name: Deploy to gh-pages
-        # Publica de main, feature/apt-repo (dev), ou trigger manual.
-        # Quando v1.3 stabilizar, restringe pra só main.
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/apt-repo' || github.event_name == 'workflow_dispatch'
+        # Publica de main, qualquer feature/** branch (pra permitir
+        # testes via apt upgrade durante dev), ou trigger manual.
+        # Quando uma feature stabilizar e for pra release, restringir
+        # pra só main pode fazer sentido — mas durante o ciclo de uma
+        # release maior (ex: v1.3.4), permitir deploy de feature acelera
+        # o feedback loop drasticamente (testar fix imediatamente em
+        # sistema instalado, em vez de esperar merge).
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/feature/') || github.event_name == 'workflow_dispatch'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
