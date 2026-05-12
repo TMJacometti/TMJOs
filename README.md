@@ -94,7 +94,7 @@ Killer feature do TMJOs: atualiza TODO o core (branding, identity, defaults, TMJ
 - Python 3 + GTK4 + libadwaita
 - Calamares (installer gráfico)
 - Fontes: JetBrains Mono, Cantarell
-- CLI: curl, wget, htop, neofetch, vim
+- CLI: curl, wget, htop, fastfetch, vim
 
 ---
 

@@ -36,10 +36,15 @@ fi
 echo "Populando $CONFIG com TMJOs branding..."
 
 # === 1. archives/ — APT repos extras ===
+# Importante: SEM `signed-by=<path>` aqui porque live-build copia os
+# `.key.chroot` pra /etc/apt/trusted.gpg.d/ no chroot. Apontar signed-by
+# pra /usr/share/keyrings/ faria mismatch → repo unsigned → pacotes
+# invisíveis. Em sistema instalado pelo customize.sh, signed-by é
+# correto (key copiada explicitamente pra /usr/share/keyrings/).
 echo "→ archives/ (TMJOs + VSCode)"
 
 cat > "$CONFIG/archives/tmjos.list.chroot" << 'EOF'
-deb [arch=amd64 signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br trixie main apps extras
+deb [arch=amd64] https://packages.tmjos.com.br trixie main apps extras
 EOF
 cp "$CONFIG/archives/tmjos.list.chroot" "$CONFIG/archives/tmjos.list.binary"
 
@@ -48,7 +53,7 @@ curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.asc \
 cp "$CONFIG/archives/tmjos.key.chroot" "$CONFIG/archives/tmjos.key.binary"
 
 cat > "$CONFIG/archives/microsoft.list.chroot" << 'EOF'
-deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main
+deb [arch=amd64] https://packages.microsoft.com/repos/code stable main
 EOF
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
     -o "$CONFIG/archives/microsoft.key.chroot"
@@ -57,6 +62,12 @@ curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
 echo "→ package-lists/tmjos.list.chroot"
 
 cat > "$CONFIG/package-lists/tmjos.list.chroot" << 'EOF'
+# === Kernel + firmware ===
+# Explícito porque `lb config` em algumas versões a57 gera nome errado
+# (`linux-amd64` em vez de `linux-image-amd64`) na config interna.
+linux-image-amd64
+firmware-linux-free
+
 # === GNOME desktop SLIM ===
 # gnome-core é o meta minimal do GNOME (~1GB vs ~3GB do task-gnome-desktop).
 # Traz gnome-shell, gdm3, nautilus, gnome-control-center, gnome-terminal,
@@ -99,7 +110,7 @@ gir1.2-adw-1
 curl
 wget
 htop
-neofetch
+fastfetch
 vim
 xdotool
 imagemagick
