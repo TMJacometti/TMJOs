@@ -4,6 +4,8 @@
 >
 > Distribuição Linux baseada em Ubuntu 24.04 LTS pra devs hardcore — slim, dark, neon, com stack proprietária de apps.
 
+> ⚠️ **Status: Preview interno (v1.x)** — em uso pessoal do dev. Launch oficial vai sair com **v2.0** (rebase em Debian 13 trixie, ~Q3 2026). Estável o suficiente pra usar, mas sem promessa de polish ou suporte público enquanto v1.x.
+
 ![Version](https://img.shields.io/badge/version-1.3.4-cyan)
 ![License](https://img.shields.io/badge/license-GPLv3-green)
 ![Base](https://img.shields.io/badge/based%20on-Ubuntu%2024.04%20LTS-orange)
