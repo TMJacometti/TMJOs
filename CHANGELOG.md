@@ -107,6 +107,15 @@ Major version bump. Decisão grande, requer plan dedicado.
   Cubic 26.04 oferece config simples pra merge. Investigar quando
   começar v2.0.
 
+- **APT repo com components** (`main`, `apps`, `extras`). Padrão
+  Ubuntu (`main`, `restricted`, `universe`, `multiverse`). User
+  decide o que quer no source.list:
+  - `noble main` = só core (conservador)
+  - `noble main apps` = default TMJOs
+  - `noble main apps extras` = power user
+  Permite bump independente de TMJPad/TMJMenu/TMJCode sem mexer no
+  core. Combina com noble-dev pra stable vs WIP.
+
 ## [Backlog dev workflow] — TMJOs Dev VM
 
 Investigação da v1.3.4 revelou que **GNOME Boxes** não é o ambiente
