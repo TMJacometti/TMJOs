@@ -198,14 +198,10 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # evitar recalcular monitor a cada tick.
         self._hidden = False
         self._mouse_over_dock = False
-        # Auto-hide DESATIVADO em VM por default (strut churn cascateia
-        # Mutter re-layouts caros em virt sem aceleração GPU).
-        # Em hardware real, auto-hide funciona normal.
+        # Auto-hide condicional: off em VM (strut churn cascateia Mutter
+        # re-layouts caros em virt). Hardware real → auto-hide funciona.
+        # Em VM, Super+Shift+H é no-op (não reativa, evita confusão).
         self._auto_hide_enabled = not _running_in_vm()
-        # Pinned mode: quando user aperta Super+Shift+H, auto-hide é
-        # desligado e dock fica sempre visível. Toggle de novo volta
-        # ao comportamento auto-hide normal. Em VM começa "implicitamente
-        # pinned" porque auto-hide desativado.
         self._pinned = not self._auto_hide_enabled
         # Counter de popovers abertos (context menu pin/unpin). Enquanto > 0
         # a dock NÃO esconde mesmo se mouse sair (senão menu some no meio
@@ -276,7 +272,14 @@ class TMJDockWindow(Gtk.ApplicationWindow):
     # ── Build / rebuild da bar ────────────────────────────────────────
 
     def _build_bar(self) -> None:
-        """Limpa e re-popula a bar. Chamado on init e on pinned.json change."""
+        """Limpa e re-popula a bar. Chamado on init e on pinned.json change.
+
+        Re-discovery dos apps pra pegar apps instalados depois do __init__
+        do tmjdock (ex: user instalou TMJStore via apt, pinou via popup
+        TMJMenu — sem o re-discovery, a dock skipava silenciosamente
+        porque _all_apps não tinha o desktop_id novo).
+        """
+        self._all_apps = {a.desktop_id: a for a in discover_apps()}
         # Limpa filhos existentes
         child = self._bar.get_first_child()
         while child:
@@ -538,25 +541,31 @@ class TMJDockWindow(Gtk.ApplicationWindow):
     def toggle_pinned(self) -> None:
         """Toggle do modo pinned — chamado por Super+Shift+H.
 
-        Off → On:  auto-hide desligado, dock fica sempre visível, badge
-                   cyan glow + notify-send "Dock fixa".
-        On → Off:  volta ao comportamento auto-hide normal + notify-send
-                   "Auto-hide ativo".
+        Em hardware real:
+            Off → On:  auto-hide desligado, dock fixa + badge glow.
+            On → Off:  retorna ao auto-hide normal.
+
+        Em VM (auto-hide hardcoded off):
+            No-op com notification informando.
         """
+        if not self._auto_hide_enabled:
+            # Em VM, auto-hide cascateia Mutter relayout caro. Toggle
+            # silenciosamente seria confuso — informa o user.
+            self._notify(
+                "TMJDock",
+                "Auto-hide indisponível em VM (use hardware real)",
+                "dialog-information-symbolic",
+            )
+            return
+
         self._pinned = not self._pinned
         self._update_pinned_visual()
 
         if self._pinned:
-            # Garante dock visível imediatamente. Polling vai pausar
-            # no próximo tick (return False em _auto_hide_tick).
             self._show_dock()
             self._notify("TMJDock", "Dock fixa", "view-pin-symbolic")
         else:
-            # Reinicia o polling do auto-hide — só se hardware suporta.
-            # Em VM, _auto_hide_enabled é False (toggling pinned não muda
-            # isso) então não reinicia polling caro.
-            if self._auto_hide_enabled:
-                GLib.timeout_add(AUTO_HIDE_POLL_MS, self._auto_hide_tick)
+            GLib.timeout_add(AUTO_HIDE_POLL_MS, self._auto_hide_tick)
             self._notify("TMJDock", "Auto-hide ativo",
                          "view-restore-symbolic")
 

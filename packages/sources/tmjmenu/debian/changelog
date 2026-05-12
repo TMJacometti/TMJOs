@@ -1,3 +1,16 @@
+tmjmenu (1.3.4-14) noble; urgency=medium
+
+  * Fix: apps TMJ recém-instalados (TMJStore, TMJCode futuro) não
+    apareciam na dock após pin via popup TMJMenu. Causa: _all_apps
+    era cacheado no __init__ do tmjdock; apps instalados depois
+    nunca entravam no cache. _build_bar() agora re-roda
+    discover_apps() em todo rebuild, pegando apps novos.
+  * Super+Shift+H em VM mostra toast "Auto-hide indisponível em VM"
+    em vez de toggle silencioso e confuso (auto-hide hardcoded
+    off em VM via systemd-detect-virt).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 22:50:00 -0300
+
 tmjmenu (1.3.4-13) noble; urgency=low
 
   * Logo próprio do TMJMenu (1024x1024 PNG) — antes usava fallback
