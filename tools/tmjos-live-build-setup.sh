@@ -155,8 +155,19 @@ SOURCES
 apt-get update
 
 # Install tmjos meta (puxa tmjos-branding, tmjos-os-identity, tmjos-defaults,
-# tmjmenu, tmjpad via Depends) + code (VSCode oficial).
+# tmjmenu, tmjpad via Depends; tmjos-calamares-branding via Recommends)
+# + code (VSCode oficial).
 DEBIAN_FRONTEND=noninteractive apt-get install -y tmjos code
+
+# Ativa branding tmjos no Calamares se o pacote foi instalado.
+if [ -d /usr/share/calamares/branding/tmjos ] && [ -f /etc/calamares/settings.conf ]; then
+    if grep -qE '^[[:space:]]*branding:' /etc/calamares/settings.conf; then
+        sed -i 's/^[[:space:]]*branding:.*/branding: tmjos/' /etc/calamares/settings.conf
+    else
+        echo "branding: tmjos" >> /etc/calamares/settings.conf
+    fi
+    echo "  → Calamares branding ativado: tmjos"
+fi
 
 echo "=== TMJOs apt install done ==="
 HOOK

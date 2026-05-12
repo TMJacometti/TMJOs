@@ -168,18 +168,24 @@ echo -e "${YELLOW}[5/7] Instalando TMJOs metapackage + apps...${NC}"
 $SUDO apt install -y tmjos
 
 # ===========================================
-# FASE 6 — CALAMARES BRANDING (v2.0 alpha: básico)
+# FASE 6 — CALAMARES BRANDING
 # ===========================================
 
-echo -e "${YELLOW}[6/7] Configurando Calamares (placeholder v2.0 alpha)...${NC}"
+echo -e "${YELLOW}[6/7] Configurando Calamares + branding TMJOs...${NC}"
 
-# TODO em v2.0 stable: tmjos-calamares-branding package que provê:
-#   /etc/calamares/branding/tmjos/branding.desc
-#   /etc/calamares/branding/tmjos/show.qml (slideshow QML)
-#   /etc/calamares/branding/tmjos/*.png (assets)
-#
-# Por ora, garante calamares instalado. Branding default Debian.
-$SUDO apt install -y calamares calamares-settings-debian || true
+if $SUDO apt install -y calamares calamares-settings-debian tmjos-calamares-branding; then
+    # Pacote instala em /usr/share/calamares/branding/tmjos/ (Debian-idiomatic).
+    if [ -d /usr/share/calamares/branding/tmjos ] && [ -f /etc/calamares/settings.conf ]; then
+        if grep -qE '^[[:space:]]*branding:' /etc/calamares/settings.conf; then
+            $SUDO sed -i 's/^[[:space:]]*branding:.*/branding: tmjos/' /etc/calamares/settings.conf
+        else
+            echo "branding: tmjos" | $SUDO tee -a /etc/calamares/settings.conf > /dev/null
+        fi
+    fi
+else
+    echo -e "${YELLOW}Aviso: tmjos-calamares-branding indisponível; mantendo branding Debian.${NC}"
+    $SUDO apt install -y calamares calamares-settings-debian || true
+fi
 
 # ===========================================
 # FASE 7 — OPTIMIZE (mask services + zram + preload)

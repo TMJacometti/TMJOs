@@ -1,3 +1,10 @@
+tmjos (2.0.0-2) trixie; urgency=medium
+
+  * Add tmjos-calamares-branding em Recommends — branding TMJOs pro
+    installer Calamares (slideshow QML, paleta neon, strings TMJOs).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Tue, 12 May 2026 22:00:00 -0300
+
 tmjos (2.0.0-1) trixie; urgency=medium
 
   * Rebase em Debian 13 (trixie). Sai do ciclo Ubuntu.
