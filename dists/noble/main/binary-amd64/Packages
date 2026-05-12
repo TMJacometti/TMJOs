@@ -192,10 +192,10 @@ Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: admin
 Filename: pool/main/t/tmjos-installer/tmjos-installer_1.3.4-3_all.deb
-Size: 2378712
-SHA256: 9484190b4972a96ff59858ce40f839bd4bbab1f4c90530212b9f51a2e62cbf87
-SHA1: d178d7fea8486fb9bb8fba4f18288ef53fb9ceaa
-MD5sum: a5d6475abf19746ba9bf68146bb35e80
+Size: 2378710
+SHA256: a8728351de5ccb74dc51e327d3f6f3df194c01f4c2c6be9685112b72fcf1b23f
+SHA1: bf08f38714227dab39ad86a22fc8d9ce53e63daa
+MD5sum: d826c066c4aded954c7f292790464080
 Description: Ubuntu graphical installer (ubiquity) configured for TMJOs
  Ensures the TMJOs live-CD ships with a working graphical installer.
  Ubuntu 24.04's default install path is snapd-based, which TMJOs
