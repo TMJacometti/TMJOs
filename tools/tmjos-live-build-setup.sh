@@ -35,28 +35,42 @@ fi
 
 echo "Populando $CONFIG com TMJOs branding..."
 
-# === 1. archives/ — APT repos extras ===
-# Importante: SEM `signed-by=<path>` aqui porque live-build copia os
-# `.key.chroot` pra /etc/apt/trusted.gpg.d/ no chroot. Apontar signed-by
-# pra /usr/share/keyrings/ faria mismatch → repo unsigned → pacotes
-# invisíveis. Em sistema instalado pelo customize.sh, signed-by é
-# correto (key copiada explicitamente pra /usr/share/keyrings/).
-echo "→ archives/ (TMJOs + VSCode)"
+# === 0. Fix vazamentos Ubuntu no `lb config` (quando rodado em host Ubuntu) ===
+# `lb config` em Ubuntu host puxa defaults Ubuntu — `LB_LINUX_PACKAGES="linux"`
+# concatena com `LB_LINUX_FLAVOURS="amd64"` virando `linux-amd64` (pacote
+# inexistente em Debian). Fix manual no config/chroot e config/binary.
+echo "→ corrigindo vazamentos Ubuntu em config/{chroot,binary}"
+sed -i 's/^LB_LINUX_PACKAGES="linux"$/LB_LINUX_PACKAGES="linux-image"/' "$CONFIG/chroot"
+sed -i 's/^LB_SYSLINUX_THEME="ubuntu-oneiric"$/LB_SYSLINUX_THEME=""/' "$CONFIG/binary"
 
-cat > "$CONFIG/archives/tmjos.list.chroot" << 'EOF'
-deb [arch=amd64] https://packages.tmjos.com.br trixie main apps extras
+# === 1. APT repos extras via includes.chroot_before_packages/ ===
+# Pattern recomendado (vs archives/) — sources e keys são copiadas pra
+# paths consistentes ANTES do install pass, com signed-by funcionando.
+# Live-build a57 tem timing issues com archives/, então evitamos.
+echo "→ includes.chroot_before_packages/ (TMJOs + VSCode)"
+
+KEYS_DIR="$CONFIG/includes.chroot_before_packages/usr/share/keyrings"
+SOURCES_DIR="$CONFIG/includes.chroot_before_packages/etc/apt/sources.list.d"
+mkdir -p "$KEYS_DIR" "$SOURCES_DIR"
+
+# TMJOs keyring (dearmored .gpg)
+curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg \
+    -o "$KEYS_DIR/tmjos-archive-keyring.gpg"
+
+cat > "$SOURCES_DIR/tmjos.list" << 'EOF'
+deb [arch=amd64 signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br trixie main apps extras
 EOF
-cp "$CONFIG/archives/tmjos.list.chroot" "$CONFIG/archives/tmjos.list.binary"
 
-curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.asc \
-    -o "$CONFIG/archives/tmjos.key.chroot"
-cp "$CONFIG/archives/tmjos.key.chroot" "$CONFIG/archives/tmjos.key.binary"
-
-cat > "$CONFIG/archives/microsoft.list.chroot" << 'EOF'
-deb [arch=amd64] https://packages.microsoft.com/repos/code stable main
-EOF
+# Microsoft VSCode keyring (dearmor manualmente)
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
-    -o "$CONFIG/archives/microsoft.key.chroot"
+    | gpg --dearmor > "$KEYS_DIR/microsoft.gpg"
+
+cat > "$SOURCES_DIR/vscode.list" << 'EOF'
+deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main
+EOF
+
+# Limpa archives/ antigo (caso setup tenha rodado antes em modo archives)
+rm -f "$CONFIG/archives/"tmjos.* "$CONFIG/archives/"microsoft.* 2>/dev/null || true
 
 # === 2. package-lists/ ===
 echo "→ package-lists/tmjos.list.chroot"
