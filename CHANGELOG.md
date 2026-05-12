@@ -139,6 +139,24 @@ funciona em metal.
 Futuro: script `tools/tmjos-dev-vm.sh` que cria VM via virt-install
 com XML otimizado.
 
+## [Backlog v1.4 ou v2.0] — TMJOs Installer Slideshow
+
+v1.3.4 e abaixo: install em silêncio (sem slideshow) — `ubiquity-slideshow-ubuntu`
+removido pelo customize.sh.
+
+Futuro: slideshow próprio durante a tela "Copying files" do ubiquity.
+Slides com identidade TMJOs:
+- "OS DA TMJSistemas · OS MELHORES · OS INSANOS"
+- "Slim Aggressive · ~700MB RAM idle"
+- "TMJMenu + TMJDock · launcher proprietário"
+- "APT repo · `sudo apt upgrade tmjos`"
+- "TMJPad · text editor com persistência total"
+- "Codename: insano"
+
+Implementação: pacote `tmjos-slideshow` que provê arquivos compatíveis
+com `ubiquity-slideshow-ubuntu` (HTML + assets em /usr/share/ubiquity-slideshow/).
+Conflicts com ubiquity-slideshow-ubuntu pra evitar Ubuntu marketing voltar.
+
 ## [Backlog v1.4] — apps proprietários novos
 
 
