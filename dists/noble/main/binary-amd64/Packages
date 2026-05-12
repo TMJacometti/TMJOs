@@ -183,19 +183,19 @@ Description: TMJOs pipeline smoke test package
  Safe to keep installed; safe to remove.
 
 Package: tmjos-installer
-Version: 1.3.4-2
+Version: 1.3.4-3
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Installed-Size: 119
+Installed-Size: 2352
 Depends: ubiquity, ubiquity-frontend-gtk
 Homepage: https://github.com/TMJacometti/TMJOs
 Priority: optional
 Section: admin
-Filename: pool/main/t/tmjos-installer/tmjos-installer_1.3.4-2_all.deb
-Size: 101064
-SHA256: f000a38cc4803b218f85c6ff0b01af1fc938b0526f32a2979624b2bef1c93fff
-SHA1: cea34d1c03b3261327d44e9e50666e6d236d7544
-MD5sum: 9e9b341b5c6a78a0a782e0abdba33d0a
+Filename: pool/main/t/tmjos-installer/tmjos-installer_1.3.4-3_all.deb
+Size: 2378712
+SHA256: 9484190b4972a96ff59858ce40f839bd4bbab1f4c90530212b9f51a2e62cbf87
+SHA1: d178d7fea8486fb9bb8fba4f18288ef53fb9ceaa
+MD5sum: a5d6475abf19746ba9bf68146bb35e80
 Description: Ubuntu graphical installer (ubiquity) configured for TMJOs
  Ensures the TMJOs live-CD ships with a working graphical installer.
  Ubuntu 24.04's default install path is snapd-based, which TMJOs
