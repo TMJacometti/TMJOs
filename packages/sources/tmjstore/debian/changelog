@@ -1,0 +1,12 @@
+tmjstore (0.1.0-1) noble; urgency=low
+
+  * Initial release. TMJOs proprietary software center.
+  * 3 abas (Adw.ViewStack): Apps disponíveis, Instalados, Updates.
+  * Descobre apps TMJOs via APT origin packages.tmjos.com.br +
+    AppStream metadata em /usr/share/metainfo/.
+  * Install/Remove/Upgrade via pkexec + apt-get (PolicyKit prompt
+    gráfico de senha).
+  * Visual neon TMJOs: gradient cyan/magenta nos botões de ação,
+    cards com border subtle, "Installed" tag em accent cyan.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Mon, 11 May 2026 21:30:00 -0300
