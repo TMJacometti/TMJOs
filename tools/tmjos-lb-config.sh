@@ -47,7 +47,6 @@ lb config \
     --parent-mirror-binary "http://deb.debian.org/debian/" \
     --parent-mirror-binary-security "http://security.debian.org/debian-security/" \
     --security false \
-    --volatile false \
     --backports false \
     --apt apt \
     --apt-recommends true \
