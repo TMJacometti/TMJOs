@@ -1,53 +1,51 @@
 #!/usr/bin/make -f
 
-# TMJPad upstream lives in apps/tmjpad/ at the repo root. Pre-build
-# step (tools/vendor-tmjpad.sh, called by CI before dpkg-buildpackage)
-# copies the upstream files into ./vendor/. If the file isn't there,
-# fail with a clear message.
+# TMJPad é Rust + gtk4-rs desde v2.0.0. Build flow:
+#   1. tools/vendor-tmjpad.sh popula vendor/ com src/ + Cargo.{toml,lock}
+#      + rust-deps/ (todas as crates vendored) + .cargo/config.toml +
+#      data/ (desktop, appdata, icon).
+#   2. dpkg-buildpackage chama este rules.
+#   3. override_dh_auto_build: cargo build --release --offline
+#      (reads vendored deps from rust-deps/ via .cargo/config.toml).
+#   4. override_dh_auto_install: copia binary + desktop + appdata + icon.
 
 %:
 	dh $@
 
-override_dh_auto_install:
-	@if [ ! -d vendor/tmjpad ]; then \
+override_dh_auto_build:
+	@if [ ! -f vendor/Cargo.toml ]; then \
 		echo ""; \
-		echo "ERROR: vendor/tmjpad/ missing."; \
+		echo "ERROR: vendor/Cargo.toml missing."; \
 		echo "Run tools/vendor-tmjpad.sh from the repo root before building."; \
 		echo "(CI does this automatically via the build-deb workflow.)"; \
 		echo ""; \
 		exit 1; \
 	fi
+	# Build Rust offline (deps já vendored em vendor/rust-deps/).
+	cd vendor && cargo build --release --offline --locked
 
-	# Python module → /opt/tmjpad/tmjpad/
-	mkdir -p debian/tmjpad/opt/tmjpad
-	cp -r vendor/tmjpad debian/tmjpad/opt/tmjpad/
-	chmod -R a+rX debian/tmjpad/opt/tmjpad
-
-	# Wrapper script → /usr/bin/tmjpad
+override_dh_auto_install:
+	# Binary → /usr/bin/tmjpad
 	mkdir -p debian/tmjpad/usr/bin
-	cp vendor/tmjpad-launcher.sh debian/tmjpad/usr/bin/tmjpad
+	cp vendor/target/release/tmjpad debian/tmjpad/usr/bin/tmjpad
 	chmod +x debian/tmjpad/usr/bin/tmjpad
 
 	# Desktop entry → /usr/share/applications/
 	mkdir -p debian/tmjpad/usr/share/applications
-	cp vendor/tmjpad.desktop debian/tmjpad/usr/share/applications/
+	cp vendor/data/tmjpad.desktop debian/tmjpad/usr/share/applications/
 
 	# AppStream metadata → /usr/share/metainfo/ (TMJStore + gnome-software)
 	mkdir -p debian/tmjpad/usr/share/metainfo
-	cp vendor/tmjpad.appdata.xml \
+	cp vendor/data/tmjpad.appdata.xml \
 		debian/tmjpad/usr/share/metainfo/br.com.tmjsistemas.tmjpad.appdata.xml
 
-	# Icon — installed in multiple paths for maximum fallback coverage:
-	#   1. hicolor 512x512 (real PNG size is 1024x1024, but 512 is the
-	#      largest standard hicolor bucket — GTK downscales).
-	#   2. hicolor 256x256 (older lookup paths).
-	#   3. /usr/share/pixmaps/ — XDG fallback. ALWAYS consulted by
-	#      Icon=name desktop entries even if hicolor cache is stale,
-	#      which is the failure mode we hit on v1.3.0-1 (icon file
-	#      present but GNOME shows generic fallback).
+	# Icon em múltiplos paths pra max fallback coverage
 	mkdir -p debian/tmjpad/usr/share/icons/hicolor/512x512/apps
-	cp vendor/tmjpad.png debian/tmjpad/usr/share/icons/hicolor/512x512/apps/
+	cp vendor/data/tmjpad.png debian/tmjpad/usr/share/icons/hicolor/512x512/apps/
 	mkdir -p debian/tmjpad/usr/share/icons/hicolor/256x256/apps
-	cp vendor/tmjpad.png debian/tmjpad/usr/share/icons/hicolor/256x256/apps/
+	cp vendor/data/tmjpad.png debian/tmjpad/usr/share/icons/hicolor/256x256/apps/
 	mkdir -p debian/tmjpad/usr/share/pixmaps
-	cp vendor/tmjpad.png debian/tmjpad/usr/share/pixmaps/tmjpad.png
+	cp vendor/data/tmjpad.png debian/tmjpad/usr/share/pixmaps/tmjpad.png
+
+override_dh_auto_test:
+	# Skip cargo test (deps vendored, alguns testes precisam de network).

@@ -33,7 +33,9 @@ jobs:
               build-essential \
               devscripts debhelper dpkg-dev reprepro \
               gnupg lintian fakeroot \
-              imagemagick
+              imagemagick \
+              cargo rustc pkg-config \
+              libgtk-4-dev libadwaita-1-dev
 
       - name: Import GPG signing key
         env:

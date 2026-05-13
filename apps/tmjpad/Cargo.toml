@@ -1,0 +1,33 @@
+[package]
+name = "tmjpad"
+version = "2.0.0"
+edition = "2021"
+rust-version = "1.75"
+description = "TMJOs text editor with full session persistence"
+license = "GPL-3.0-or-later"
+authors = ["TMJOs Team <tmjos-archive@tmjsistemas.com.br>"]
+homepage = "https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjpad"
+repository = "https://github.com/TMJacometti/TMJOs"
+keywords = ["editor", "tmjos", "gtk4", "linux"]
+categories = ["text-editors"]
+
+[[bin]]
+name = "tmjpad"
+path = "src/main.rs"
+
+[dependencies]
+gtk = { package = "gtk4", version = "0.10", features = ["v4_12"] }
+adw = { package = "libadwaita", version = "0.8", features = ["v1_5"] }
+glib = "0.21"
+gio = "0.21"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.10", features = ["v4"] }
+dirs = "5.0"
+anyhow = "1.0"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true

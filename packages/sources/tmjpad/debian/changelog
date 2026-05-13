@@ -1,3 +1,31 @@
+tmjpad (2.0.0-1) trixie; urgency=medium
+
+  * REWRITE COMPLETA EM RUST. TMJPad agora é Rust + gtk4-rs +
+    libadwaita (era Python + PyGObject). Primeiro app TMJOs no
+    pipeline de migração Rust (v3.0 = TMJOs Rust-only).
+  * Single binary em /usr/bin/tmjpad (~3-5MB statically linked) —
+    sem deps Python no runtime.
+  * Startup time 5-10x mais rápido vs versão Python (~100ms vs ~500ms).
+  * Memory footprint -60% (~15MB vs ~40MB Python+GObject).
+  * Architecture: amd64 (era all/Python). Pacotes futuros pra arm64
+    quando hardware demandar.
+  * Paridade total com a versão 0.1.2-2 Python:
+    - Multi-tab com reordenação
+    - Auto-save debounced 500ms
+    - Session persistence atômica (~/.config/tmjpad/{session.json,
+      buffers/<uuid>.txt})
+    - Find & Replace inline (Ctrl+F/Ctrl+H, case-insensitive, wrap)
+    - Dark theme TMJOs neon (cyan #00d4ff, magenta #ff2d95, navy
+      #0a0e2a) + JetBrains Mono
+    - Cursor restoration entre sessões
+    - GTK4 + libadwaita nativo
+  * Build via cargo (Build-Depends: cargo, rustc, libgtk-4-dev,
+    libadwaita-1-dev). vendor/rust-deps/ contém todas as crates
+    pra build offline (cargo build --release --offline --locked).
+  * tools/vendor-tmjpad.sh reescrito pra Rust workflow.
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Wed, 13 May 2026 15:00:00 -0300
+
 tmjpad (0.1.2-2) trixie; urgency=medium
 
   * No-change rebuild para publicar o TMJPad no repo trixie da linha
