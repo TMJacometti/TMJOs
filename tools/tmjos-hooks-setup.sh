@@ -2,14 +2,22 @@
 # tmjos-hooks-setup.sh
 #
 # Popula config/ do build dir com:
-# - hook 0100 chroot_early: instala base GNOME + TMJOs stack
-# - hook 0500 normal: adiciona repos TMJOs+VSCode, instala meta+code
-# - hook 0700 normal: masking serviços + zramswap enable
-# - hook 0900 normal: caches finais
-# - apt preferences pra bloquear rygel
-# - dpkg.cfg pra skip docs/man/locales extras
+# - package-lists/tmjos.list.chroot: lista de pacotes Debian instalados
+#   pelo live-build (stage chroot_install-packages)
+# - includes.chroot_before_packages/: defenses pré-install
+#   (dpkg.cfg path-exclude, APT preferences blocklist, policy-rc.d)
+# - hooks/normal/*.hook.chroot: customização pós-install
+#   - 0500: adiciona repos TMJOs+VSCode, instala meta+code
+#   - 0700: masking serviços + zramswap enable
+#   - 0900: caches finais (icon, desktop-database)
 #
 # Espera BUILD_DIR no env. Sourced por tmjos-build.sh.
+#
+# Approach pra live-build moderno upstream (Debian, 20250505+):
+# - SEM hooks .chroot_early (sufixo legacy, removido em moderno)
+# - SEM shims systemctl/start-stop-daemon (live-build moderno já tem
+#   policy-rc.d, em Debian host postinst não trava em chroot)
+# - SEM workaround /root/isolinux/ (com --bootloader grub-efi)
 
 set -euo pipefail
 
@@ -25,33 +33,98 @@ if [ ! -d "$CONFIG" ]; then
     exit 1
 fi
 
-echo "→ populando hooks/ e preferences/ em $CONFIG"
+echo "→ populando config/ em $CONFIG"
 
-# Limpa qualquer config legacy de tentativas anteriores
+# Limpa estado legacy (hooks com sufixos antigos, archives manuais)
+rm -rf "$CONFIG/hooks"
 rm -rf "$CONFIG/package-lists"
-rm -rf "$CONFIG/includes.chroot_before_packages" 2>/dev/null || true
+rm -rf "$CONFIG/includes.chroot_before_packages"
 rm -f "$CONFIG/archives/"tmjos.* "$CONFIG/archives/"microsoft.* 2>/dev/null || true
-mkdir -p "$CONFIG/package-lists"
-mkdir -p "$CONFIG/hooks"
 mkdir -p "$CONFIG/hooks/normal"
+mkdir -p "$CONFIG/package-lists"
+mkdir -p "$CONFIG/includes.chroot_before_packages"
 
 # ─────────────────────────────────────────────────────────────────
-# Hook 0100 — early chroot: instala base Debian + GNOME minimal
+# 1. package-lists/tmjos.list.chroot
 # ─────────────────────────────────────────────────────────────────
-echo "→ hooks/0100-tmjos-debian-base.chroot_early"
-cat > "$CONFIG/hooks/0100-tmjos-debian-base.chroot_early" << 'HOOK'
-#!/bin/sh
-set -e
-echo "=== TMJOs Debian base packages ==="
+# Live-build instala TODOS esses pacotes via stage chroot_install-packages
+# ANTES dos hooks normais rodarem. Daí o hook 0500 tem curl/gpg disponível.
+echo "→ package-lists/tmjos.list.chroot"
+cat > "$CONFIG/package-lists/tmjos.list.chroot" << 'PKG'
+# === Kernel + firmware (firmware vem via archive-areas non-free-firmware) ===
+linux-image-amd64
 
-export DEBIAN_FRONTEND=noninteractive
-export NEEDRESTART_MODE=a
-export UCF_FORCE_CONFFOLD=1
-export APT_LISTCHANGES_FRONTEND=none
+# === GNOME desktop minimal (sem gnome-core meta — evita rygel/yelp/games) ===
+gnome-session
+gnome-shell
+gnome-shell-extension-prefs
+gnome-settings-daemon
+gnome-control-center
+gnome-terminal
+nautilus
+gdm3
+eog
+evince
+gnome-text-editor
+gnome-calculator
+gnome-system-monitor
+gnome-disk-utility
+file-roller
+network-manager-gnome
+gvfs-backends
+xdg-user-dirs-gtk
+adwaita-icon-theme
+fonts-noto
 
-# ───── dpkg: skip docs/man/locales extras ─────
-# Economiza 200-500MB e elimina trigger lerdo do man-db.
-cat > /etc/dpkg/dpkg.cfg.d/01-tmjos-no-docs << 'DPKG'
+# === Audio (PipeWire) ===
+pipewire
+pipewire-pulse
+pipewire-audio
+wireplumber
+
+# === RAM efficiency ===
+zram-tools
+
+# === Installer ===
+calamares
+calamares-settings-debian
+
+# === Dev tools ===
+git
+
+# === Python + GTK (pra tmjmenu/tmjpad/tmjstore) ===
+python3
+python3-gi
+python3-xlib
+gir1.2-gtk-4.0
+gir1.2-adw-1
+
+# === CLI essenciais (hook 0500 precisa de curl/gpg/ca-certificates) ===
+curl
+wget
+gpg
+ca-certificates
+htop
+vim
+xdotool
+fonts-jetbrains-mono
+
+# === Live system ===
+live-boot
+live-config
+live-config-systemd
+PKG
+
+# ─────────────────────────────────────────────────────────────────
+# 2. includes.chroot_before_packages/ — defenses copiadas pro chroot
+#    ANTES dos pacotes serem instalados (afetam apt/dpkg behavior)
+# ─────────────────────────────────────────────────────────────────
+
+# 2a. dpkg.cfg.d — skip docs/man/locales (economiza 200-500MB)
+echo "→ includes.chroot_before_packages/etc/dpkg/dpkg.cfg.d/01-tmjos-no-docs"
+mkdir -p "$CONFIG/includes.chroot_before_packages/etc/dpkg/dpkg.cfg.d"
+cat > "$CONFIG/includes.chroot_before_packages/etc/dpkg/dpkg.cfg.d/01-tmjos-no-docs" << 'DPKG'
+# TMJOs: skip docs/man/locales-extras
 path-exclude=/usr/share/man/*
 path-exclude=/usr/share/doc/*
 path-exclude=/usr/share/info/*
@@ -64,154 +137,21 @@ path-include=/usr/share/locale/pt_BR/*
 path-include=/usr/share/locale/locale.alias
 DPKG
 
-# Desativa trigger do man-db (mesmo com path-exclude, ele ainda
-# escaneia diretório vazio — debconf elimina de vez).
-echo "man-db man-db/auto-update boolean false" | debconf-set-selections
-
-# ───── policy-rc.d: deny daemon starts em chroot ─────
-cat > /usr/sbin/policy-rc.d << 'POLICY'
-#!/bin/sh
-exit 101
-POLICY
-chmod +x /usr/sbin/policy-rc.d
-
-# ───── PATH shimming pra binários que travam em chroot ─────
-# Approach robusto: pasta de shims no PATH prependado. Quando um
-# postinst chama `systemctl daemon-reload`, `start-stop-daemon ...`,
-# ou `update-initramfs -u`, o shim intercepta antes do binário real
-# e retorna 0 silenciosamente. Nada do sistema é tocado.
-#
-# Anterior tentamos `dpkg-divert` mas é frágil: se o build crashar
-# no meio, o estado fica corrompido (binário real movido pra .distrib
-# e nunca volta). PATH shim é 100% reversível por `rm -rf`.
-mkdir -p /usr/local/sbin/tmjos-shims
-cat > /usr/local/sbin/tmjos-shims/_shim.sh << 'SHIM'
-#!/bin/sh
-echo "[$(basename "$0")] $@" >> /tmp/tmjos-shims.log 2>/dev/null || true
-exit 0
-SHIM
-chmod +x /usr/local/sbin/tmjos-shims/_shim.sh
-
-for cmd in systemctl start-stop-daemon initctl invoke-rc.d update-initramfs; do
-    ln -sf /usr/local/sbin/tmjos-shims/_shim.sh \
-           /usr/local/sbin/tmjos-shims/"$cmd"
-done
-
-export PATH=/usr/local/sbin/tmjos-shims:$PATH
-
-# ───── Bloquear pacotes problemáticos via apt preferences ─────
-# Rygel trava o build (trigger postinst em chroot). É Recommends de
-# gnome-shell, então mesmo sem gnome-core entra se não bloqueado.
-mkdir -p /etc/apt/preferences.d
-cat > /etc/apt/preferences.d/tmjos-blocklist << 'PREFS'
+# 2b. APT preferences — blocklist rygel (Recommends de gnome-shell, trava
+# o build em chroot se entrar)
+echo "→ includes.chroot_before_packages/etc/apt/preferences.d/tmjos-blocklist"
+mkdir -p "$CONFIG/includes.chroot_before_packages/etc/apt/preferences.d"
+cat > "$CONFIG/includes.chroot_before_packages/etc/apt/preferences.d/tmjos-blocklist" << 'PREFS'
+# TMJOs: rygel é problemático em chroot. Bloqueia totalmente.
 Package: rygel rygel-playbin rygel-tracker rygel-tracker3
 Pin: release *
 Pin-Priority: -1
 PREFS
 
-# ───── Pre-mask serviços problemáticos ─────
-# Mascarar ANTES do install impede systemd presets de ativar.
-PREMASK="rygel.service \
-         fwupd.service fwupd-refresh.service fwupd-refresh.timer \
-         ModemManager.service \
-         packagekit.service packagekit-offline-update.service \
-         apt-daily.service apt-daily.timer \
-         apt-daily-upgrade.service apt-daily-upgrade.timer \
-         plymouth-quit-wait.service \
-         tracker-miner-fs-3.service tracker-miner-rss-3.service \
-         tracker-extract-3.service tracker-writeback-3.service \
-         man-db.timer man-db.service"
-
-mkdir -p /etc/systemd/system
-for svc in $PREMASK; do
-    ln -sf /dev/null "/etc/systemd/system/$svc" 2>/dev/null || true
-done
-
-apt-get update
-
-APT_INSTALL="apt-get install -y \
-    -o Dpkg::Options::=--force-confdef \
-    -o Dpkg::Options::=--force-confold \
-    -o APT::Install-Recommends=true"
-
-APT_INSTALL_NOREC="apt-get install -y \
-    -o Dpkg::Options::=--force-confdef \
-    -o Dpkg::Options::=--force-confold \
-    --no-install-recommends"
-
-# ───── Bloco GNOME minimal (sem gnome-core, sem bloat) ─────
-# Lista cirúrgica. --no-install-recommends evita arrastar yelp,
-# gnome-user-docs, rygel, gnome-games, totem, rhythmbox, cheese etc.
-echo "=== TMJOs block: GNOME minimal ==="
-$APT_INSTALL_NOREC \
-    gnome-session \
-    gnome-shell \
-    gnome-shell-extension-prefs \
-    gnome-settings-daemon \
-    gnome-control-center \
-    gnome-terminal \
-    nautilus \
-    gdm3 \
-    eog \
-    evince \
-    gnome-text-editor \
-    gnome-calculator \
-    gnome-system-monitor \
-    gnome-disk-utility \
-    file-roller \
-    network-manager-gnome \
-    gvfs-backends \
-    xdg-user-dirs-gtk \
-    adwaita-icon-theme \
-    fonts-noto \
-    pipewire \
-    pipewire-pulse \
-    pipewire-audio \
-    wireplumber
-
-echo "=== TMJOs block: Calamares ==="
-# calamares-settings-debian provê settings.conf + module configs
-# (unpackfs, bootloader, displaymanager etc.). O .deb tmjos-calamares-
-# branding (instalado pelo hook 0500) só sobrescreve o branding.
-$APT_INSTALL \
-    zram-tools \
-    calamares \
-    calamares-settings-debian
-
-echo "=== TMJOs block: Dev tools ==="
-$APT_INSTALL \
-    git
-
-echo "=== TMJOs block: Python GTK (pra tmjmenu/tmjpad) ==="
-$APT_INSTALL \
-    python3 \
-    python3-gi \
-    python3-xlib \
-    gir1.2-gtk-4.0 \
-    gir1.2-adw-1
-
-echo "=== TMJOs block: CLI ==="
-$APT_INSTALL \
-    curl \
-    wget \
-    gpg \
-    ca-certificates \
-    htop \
-    vim \
-    xdotool \
-    fonts-jetbrains-mono
-
-# ───── Remove shims do PATH ─────
-# Cleanup é simples: rm -rf na pasta. Nada do sistema foi tocado.
-rm -rf /usr/local/sbin/tmjos-shims
-export PATH="$(echo "$PATH" | sed 's|/usr/local/sbin/tmjos-shims:||g')"
-
-echo "=== TMJOs base done ==="
-HOOK
-chmod +x "$CONFIG/hooks/0100-tmjos-debian-base.chroot_early"
-
 # ─────────────────────────────────────────────────────────────────
-# Hook 0500 — normal chroot: adiciona repos TMJOs + Microsoft VSCode
+# 3. Hook 0500 — adiciona repos TMJOs + Microsoft VSCode, instala
+#    `tmjos` (meta) + `code`. Tudo Debian já foi instalado via
+#    package-list, então curl/gpg/ca-certificates estão disponíveis.
 # ─────────────────────────────────────────────────────────────────
 echo "→ hooks/normal/0500-tmjos-apt-install.hook.chroot"
 cat > "$CONFIG/hooks/normal/0500-tmjos-apt-install.hook.chroot" << 'HOOK'
@@ -223,7 +163,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 mkdir -p /usr/share/keyrings
 
-# TMJOs APT repo
+# TMJOs APT repo (trixie)
 curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg \
     -o /usr/share/keyrings/tmjos-archive-keyring.gpg
 cat > /etc/apt/sources.list.d/tmjos.list << 'SOURCES'
@@ -239,18 +179,21 @@ SOURCES
 
 apt-get update
 
+# tmjos meta puxa tmjos-branding, tmjos-os-identity, tmjos-defaults,
+# tmjmenu, tmjpad via Depends; tmjos-calamares-branding via Recommends.
 apt-get install -y \
     -o Dpkg::Options::=--force-confdef \
     -o Dpkg::Options::=--force-confold \
     tmjos code
 
-# Ativa branding tmjos no Calamares
+# Ativa branding tmjos no Calamares se o pacote foi instalado.
 if [ -d /usr/share/calamares/branding/tmjos ] && [ -f /etc/calamares/settings.conf ]; then
     if grep -qE '^[[:space:]]*branding:' /etc/calamares/settings.conf; then
         sed -i 's/^[[:space:]]*branding:.*/branding: tmjos/' /etc/calamares/settings.conf
     else
         echo "branding: tmjos" >> /etc/calamares/settings.conf
     fi
+    echo "  → Calamares branding ativado: tmjos"
 fi
 
 echo "=== TMJOs apt install done ==="
@@ -258,7 +201,7 @@ HOOK
 chmod +x "$CONFIG/hooks/normal/0500-tmjos-apt-install.hook.chroot"
 
 # ─────────────────────────────────────────────────────────────────
-# Hook 0700 — slim service masking + zram
+# 4. Hook 0700 — slim aggressive + service masking
 # ─────────────────────────────────────────────────────────────────
 echo "→ hooks/normal/0700-tmjos-slim.hook.chroot"
 cat > "$CONFIG/hooks/normal/0700-tmjos-slim.hook.chroot" << 'HOOK'
@@ -268,7 +211,7 @@ echo "=== TMJOs slim hook ==="
 
 export DEBIAN_FRONTEND=noninteractive
 
-# Safety net — purga só o que talvez tenha entrado por Depends
+# Safety net — purga só o que talvez tenha entrado por Depends de terceiros
 BLOAT="rygel rygel-playbin rygel-tracker rygel-tracker3 \
        libreoffice-core libreoffice-common"
 
@@ -297,7 +240,7 @@ HOOK
 chmod +x "$CONFIG/hooks/normal/0700-tmjos-slim.hook.chroot"
 
 # ─────────────────────────────────────────────────────────────────
-# Hook 0900 — caches finais
+# 5. Hook 0900 — caches finais
 # ─────────────────────────────────────────────────────────────────
 echo "→ hooks/normal/0900-tmjos-caches.hook.chroot"
 cat > "$CONFIG/hooks/normal/0900-tmjos-caches.hook.chroot" << 'HOOK'
