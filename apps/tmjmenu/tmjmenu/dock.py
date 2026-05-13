@@ -114,8 +114,9 @@ DOCK_CSS = b"""
 
 
 def _set_tmjos_icon(image: Gtk.Image) -> None:
-    """Tenta o icon 'tmjos' do theme (tmjos-branding instalado), fallback
-    pro asset embedded no módulo (dev local / sistemas sem tmjos-branding).
+    """Tenta o icon 'tmjos' do theme do sistema (se já estiver instalado),
+    fallback pro PNG embedded no próprio pacote tmjmenu. tmjmenu inclui
+    o asset, então funciona standalone sem depender de outros pacotes.
     """
     display = Gdk.Display.get_default()
     if display is not None:

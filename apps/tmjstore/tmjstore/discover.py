@@ -172,24 +172,15 @@ TMJ_REPO_ORIGINS = [
     "packages.tmjos.com.br",
     "tmjacometti.github.io/tmjos",
 ]
-# Pacotes "core" da distro — NÃO devem aparecer no TMJStore.
-# User clicando "Remover" em qualquer um destes quebra a instalação
-# (perde branding, identity, dconf overrides, X11 force, installer
-# integration, etc). São managed pelo meta `tmjos` via apt upgrade.
-#
-# TMJStore é pra apps USER-FACING (TMJPad, TMJMenu, TMJStore, TMJCode,
-# TMJNotes futuros). Core fica invisível — limpa UX, evita acidentes.
+# Pacotes "core" da suite TMJOs — NÃO devem aparecer no TMJStore.
+# TMJStore é pra apps USER-FACING (TMJPad, TMJCode, TMJNotes futuros,
+# etc). O próprio TMJStore + TMJMenu/TMJDock são infraestrutura da
+# suite — desinstalar via TMJStore quebraria a experiência. User que
+# realmente quer remover usa `sudo apt remove tmjmenu` no terminal
+# (força extra de "sei o que tô fazendo").
 CORE_PACKAGES = frozenset({
-    "tmjos",                  # metapackage
-    "tmjos-branding",
-    "tmjos-os-identity",
-    "tmjos-defaults",
-    "tmjos-hello",            # pipeline smoke test
-    # TMJMenu/TMJDock é o launcher proprietário — core UX da distro,
-    # mesma categoria de tmjos-defaults. Remover quebra a experiência.
-    # User que realmente quer remover usa `sudo apt remove tmjmenu`
-    # no terminal (força extra de "sei o que tô fazendo").
-    "tmjmenu",
+    "tmjmenu",   # launcher + dock — infra da suite
+    "tmjstore",  # o próprio software center
 })
 
 

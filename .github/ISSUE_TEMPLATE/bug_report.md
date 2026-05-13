@@ -34,13 +34,14 @@ journalctl -xe | tail -50
 
 ## Ambiente
 
-- **Versão TMJOs**: <!-- ex: v1.0 -->
-- **Hardware**: <!-- ex: Notebook Dell XPS 15 -->
-- **CPU / RAM**: <!-- ex: i7-10750H / 16GB -->
-- **Tipo de instalação**: <!-- VM (qual?) ou Hardware Real -->
+- **App afetado**: <!-- ex: tmjpad, tmjmenu, tmjstore -->
+- **Versão do app**: <!-- saída de `apt show tmjpad | grep Version` -->
+- **Distro + versão**: <!-- ex: Ubuntu 24.04, Debian trixie, Linux Mint 22 -->
+- **Sessão**: <!-- X11 ou Wayland — saída de `echo $XDG_SESSION_TYPE` -->
+- **Hardware**: <!-- opcional, ex: Dell XPS 13 i7 16GB -->
 
 ## Checklist
 
 - [ ] Consegui reproduzir o bug consistentemente
 - [ ] Procurei por issues similares já abertas
-- [ ] Testei em modo seguro/recovery (se aplicável)
+- [ ] Estou na versão mais recente (`apt update && apt upgrade <app>`)

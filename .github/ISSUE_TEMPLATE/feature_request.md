@@ -8,7 +8,7 @@ assignees: ''
 
 ## Descrição da Feature
 
-O que você gostaria de ver no TMJOs?
+Qual app TMJOs (tmjpad / tmjmenu / tmjstore / app novo) e o que gostaria de ver?
 
 ## Caso de Uso
 
@@ -24,10 +24,10 @@ Outras formas de resolver o mesmo problema (se houver).
 
 ## Contexto Adicional
 
-Links, screenshots, exemplos de outras distros, etc.
+Links, screenshots, exemplos de apps similares, etc.
 
 ## Checklist
 
 - [ ] Verifiquei se essa feature já não existe
 - [ ] Verifiquei se essa feature já não foi sugerida
-- [ ] A feature está dentro do escopo do TMJOs (clean / minimal / dev-focused)
+- [ ] A feature combina com o nicho TMJOs (dev hardcore, neon, GTK4)

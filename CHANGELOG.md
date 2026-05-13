@@ -1,670 +1,90 @@
 # Changelog
 
-Todas as mudanças relevantes deste projeto serão documentadas aqui.
+Mudanças relevantes do TMJOs Suite. Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
-O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
-e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
+Cada app tem versionamento independente — não há "versão do TMJOs". Apps são publicados no APT repo TMJOs (suite `stable`) conforme novas releases saem.
 
-## [1.3.4-final-ubuntu] - 2026-05-12 — última geração Ubuntu
+---
 
-**Fim do ciclo Ubuntu.** v1.3.4 é a última release sobre Ubuntu 24.04.
-ISO oficial **não foi gerada nem subida pro R2** — v1.x ficou como
-preview interno (single dev).
+## [Unreleased]
 
-A partir de v2.0, TMJOs migra pra **Debian 13 (trixie)**:
-- Cubic → live-build
-- ubiquity → Calamares
-- noble → trixie
-- "Ubuntu modificado" → "Debian-based, sem Canonical"
+- Apps novos no backlog: **TMJCode** (editor VSCode-style, Rust), **TMJNotes** (sticky notes, Rust), **TMJMoney** (controle financeiro, Rust), **TMJRestApi** (REST client tipo Postman, Rust), **TMJCriptoBot** (bot trading cripto educacional, Rust)
+- **AppImage** releases pra alcance cross-distro x86_64 sem APT
+- **Flatpak** no Flathub pra distribuição universal Linux
+- Migração progressiva dos apps Python (tmjmenu, tmjstore) pra Rust
 
-### Estado do APT repo após v1.3.4 (`packages.tmjos.com.br`)
+---
 
-| Pacote | Versão | Status |
-|---|---|---|
-| `tmjos` (meta) | 1.3.4-1 | Estável |
-| `tmjmenu` (TMJMenu + TMJDock) | 1.3.4-14 | Estável |
-| `tmjstore` (software center) | 0.1.6-1 | MVP funcional |
-| `tmjpad` (editor) | 0.1.2-1 | Estável |
-| `tmjos-defaults` (slim runtime + X11 force) | 1.3.4-1 | Estável |
-| `tmjos-installer` (ubiquity branding TMJOs) | 1.3.4-3 | Estável (morre em v2.0) |
-| `tmjos-branding` | 1.3.0-1 | Estável |
-| `tmjos-os-identity` | 1.3.0-2 | Estável |
-| `tmjos-shell-tweaks` (GJS extension) | 1.3.0-3 | Estável (provavelmente desnecessário em v2.0) |
-| `tmjos-dock` (legacy Plank) | 1.3.0-2 | Legacy (morre em v2.0) |
+## TMJPad
 
-### O que porta pra Debian (v2.0)
+Editor de texto com persistência total de sessão. Multi-tab, auto-save, find/replace, dark theme neon. GTK4 + libadwaita.
 
-Apps GTK4 (TMJPad, TMJMenu, TMJDock, TMJStore) → 95-100% portáveis.
-APT repo + CI/CD GitHub Actions → reusa, só muda codename.
-Cloudflare R2 + DNS + LE → reusa.
-Logos, branding, identidade visual → 100% reusa.
-Políticas (versionamento independente de apps, etc) → reusa.
+### [2.0.0] — 2026-05-13
 
-### O que morre com Ubuntu
+- **Reescrita completa em Rust** + gtk4-rs + libadwaita (era Python + PyGObject).
+- Single binary em `/usr/bin/tmjpad` (~3-5MB, sem deps Python no runtime).
+- Startup time ~5x mais rápido (~100ms vs ~500ms Python).
+- Memory footprint -60% (~15MB vs ~40MB).
+- Paridade total com versão 0.1.2 Python:
+  - Multi-tab com reordenação
+  - Session persistence atômica em `~/.config/tmjpad/`
+  - Auto-save debounced 500ms
+  - Find & Replace inline (Ctrl+F / Ctrl+H, case-insensitive, wrap)
+  - Dark theme TMJOs neon + JetBrains Mono
+  - Cursor restoration entre sessões
+- Architecture: amd64 (era `all`/Python). Build via cargo no CI.
 
-- `customize.sh` estilo Cubic
-- `tmjos-installer` com dpkg-divert (vira `tmjos-calamares-branding`)
-- Ubuntu-slideshow fights (Calamares branding é nativo)
-- X11 force no GDM (Wayland direto via `gtk4-layer-shell`)
-- Slim aggressive (Debian já nasce slim)
+### [0.1.2] — Python, era pré-Rust
 
-v2.0 começa fresh em `feature/v2.0-debian`.
+- Multi-tab + session persistence + find/replace + auto-save (~838 linhas Python).
+- Substituída por 2.0.0 Rust (history preservada no git).
 
-## Política de versionamento
+---
 
-**TMJOs (a distro)** segue SemVer baseado em mudança de **stack/infra**,
-não em adição de apps:
+## TMJMenu / TMJDock
 
-- **MAJOR (1.x → 2.x)** = rebase de Ubuntu base, mudança de stack
-  significativa, breakage proposital.
-- **MINOR (1.3 → 1.4)** = mudança de UX/feature substancial no core
-  da distro (não apps individuais).
-- **PATCH (1.3.0 → 1.3.4)** = bug fixes, point releases.
+Launcher popup search (Super+Space) + dock GTK4 nativo. Visual TMJOs em qualquer GNOME (substitui dash-to-dock + Activities Overview pra quem quer). Python + PyGObject (migra pra Rust em v3.0).
 
-**Apps TMJOs (TMJPad, TMJMenu, TMJCode, TMJNotes, ...)** têm
-**versionamento independente**. São lançados/atualizados como `.deb`
-no APT repo a qualquer momento — não exigem bump da distro.
+### [1.3.4-16] — 2026-05-13
 
-User existente roda `sudo apt install tmjcode` (app novo) ou
-`sudo apt upgrade tmjpad` (versão nova de app) sem precisar de ISO
-nova OU bump de versão da distro. Padrão Ubuntu/Debian — Firefox 122
-não vira "Ubuntu 24.05".
+- **Fix**: TMJDock agora ancora no monitor INTERNO do laptop (eDP/LVDS/DSI), independente do que esteja marcado como primary. Em multi-monitor (laptop + externo), dock sempre fica no painel do laptop.
+- **Add `tmjmenu/monitors.py`**: helper module com `shell_monitor()` + `shell_geometry()`. Prioriza connector interno, fallback pra primary, fallback pra primeiro monitor. Env overrides `TMJOS_MONITOR_CONNECTOR` e `TMJOS_MONITOR_GEOMETRY` pra casos edge (kiosk, etc).
+- **Wayland nativo** via gtk4-layer-shell quando disponível (Recommends). Mutter trata layer-shell direto. Fallback X11 hints pra Xorg/XWayland.
+- Padding interno reduzido (12 → 6) — bar mais compacto.
+- AUTO_HIDE_REVEAL_PX aumentado (8 → 64) — área de hover maior pra detectar mouse aproximando.
+- Botão central renomeado: "Activities Overview" → "Todos os apps" (abre TMJMenu popup com lista completa).
 
-Bumping a distro inteira pra adicionar um app é Apple-istão. TMJOs
-não faz isso.
+### Versões anteriores
 
-## [Backlog v1.3.4] — release combinada: menu proprietário + cleanups
+- 1.3.4-15: rebuild pra publicar no APT repo TMJOs.
+- 1.3.4-14: fix de re-detecção de apps recém instalados na dock.
+- 1.3.x série anterior: TMJMenu (popup search Super+Space) + TMJDock (botão TMJOs gradient cyan/magenta) GTK4 nativo.
 
-Bundling de TMJMenu (feature grande) com correções v1.3.x acumuladas.
-Próxima ISO pública. Esperar ~3-4 dias de trampo.
+---
 
-### Feature principal
+## TMJStore
 
-- **TMJMenu** (menu de aplicações proprietário TMJOs):
-  - Substitui o uso atual de Activities Overview / "Todos os Apps" do
-    Plank por um menu próprio com identidade TMJOs.
-  - Tech stack: GTK4 + libadwaita (mesma do TMJPad — coerência visual
-    e dev velocity, não precisa aprender GJS).
-  - Trigger: hotkey global (Super? Super+Space?) + botão dedicado no
-    Plank (.dockitem) que invoca `tmjmenu --toggle`.
-  - Layout: popup ancorado, não fullscreen (diferenciar do Activities).
-    Search bar no topo + grid de apps pinados + lista recentes abaixo.
-  - Search: lê `/usr/share/applications/*.desktop` (mesma fonte do
-    GNOME). Fuzzy match no Name + Exec + Keywords.
-  - Visual: paleta neon TMJOs (cyan/magenta), fonte JetBrains Mono pros
-    titles, dark background `#0a0e2a`.
-  - Persistência: pinados do usuário em `~/.config/tmjmenu/pinned.json`
-    (estilo TMJPad — full session restore).
-  - Empacotado como `tmjmenu.deb` no APT repo, Depends gtk4+libadwaita.
-  - Adicionado a `tmjos` metapackage Depends.
+Software center proprietário que descobre apps TMJOs via AppStream + instala via apt+pkexec. Visual neon próprio. Python + PyGObject (migra pra Rust em v3.0).
 
-- **Side effect:** remove `tmjos-shell-tweaks` da depend chain (sem
-  Activities button visível porque temos nosso próprio entry point) —
-  ou mantém escondendo o Activities, decidir na implementação.
+### [0.1.0] — 2026-05-11
 
-### Correções acumuladas (puxadas do v1.3.x)
+- Initial release. 3 abas: Apps disponíveis, Instalados, Updates pendentes.
+- Discovery via AppStream metadata (`apt-cache show` + `appstreamcli`).
+- Filtra apps com origin `packages.tmjos.com.br` (TMJOs apps only).
+- Install / Remove / Upgrade via pkexec + apt.
+- GTK4 + libadwaita nativo, paleta neon TMJOs.
 
-- **Imagem default do ubiquity** (tela "Installation complete") trocada
-  pelo logo TMJOs (dragão + gear). Implementação via dpkg-divert no
-  postinst do `tmjos-installer` substituindo o PNG default
-  (`/usr/share/ubiquity/pixmaps/install_logo.png` ou similar —
-  confirmar via `dpkg -L ubiquity-frontend-gtk | grep -i png`).
-  Patch aplicável via `apt upgrade` em sistemas v1.3.0 sem regen ISO.
+---
 
-- **Bugs menores observados em v1.3.0** que surgirem no uso.
+## Suite (infraestrutura)
 
-**Removido do escopo:** redução do tamanho da ISO (6GB) — não vai
-caber aqui. Tema migrado pro backlog v2.0, junto com o rebase em
-26.04 (onde o issue do layered squashfs pode nem existir mais).
+### [2026-05-13] — Foco: suite de apps
 
-### Por que bundle
+- TMJOs é uma **suite de apps proprietários** instaláveis via apt em qualquer Linux Debian-based (Ubuntu, Debian, Mint, Pop!_OS, Kali, Tails, Parrot, elementaryOS, Zorin, etc).
+- APT repo `packages.tmjos.com.br` com suite única `stable` (agnóstica de codename de distro).
+- Site/landing em `packages.tmjos.com.br`.
+- Build CI em `.github/workflows/build-deb.yml`: vendor + dpkg-buildpackage + reprepro + deploy gh-pages com `force_orphan: true` (APT repo recriado do zero a cada deploy).
 
-Releases pesadas (com ISO nova) custam o mesmo trabalho de teste em
-VM independente do número de mudanças. v1.3.0 já validou o pipeline
-apt-only — agora podemos consolidar 3-4 melhorias num único re-spin
-ISO + apt patches simultâneos.
+---
 
-## [Backlog v2.0 "Insano 2"] — migração pra Debian puro
-
-**Major version bump filosófico**: TMJOs deixa de ser "Ubuntu modificado"
-e vira "Debian-based" com identidade independente. Slogan v2.0:
-
-> *"TMJOs 2.0 · Debian-based · Sem Canonical, sem snap, sem frescura"*
-
-### Motivação
-
-Ubuntu vai contra a filosofia "anti-bloat / OS INSANOS" do TMJOs:
-- snap forçado em pacotes core a cada release
-- ubiquity sendo deprecated (vira Flutter snap-based)
-- ubuntu-graphics empurra Spotify/Telegram via slideshow
-- Canonical impõe decisões corporativas (snap obrigatório, etc)
-
-Debian alinha:
-- **Zero Canonical**: sem snap, sem whoopsie, sem popularity-contest,
-  sem ubuntu-marketing
-- **Já nasce limpo**: TMJOs não precisa remover bloat — Debian é slim
-- **ubiquity → Calamares**: GTK4-native, controle total de branding
-- **Live-CD ~3GB** (vs 5-6GB do Ubuntu 24.04 layered)
-- **Sem hack `lsb-release codename=noble`**: TMJOs vira distro de verdade
-- **Community-only**: sem chefe corporativo decidindo features pra ti
-
-### Decisão base: Debian 13 "trixie"
-
-- Suporte até ~2030
-- GNOME 48
-- Estável a partir de Q3 2026
-- Single squashfs default
-
-### Trabalho envolvido (~3-5 dias)
-
-- **Migrar build**: Cubic (Ubuntu-only) → **live-build** (oficial Debian)
-- **Codename**: `noble` → `trixie` em todos os 11 changelogs +
-  `packages/conf/distributions` + `customize.sh`
-- **Installer**: ubiquity → Calamares (config branding TMJOs:
-  logo, slides, partitioner já bonitão)
-- **Re-test tudo**: ISO build, install, apt repo, dock, extensions,
-  TMJMenu/TMJDock/TMJStore/TMJPad
-- **Refactor `customize.sh`**: remove PPAs Ubuntu (Cubic etc),
-  ajusta apt sources pra Debian
-- **Documentar migração**: v1.x → v2.x é clean install (apt upgrade
-  não cruza bases distintas)
-
-### Pré-requisitos antes de começar
-
-- Debian 13 stable lançado (Q3 2026 ETA)
-- Validar TMJOs stack roda OK em VM Debian 13 base
-- Validar live-build produz ISO bootável + instalável
-- Verificar Calamares branding capability
-
-## [Backlog v2.1 "Polimento Debian"] — pós-rebase
-
-Pendências que estavam na v2.0 sobre Ubuntu 26.04, agora movidas
-pra v2.1 sobre Debian 13 (após migração concluída).
-
-### Sub-bonus
-
-- Refresh visual aproveitando GNOME 48 (acabamento polído)
-- **TMJDock Wayland-native** (libgtk4-layer-shell substitui X11 hints)
-- Refazer slim aggressive baseado em Debian 13 base
-- **APT repo dual-suite** (trixie stable + trixie-dev testing):
-  - `packages/conf/distributions`: adicionar `Codename: trixie-dev`
-  - Workflow detecta branch: `main` → trixie, `feature/**` → trixie-dev
-  - Users normais consumem só `trixie` (default no customize.sh)
-  - Dev testers adicionam `trixie-dev` source manualmente
-- **APT components** (`main`, `apps`, `extras`):
-  - `trixie main` = só core (conservador)
-  - `trixie main apps` = default TMJOs
-  - `trixie main apps extras` = power user / community apps
-  - Permite bump independente de TMJPad/TMJMenu/TMJCode sem mexer
-    no core
-- **Reduzir tamanho da ISO** (Debian 13 single squashfs default
-  provavelmente resolve sozinho — confirmar)
-
-## [Backlog dev workflow] — TMJOs Dev VM
-
-Investigação da v1.3.4 revelou que **GNOME Boxes** não é o ambiente
-ideal pra testar TMJOs:
-- spice-vdagent renegocia resolução constantemente (causa travas em
-  qualquer compositor com strut, não só TMJOs)
-- Sem aceleração 3D fácil (virtio-gpu sem GL)
-- Fullscreen quebra render sem GPU
-
-**Recomendação pra dev workflow**: **virt-manager + virtio-gpu-gl**.
-
-Setup:
-```bash
-sudo apt install -y virt-manager qemu-system-x86 libvirt-daemon-system
-sudo usermod -aG libvirt,kvm $USER
-# logout/login
-```
-
-VM TMJOs ótima:
-- Memory: 4-6 GB
-- vCPU: 4
-- Display: Spice + ☑ 3D acceleration
-- Video: virtio + 3D ON (driver virtio-gpu-gl)
-- Storage: 20-30GB qcow2
-
-Aceleração 3D → Mutter renderiza via GPU do host → strut churn
-vira ~1ms (igual metal) → tmjdock auto-hide funciona em VM como
-funciona em metal.
-
-Futuro: script `tools/tmjos-dev-vm.sh` que cria VM via virt-install
-com XML otimizado.
-
-## [Backlog v2.1] — TMJOs Installer Slideshow (Calamares)
-
-v1.3.4 e abaixo: install em silêncio (sem slideshow) — `ubiquity-slideshow-ubuntu`
-removido pelo customize.sh.
-
-Em v2.0 (rebase Debian), Calamares substitui ubiquity → branding
-de slides fica trivial (Calamares tem `branding.desc` com slideshow
-QML nativo). Slides com identidade TMJOs:
-- "OS DA TMJSistemas · OS MELHORES · OS INSANOS"
-- "Slim Aggressive · ~700MB RAM idle"
-- "TMJMenu + TMJDock · launcher proprietário"
-- "APT repo · `sudo apt upgrade tmjos`"
-- "TMJPad · text editor com persistência total"
-- Asset `tmjos-installing.png` (1024x1024) já empacotado no
-  tmjos-installer 1.3.4-3 — uso aqui.
-
-## [Backlog — apps TMJOs independentes]
-
-Lançados como `.deb` no APT repo durante o ciclo v1.3.x. Versões
-independentes da distro. Cada um vira `apt install <app>` quando
-estiver pronto.
-
-- **TMJCode** (VSCode customizado com tema/extensões TMJOs):
-  - Wrapper sobre VSCode upstream que injeta `--extensions-dir`
-    custom em `~/.tmjcode/extensions/`
-  - Tema dark TMJOs (paleta cyan/magenta neon)
-  - Extensões default pré-instaladas: prettier, eslint, tema TMJOs
-  - Comando: `tmjcode`
-  - Empacotado como `tmjcode.deb` no APT repo
-
-- **TMJNotes** (sticky notes nativas, estilo Microsoft Sticky Notes):
-  - GTK4 + libadwaita (mesma stack do TMJPad)
-  - Notas pequenas flutuantes na tela, várias simultaneamente
-  - Cores customizáveis por nota (paleta TMJOs neon)
-  - **Persistência total** igual TMJPad: fechou e reabriu, todas as
-    notas voltam exatamente como estavam (posição, tamanho, cor, texto,
-    cursor)
-  - Atalho global pra criar nova nota (Super+N? Super+Shift+N?)
-  - Always-on-top opcional por nota
-  - Markdown leve no texto (negrito, itálico, listas)
-  - Comando: `tmjnotes` ou `tmjsticky`
-  - Empacotado como `tmjnotes.deb` no APT repo
-
-- **TMJOs Software Center**: GUI GTK4 listando + instalando apps do
-  APT repo TMJOs. UX mais bonita que `apt search`. Lança quando tiver
-  4+ apps proprietários publicados.
-
-- **TMJMoney** — visualização de indicadores financeiros + criptomoedas.
-  - Dashboard com cards por ativo (ações BR/US, crypto)
-  - User escolhe indicadores favoritos (RSI, MACD, médias, market cap, etc)
-  - Refresh automático via APIs: Alpha Vantage / Yahoo Finance (ações),
-    CoinGecko (crypto)
-  - Persistência da watchlist em `~/.config/tmjmoney/watchlist.json`
-  - Charts via cairo (GTK4 não tem chart nativo) ou matplotlib embeddable
-  - Tema dark TMJOs neon — cyan pra alta, magenta pra baixa
-  - Comando: `tmjmoney`
-
-- **TMJCriptoBot** — bot de trades simples em criptomoedas.
-  - Código pronto de projetos anteriores (TMJSistemas)
-  - Não é app desktop convencional — daemon/service via systemd
-  - UI minimal pra monitoring: status, P&L, ordens abertas, logs
-  - Configuração via `~/.config/tmjcriptobot/config.toml`
-  - Empacotado como `tmjcriptobot.deb` (instala service + UI launcher)
-  - Comando: `tmjcriptobot` (UI) / `systemctl --user start tmjcriptobot`
-
-- **TMJRestApi** — cliente HTTP estilo Postman + SoapUI, sem o bloat.
-  - **Killer feature potencial** — Postman bloat é universal entre devs.
-  - Combina o melhor: speed/UX do Postman + projects/organização do SoapUI.
-  - Features mínimas:
-    - Múltiplos métodos (GET/POST/PUT/PATCH/DELETE/HEAD/OPTIONS)
-    - Headers, body (JSON/form/raw), params, auth (basic/bearer/api-key)
-    - Response viewer: JSON pretty print + headers + status + tempo
-    - **Projetos** (collections) — salva grupos de requests organizados
-    - Environments (dev/staging/prod com vars)
-    - Persistência em `~/.config/tmjrestapi/projects/*.json`
-  - Stack: GTK4 + libadwaita + libsoup3 (HTTP)
-  - Comando: `tmjrestapi`
-
-- **TMJCode** — VSCode com setup TMJOs opinionated (NÃO fork).
-  - Estratégia: wrapper sobre VSCode upstream, não rebuild custom.
-  - `tmjcode.deb` Depends `code` (do repo Microsoft).
-  - `/usr/bin/tmjcode` script que na primeira run:
-    - Cria profile "TMJOs" via `code --user-data-dir`
-    - Instala extension pack: Prettier, ESLint, GitLens, Better Comments,
-      Material Icon Theme, Code Spell Checker (pt-BR), TODO Highlight,
-      Bookmarks, Path Intellisense, Live Server, Docker, Python + Pylance,
-      REST Client, Markdown All in One
-    - Aplica settings.json: JetBrains Mono, format-on-save, tab=4,
-      bracket colorization, files.autoSave
-    - Tema dark TMJOs (cyan/magenta accents — custom theme.json)
-  - Próximas runs: `code --profile TMJOs` direto.
-  - Zero manutenção — segue VSCode upstream.
-  - Comando: `tmjcode`
-
-- **Outros apps idealizados durante uso real** — sem precisar bumpar
-  a distro pra cada um.
-
-### Ordem de implementação sugerida (apps livres)
-
-1. **TMJNotes** (escopo conhecido, stack já provada com TMJPad)
-2. **TMJMoney** (escopo médio, apela público mais amplo)
-3. **TMJRestApi** (big bet, killer level máximo — 1-2 semanas)
-4. **TMJCriptoBot** (código pronto facilita)
-5. **TMJCode** (wrapper simples — 1 dia)
-
-### TMJStore roadmap (app independente, lançado durante v1.3.x)
-
-- **v0.1.x (atual)**: 3 abas + AppStream metadata + install/remove/upgrade
-  via pkexec + detail view com release history.
-- **v0.2 backlog**:
-  - **AppStream DEP-11 no APT repo**: CI roda `appstreamcli compose`
-    nos .debs gerados, gera `dists/noble/main/dep11/Components-amd64.yml.gz`
-    + icons cache. APT clients (TMJStore, gnome-software) leem
-    metadata + icons de **TODOS** apps no repo, mesmo nunca instalados.
-    Resolve fragilidade do cache local atual (que só funciona pra
-    apps já vistos). Padrão Linux, robusto.
-  - **Download count**: contador por app. Requer analytics no APT
-    repo (proxy hosting OR custom CGI no GH Pages — não-trivial).
-  - **Search bar** dentro da store.
-  - **Filtro por categoria**.
-  - **Update check daemon**: autostart entry roda
-    `tmjstore-check-updates` no login. Faz `apt list --upgradable`
-    filtrado por origin TMJOs. Se tem updates, envia `notify-send`
-    com action "Abrir TMJStore" que abre direto na aba Updates.
-    Estilo macOS App Store "1 update available". Substitui o
-    unattended-upgrades que removemos.
-- **v0.3 backlog**:
-  - **Reviews / ratings**: avaliações de usuários TMJOs. Requer
-    backend (Supabase free tier? GH Discussions API hack?).
-  - **Botão Donate** na detail view: cada dev pode ter seu próprio
-    link (Pix / GitHub Sponsors / Liberapay) declarado no
-    `appdata.xml` (<url type="donation">). TMJStore renderiza
-    botão se existir. Esquema doido pra fomentar dev de apps TMJOs
-    pela comunidade.
-
-## [1.2.x] — patches via apt (depende do APT repo da v1.3)
-
-- **TMJPad usa o logo geral do TMJOs em vez do ícone próprio**
-  (livro azul). PNG foi copiado pra
-  `/usr/share/icons/hicolor/256x256/apps/tmjpad.png` mas GTK icon
-  cache não pegou ou conflitou. Será o **primeiro caso de teste do
-  sistema de updates v1.3**: empacota `tmjpad_0.1.1_all.deb` com o
-  fix do cache e users instalados rodam `apt upgrade tmjpad`.
-
-## [Backlog v1.3.x] — patches via apt
-
-- **Imagem default "Installation complete" do ubiquity ainda é a do Ubuntu**
-  (duas raposas com coroa laranja — asset upstream do ubuntu-graphics).
-  Após instalar TMJOs em disco via ubiquity, a tela final mostra essa
-  imagem em vez da logo TMJOs (dragão + gear). Fix: patch nos assets do
-  ubiquity-frontend-gtk via tmjos-installer postinst, OR dpkg-divert do
-  PNG por uma versão custom TMJOs. Path provável:
-  `/usr/share/ubiquity/pixmaps/install_logo.png` (confirmar via
-  `dpkg -L ubiquity-frontend-gtk | grep -i png`).
-
-- **ISO v1.3 não tem installer.** Slim Aggressive remove `snapd`, e em
-  Ubuntu 24.04 o `ubuntu-desktop-installer` (novo Flutter installer) é
-  distribuído como snap. Sem snapd → sem installer. Resultado: usuários
-  bootando live-CD não conseguem instalar TMJOs em disco.
-  Fix planejado: adicionar `ubiquity` (installer clássico Debian, não-snap)
-  ao customize.sh OR criar pacote `tmjos-installer` que Depends ubiquity.
-  Workaround pro user atual no live-CD:
-  ```
-  sudo apt install -y ubiquity ubiquity-frontend-gtk
-  # NÃO instala ubiquity-slideshow-ubuntu — requer gir1.2-webkit2-4.1
-  # que não tá no live-CD slim e quebra com:
-  #   ValueError: Namespace WebKit2 not available
-  sudo ubiquity gtk_ui
-  ```
-  Pacote `tmjos-installer` futuro vai puxar ubiquity + frontend-gtk
-  SEM o slideshow, eliminando a dep WebKit2.
-
-
-- `tmjos-os-identity 1.3.0-3`: trocar `dpkg-divert --rename` por
-  `--no-rename` em postinst/postrm. dpkg loga warning sobre
-  rename de Essential package — funciona OK mas é boa prática
-  evitar. Patch via apt upgrade quando alguém abrir.
-
-- **Activities button hide via GJS extension** já está incluído em
-  `tmjos-shell-tweaks 1.3.0-3` + `tmjos-defaults 1.3.0-2`. Quem upgrade
-  da 1.3.0-1 (CSS hack quebrado) recebe o cleanup do divert via
-  apt upgrade automaticamente.
-
-## [Backlog v1.3] — em planejamento
-
-(Slim Aggressive foi promovido pra v1.2 — todos os cortes, disable de
-tracker3 e adição de zram/preload já entram na release pública.)
-
-### Boot & visuais
-
-- GRUB theme com visual TMJOs (v1.2 só renomeia distributor para "TMJOs")
-- Plymouth: progress bar animada além do breathing glow do logo
-- GDM (login screen) com wallpaper e logo TMJOs
-- Empacotamento `.deb` do TMJPad (atualmente roda via wrapper em /usr/local/bin)
-- Sounds de boot/shutdown customizados
-- ARM64 build
-
-### Loja própria de apps TMJOs
-
-- **APT repo próprio** (`packages.tmjos.dev` ou `tmjacometti.github.io/tmjos-packages`):
-  hospedado em GitHub Pages, GPG key pra assinatura, GitHub Action que
-  empacota cada app em `.deb` a cada push. Usuário roda `apt install
-  tmjpad` / `tmjcode` / `tmj*` e `apt upgrade` cuida das atualizações.
-  ISO já vem com o repo pré-configurado em `/etc/apt/sources.list.d/tmjos.list`.
-- **TMJOs Software Center** (GTK4 GUI): wrapper visual sobre o APT repo
-  acima — lista apps TMJOs, busca, instala/atualiza com 1 click. Branding
-  TMJOs completo. Depende do APT repo estar de pé primeiro.
-- **Apps proprietários previstos** (atualmente em ideação, não implementados):
-  - **TMJCode** — VSCode customizado com tema/extensões TMJOs
-  - **TMJPad** já lançado em v1.2, será reembalado como `.deb` no repo
-
-### Sistema de updates do core do TMJOs (CRÍTICO)
-
-Hoje as customizações TMJOs (branding, dconf, plymouth, plank skel,
-os-release, scripts) são aplicadas **só durante o build da ISO** via
-customize.sh. Sistemas já instalados ficam congelados — não recebem
-fixes nem features novas sem reinstalar tudo. v1.3 tem que mudar isso.
-
-**Estratégia: empacotar o core em .deb instaláveis/atualizáveis via apt.**
-
-Refatorar customize.sh em pacotes:
-
-  - `tmjos-branding_X.deb`
-      /usr/share/backgrounds/tmjos/*
-      /usr/share/icons/tmjos/*
-      /usr/share/icons/hicolor/*/apps/tmjos.png
-      /usr/share/plymouth/themes/tmjos/*
-      postinst: dconf update + gtk-update-icon-cache + update-initramfs -u
-
-  - `tmjos-os-identity_X.deb`
-      /etc/os-release, /etc/lsb-release, /etc/issue, /etc/issue.net
-      conffile: marcado como "config-file" (apt não sobrescreve sem
-      perguntar)
-
-  - `tmjos-dock_X.deb`
-      /etc/skel/.config/plank/dock1/*
-      /etc/xdg/autostart/plank.desktop
-      /etc/xdg/autostart/tmjos-first-run.desktop
-      /usr/local/bin/tmjos-first-run
-      /usr/local/bin/tmjos-show-apps
-      /usr/share/applications/tmjos-show-apps.desktop
-
-  - `tmjos-defaults_X.deb`
-      /etc/dconf/db/local.d/00-tmjos-defaults
-      /etc/dconf/profile/user
-      postinst: dconf update
-
-  - `tmjos-meta_X.deb` — meta-pacote que puxa TODOS os tmjos-*
-      Depends: tmjos-branding (= X), tmjos-os-identity (= X),
-               tmjos-dock (= X), tmjos-defaults (= X),
-               tmjpad, plank, gnome-tweaks, ...
-
-Fluxo de update do user instalado:
-
-```
-sudo apt update          # ← lê packages.tmjos.dev
-sudo apt upgrade tmjos   # ← puxa nova versão de todo o core
-```
-
-Componentes adicionais:
-
-- **GitHub Action `release.yml`** dispara em `git tag v1.X` e
-  builda todos os `.deb`, assina com GPG key, sobe pra branch
-  `gh-pages` que vira o APT repo público.
-- **Postinst hooks bem feitos** que aplicam delta sem reboot quando
-  possível (dconf update, gtk-update-icon-cache, fc-cache, etc.).
-  Quando precisa de reboot (Plymouth, GRUB, initramfs), avisa.
-- **Notificação de update** (sutil, no top bar quando tem release nova).
-  Pode ser via update-notifier custom ou TMJOs Software Center.
-- **`/etc/tmjos-release`** — arquivo simples com a versão atual,
-  separado de `/etc/os-release` que é mais identidade que versão.
-
-Refatoração dolorosa mas paga **muito** dividendo: cada fix vira
-`apt upgrade` em vez de re-formatação. Releases mais frequentes
-viram viáveis (v1.2.1, v1.2.2 patches sem ISO nova).
-
-## [1.2.0] - 2026-05-10
-
-Primeira release pública. **TMJOs 1.2 (codename: insano).**
-
-### Nota sobre versionamento
-
-Pulamos v1.0.x e v1.1.x públicas. As primeiras builds internas
-(numeradas 1.0 e 1.1 durante o desenvolvimento) eram smoke tests:
-- v1.0 saía sem branding, Plymouth custom, com Ubuntu Dock duplicado
-  e popups de instalador.
-- v1.1 chegou a mostrar Plymouth TMJOs sob KVM e branding visual,
-  mas ainda tinha Activities button visível, Plank com 6 ícones em
-  vez de 4, sem Find/Replace no TMJPad e sem watermark TMJSistemas.
-
-v1.2.0 é o primeiro build com TUDO polido e Find/Replace funcional.
-
-### Novidades em v1.2 (não estavam em v1.0/v1.1)
-
-- **TMJPad ganhou Find & Replace** — Ctrl+F (busca), Ctrl+H (busca +
-  replace), Esc fecha, Enter/Shift+Enter navega entre matches, Replace
-  All com undo único.
-- **Plymouth watermark "TMJSistemas"** em vermelho sangue com glow no
-  centro do splash.
-- **Plymouth layout reorganizado** — logo TMJOs pequeno (80x80) +
-  "Loading..." no rodapé, em vez do logo grande no centro.
-- **Activities button escondido** via CSS injection no Yaru shell theme
-  (mais robusto que extension de terceiros — sem deps externas).
-- **Plank trim:** 4 launchers default (Todos os Apps + VSCode + TMJPad
-  + Terminal) em vez dos 6 anteriores.
-- **"Todos os Apps" sticky:** o launcher é re-injetado no dock se o
-  usuário tentar remover.
-- **Welcome popup do Ubuntu installer:** suprimido via Hidden=true.
-- **Wallpaper upscaled:** 1920x1080 (e variante 4K em
-  tmjos_wallpaper_4k.png) com Lanczos.
-- **VM/host integration:** spice-vdagent + qemu-guest-agent permitem
-  clipboard QEMU↔Host, drag-drop, dynamic resize.
-- **Fonts:** fonts-jetbrains-mono explicitamente instalado (referenciado
-  no dconf default monospace).
-- **Release notes URL** rebranded para o CHANGELOG do TMJOs.
-- **Esquema "branding visual + compat scripts" pra identidade do sistema:**
-  - `/etc/os-release` → TMJOs 1.2 (insano), visível no GNOME About e
-    ferramentas modernas que leem esse arquivo.
-  - `/etc/lsb-release` → 100% Ubuntu noble. Crítico pra `add-apt-repository`,
-    scripts de install (NodeJS, Docker, k8s) que usam `$(lsb_release -cs)`.
-    Sem isso, todo PPA install retorna 404 ("suite insano not found").
-  - Trade-off: `lsb_release -a` no terminal mostra "Ubuntu 24.04 LTS" em
-    vez de TMJOs. Decisão consciente — compat de scripts > vaidade do
-    terminal output. GNOME About mostra TMJOs corretamente.
-
-### Slim Aggressive — RAM idle ~700MB, ISO ~2GB (target: notebooks 4GB)
-
-- **Removido:** gnome-software, snapd, evolution-data-server,
-  update-notifier, thunderbird, gnome-calendar, gnome-contacts,
-  gnome-characters, yelp, file-roller, gnome-system-monitor.
-- **Disabled (via tmjos-first-run):** tracker3 indexação
-  (extract/miner-fs/miner-rss/writeback/xdg-portal masked).
-- **Adicionado:** zram-config (RAM compactada como swap virtual,
-  ~30% RAM efetiva extra), preload (pré-carrega apps em RAM ociosa).
-
-### Adicionado — Sistema base
-- Distribuição base Ubuntu 24.04 LTS Desktop (kernel 6.8 GA)
-- Desktop GNOME 46+ limpo, dark mode default
-- VSCode (repo oficial Microsoft) pré-instalado
-- Git + git-flow
-- Docker (docker.io + docker-compose)
-- GNOME Tweaks + dconf-editor
-- Extensões GNOME (gnome-shell-extensions, gnome-shell-extension-manager)
-- Ferramentas utilitárias: curl, wget, htop, neofetch, vim, nano, build-essential
-- Ferramentas de rede: dnsutils (nslookup, dig, host), net-tools, traceroute
-- Stack Python para apps GTK4: python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1
-- Fontes: JetBrains Mono, Cantarell, Noto Color Emoji
-
-### Adicionado — Dock (Plank, estilo macOS)
-- Plank pinnado na base, tema transparent, ícones 48px
-- Autostart system-wide via `/etc/xdg/autostart/plank.desktop`
-- Ubuntu Dock (sidebar vertical) e ícones flutuantes do desktop desabilitados
-  via dconf — apenas o Plank na base
-- 4 itens default: **Todos os Apps** + VSCode + TMJPad + Terminal
-- Launcher "Todos os Apps" abre o GNOME Apps Overview via `org.gnome.Shell.Eval`
-- "Todos os Apps" é re-injetado no dock no login se removido (entrada
-  obrigatória — ponto único de descoberta de apps no dock)
-- First-run autostart copia config de Plank do `/etc/skel/` pro user atual
-  (resolve live-CD onde user 'ubuntu' já existe sem skel)
-
-### Adicionado — Branding & Identidade Visual
-- Wallpaper oficial TMJOs (dragão + engrenagem hexagonal + janelas IDE
-  flutuantes + tipografia "TMJOs" central) instalado em
-  `/usr/share/backgrounds/tmjos/tmjos_wallpaper.png`
-- Logo TMJOs em 3 variantes (Circular, Rounded, Square) em
-  `/usr/share/icons/tmjos/`; Rounded como app icon default em
-  `/usr/share/icons/hicolor/512x512/apps/tmjos.png`
-- `/etc/os-release` e `/etc/lsb-release` com identidade TMJOs
-  (NAME=TMJOs, ID=tmjos, VERSION_CODENAME=insano)
-- `/etc/issue` e `/etc/issue.net` com banner TMJOs no login TTY
-- dconf system-wide defaults: dark mode (`color-scheme=prefer-dark`),
-  wallpaper TMJOs, fonte mono JetBrains Mono, favorite-apps incluindo TMJPad
-
-### Adicionado — Boot Identity
-- GRUB renomeado: `GRUB_DISTRIBUTOR="TMJOs"` em `/etc/default/grub`,
-  entrada do menu mostra "TMJOs" no lugar de "Ubuntu"
-- Plymouth tema custom **TMJOs** instalado em `/usr/share/plymouth/themes/tmjos/`:
-  fundo dark navy, logo central, breathing-glow opacity animation (0.92↔1.0)
-- Tema setado como default via `update-alternatives` + initramfs regenerado
-
-### Adicionado — Apps Próprios TMJOs
-- **TMJPad** v0.1: editor de texto sem frescura com persistência total das abas
-  - Auto-save de buffer a cada 500ms (debounced) — zero perda de dados em crash
-  - Restauração completa do estado ao reabrir (abas, conteúdo, cursor, ordem)
-  - Atomic writes (tmp file + rename) pra todos os arquivos de estado
-  - Dark theme único, paleta TMJOs, fonte JetBrains Mono
-  - Atalhos: Ctrl+N/W/Tab/S, foco automático no text view ao abrir aba
-  - **Find & Replace:** Ctrl+F (busca), Ctrl+H (busca + replace), Esc fecha,
-    Enter/Shift+Enter navega entre matches, Replace All com undo único
-  - **Ícone próprio** (`apps/tmjpad/assets/logo/tmjpad.png`) instalado
-    em `/usr/share/icons/hicolor/256x256/apps/tmjpad.png` — estilo
-    macOS app icon com livro + letras T M J coloridas
-
-### Dock unificada — pin Activities ↔ Plank
-
-- **`tmjos-dock-sync` daemon** (`/usr/local/bin/tmjos-dock-sync`):
-  monitora `gsettings get org.gnome.shell favorite-apps` e replica as
-  mudanças em `~/.config/plank/dock1/settings`. Quando o usuário pina
-  um app pelo Activities Overview (right-click → Pin to Dash), o
-  launcher aparece automaticamente na Plank. Cria os `.dockitem`
-  faltantes em `launchers/` no caminho.
-- **Sticky:** `tmjos-show-apps.dockitem` permanece SEMPRE no início.
-- **Unidirecional** (Activities → Plank) por design. A direção contrária
-  não faz sentido prático — pin no Plank é via right-click "Keep in Dock".
-- Autostart entry em `/etc/xdg/autostart/tmjos-dock-sync.desktop`.
-  - Instalado em `/opt/tmjpad/` com wrapper em `/usr/local/bin/tmjpad`
-  - Entry no menu de apps (`/usr/share/applications/tmjpad.desktop`)
-
-### Adicionado — Documentação
-- README, CONTRIBUTING, CHANGELOG, LICENSE (GPLv3)
-- Script automatizado de customização (`scripts/tmjos_customize.sh`)
-- Guia de build (`docs/BUILD.md`)
-- Checklist de criação (`docs/CHECKLIST.md`)
-- Referência de design (`docs/DESIGN.md`)
-- README do TMJPad (`apps/tmjpad/README.md`)
-- Templates de issue (bug, feature, question) e PR
-
-### Removido (slim)
-- LibreOffice (suite completa)
-- Apps GNOME pouco usados: Maps, Music, Videos, Todo
-- Totem, Rhythmbox, Shotwell, Remmina, Transmission
-- Telemetria: ubuntu-report, apport, popularity-contest
-
-### Mantido (decisão de produto)
-- Firefox: browser padrão de fato dos usuários Ubuntu
-  (Thunderbird foi removido em v1.2 — usuário usa webmail ou outro cliente)
-
-### Suprimido (cosmético)
-- Welcome popups do Ubuntu installer / gnome-initial-setup que abrem
-  no login do live-CD com erro "Something went wrong" (depend de hooks
-  do casper que não combinam com squashfs regenerado por Cubic). Os
-  pacotes ficam instalados — o ícone "Install TMJOs" no desktop continua
-  funcional, só os autostart popups são marcados `Hidden=true`.
-
-[Backlog v1.3]: https://github.com/TMJacometti/TMJOs/compare/v1.2.0...HEAD
-[1.2.0]: https://github.com/TMJacometti/TMJOs/releases/tag/v1.2.0
+[Unreleased]: https://github.com/TMJacometti/TMJOs/compare/main...HEAD
