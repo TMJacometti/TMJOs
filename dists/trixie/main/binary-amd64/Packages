@@ -1,33 +1,31 @@
 Package: tmjmenu
-Version: 1.3.4-15
+Version: 1.3.4-16
 Architecture: all
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Installed-Size: 5627
-Depends: python3 (>= 3.10), python3-gi, python3-xlib, gir1.2-gtk-4.0, gir1.2-adw-1, xdotool
-Recommends: tmjos-branding
+Installed-Size: 5642
+Depends: python3 (>= 3.10), python3-gi, python3-xlib, gir1.2-gtk-4.0, gir1.2-adw-1, x11-utils, xdotool
+Recommends: tmjos-branding, gir1.2-gtk4layershell-1.0, libgtk4-layer-shell0
 Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjmenu
 Priority: optional
 Section: utils
-Filename: pool/main/t/tmjmenu/tmjmenu_1.3.4-15_all.deb
-Size: 1800750
-SHA256: dc13de8865f5a6ccdb8e60647628720a13cf714a975d1061b80b8584435eca92
-SHA1: 3671b700a557605444ca0b6a0938d66d83c7c43e
-MD5sum: bcd97731ae7fefc780482db86ac625b3
+Filename: pool/main/t/tmjmenu/tmjmenu_1.3.4-16_all.deb
+Size: 1804222
+SHA256: 4fcde960633d8c014ed79271204efffef1f4e681fe3bc93c14789418ee4e43c2
+SHA1: 9cf18dd8b7a0fa631297856dea05031ab7f406d5
+MD5sum: 9f43b3f675a95fe70053f06369796fd8
 Description: TMJOs proprietary application menu + dock
  Replaces Plank dock and GNOME Activities Overview with two integrated
  components, both GTK4 + libadwaita native (same stack as TMJPad):
  .
    * tmjmenu — popup search launcher, opened by Super key
-   * tmjdock — bottom-centered dock with pinned apps + central TMJOs
-     button that opens tmjmenu
+   * tmjdock — dock no painel INTERNO do laptop (eDP/LVDS/DSI) com
+     anchor bottom-center via gtk4-layer-shell (Wayland nativo) ou
+     X11 hints (XWayland/Xorg fallback). Detecção do monitor interno
+     ignora qual está marcado como primary — sempre ancora no laptop.
  .
- Postinst disables /etc/xdg/autostart/plank.desktop (if present) so
- tmjdock takes over without two docks fighting for screen space.
- The Plank package itself is left installed (tmjos-dock scripts like
- tmjos-first-run remain functional).
- .
- Wayland support deferred to v2.0 (will use gtk4-layer-shell instead
- of X11 hints).
+ gir1.2-gtk4layershell-1.0 + libgtk4-layer-shell0 são Recommends pra
+ layer-shell Wayland; se ausentes, tmjdock cai pro fallback X11 sem
+ quebrar.
 
 Package: tmjos
 Version: 2.0.0-3

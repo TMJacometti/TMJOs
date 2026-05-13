@@ -5,13 +5,13 @@ Origin: TMJOs
 Label: TMJOs
 Suite: stable
 Codename: trixie
-Date: Wed, 13 May 2026 16:44:51 UTC
+Date: Wed, 13 May 2026 17:07:58 UTC
 Architectures: amd64
 Components: main apps extras
 Description: TMJOs custom packages for Debian 13 trixie (v2.0+)
 MD5Sum:
- 037f1549dedf9f87ac8b5bbd01dd6db4 11267 main/binary-amd64/Packages
- 4ffcbe539204b3646916eeb6d313c739 4748 main/binary-amd64/Packages.gz
+ 3886481e08f8d8b99e0fefd33da3ebe7 11326 main/binary-amd64/Packages
+ b2b62e26e951833c0bbf9e09eb218ad8 4770 main/binary-amd64/Packages.gz
  efea1cd09cfe036797b176741c33cebb 143 main/binary-amd64/Release
  d41d8cd98f00b204e9800998ecf8427e 0 main/source/Sources
  7029066c27ac6f5ef18d660d5741979a 20 main/source/Sources.gz
@@ -29,8 +29,8 @@ MD5Sum:
  7029066c27ac6f5ef18d660d5741979a 20 extras/source/Sources.gz
  7e99632d2b793ecc6f1ec572cbc9f97f 146 extras/source/Release
 SHA1:
- 4881a92d5f424ead0fc3794400823ddc5390b4bf 11267 main/binary-amd64/Packages
- 682687f2379e538454c7055331e57a029552db59 4748 main/binary-amd64/Packages.gz
+ bea37d66e5f1f4f7d396e892a26ea3a310fa6561 11326 main/binary-amd64/Packages
+ c3277466c0995577dc2bbe742ad653353e05bdab 4770 main/binary-amd64/Packages.gz
  4796e1294cd5090678f4bfc133250cfcfe4b123a 143 main/binary-amd64/Release
  da39a3ee5e6b4b0d3255bfef95601890afd80709 0 main/source/Sources
  46c6643f07aa7f6bfe7118de926b86defc5087c4 20 main/source/Sources.gz
@@ -48,8 +48,8 @@ SHA1:
  46c6643f07aa7f6bfe7118de926b86defc5087c4 20 extras/source/Sources.gz
  fbb6e46d13e2bba77b5238c9cc69b6eb913e4735 146 extras/source/Release
 SHA256:
- 8aaceb541361bd687f19cf88acea3c352615934640ea80bfa8877cec3944cd39 11267 main/binary-amd64/Packages
- 60237789432cdac651e4d3db894d89609529dead7cd772505f64d0a4440bfd11 4748 main/binary-amd64/Packages.gz
+ d9dcb38ba2e49b618630212a1dabe3c40185f2d4d2a8108bbc872e0e802d7227 11326 main/binary-amd64/Packages
+ 487877804bd8bb97de5a07a3752cc5646ed7f4c340c0e542e63fb4ec5b275534 4770 main/binary-amd64/Packages.gz
  02dc5e3cfcd94ac776ac990f7d50406c5e9a5bab503b8a9b29de60c0f8671814 143 main/binary-amd64/Release
  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 main/source/Sources
  59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 main/source/Sources.gz
@@ -68,17 +68,17 @@ SHA256:
  baf4507701ff099ab291690e5b29eb64f5d18413dc6c65f2d8db37f8a7bd9b81 146 extras/source/Release
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEEhpHfLTAcLENAH163dUhY4qWMQ2MFAmoEqoMACgkQdUhY4qWM
-Q2PZDw//R5C0TJrsvoK4oaRs/4mJq/UIHQT6ipGlMyTkpwIrJV/7XU+nFDYnOxBX
-c06EFQEJeJ6INmxxDfrXQvwu52InOHoZIyMSNhSDJXLPS1ZzggfHPM3qQpdrUsot
-ivqr9slKTX1lejNtGb5orp/wjdHlgNJu5pYkHW4qofp7g3ARLE4V5INKHQ9uUZJz
-fFMKo2hDsFedfcTPjomw2I2mMIMgznITAcVVBR8DFOF39eC0lXLkf/cYmOws3/58
-Jec+N2ZEQbY5MdxRxyTcN6i0Uz7+4u5EAY4sdneEk3N/W9qKp7aktknIHZlz31LA
-9/6M3uhgaIiV06lIQqcU3aiTImH69IbLKV+TND2sQoSEEoDbupjAwbPx4ACWntzW
-qdQ535iS8N41hIR3xo27IGgmKvh0OatsU516ndHOtann9pbi7O1j/YsLWFjhFh8b
-6U7MEvw+ttb80P3tTRrhgkg16ICWRKFXaBC1EXg7HtLyabyrHhQhDDWCMIf+KLXD
-KO365UZkw8VQhsQa1w55MbGSCQFsB6tVUo5HTixs0hLFfMDcCEXtAT0ZYejiYg/B
-fnYbyRAJBO+z7rB4RCbq7ytlzPKfDExcVIBE/GeQ3BFv5+RYKa++MK7EZc5f/YeQ
-xHAJx7q724jbmW1bPuprUgnRJ1bVT0DGgMOhclV05IJrI2juftI=
-=OfxI
+iQIzBAEBCgAdFiEEhpHfLTAcLENAH163dUhY4qWMQ2MFAmoEr+4ACgkQdUhY4qWM
+Q2MXWg//RCSTf8ii7bkb5a3VueqCgoLd9whGw+BtqlJhEw8fc5V/N7Kv2ephhyXB
+8vY/t+ktYUsiU8NjlBI8aZP2x6HA5bRYppt8yVNDej9z3w3ycXt/H23herlEA2LM
+BJjXwlaFP/UU5uESpJEke7sTNB+WUVejqmoJ+LQ+59xlUYC/8l98nIsQuPvC4bIU
+dQXVSFLAh9F0LONaVumFjS/grXksVILPpzfWwbaf/CTS4C81SC7QuHfdO+LprxCk
+i7POg1EF/a/kFJP53v8QtjGV83XuetRsUC/aoknzqkxXZloP7zZhHA7kUmCh1qoO
+urWOXz4Lm6e/aEMz8WV3CjVUzL8mYsu+g1MxCgVmyg30vhbfOvS6vbfiMMkxhYm+
+TWMMnkAS/icZVEZY88vjlyDNYUSWH/yIW1tRMN4jqd6jIL87bKcE2udeJpZA7gBQ
+4S6jxFOJt6t9jQpAY9h+NrJZp+WfkrrYE7RZmh2UPtAowmHlAGTDrVCUY5dAqWvk
+kXdFxgHe4UwjGWFjHdqn30Hk2U1EsNzqKILak4IoUqtKEAAjTSwQe1mnFBw7/F1l
+Olbeh61VHHvHWeJxGoAJc+n/Ea+Cv6Ob4PxCgRTE26SN0W/ZPUan9vo/1GfQ+iNX
+aGiMyM9f6Lxqs77q2IqJXkVPWpnoCuOXDMsOXWYHIjUQveXES10=
+=LyKO
 -----END PGP SIGNATURE-----
