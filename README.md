@@ -147,18 +147,16 @@ sudo lb config \
     --distribution trixie \
     --architectures amd64 \
     --binary-images iso-hybrid \
-    --mirror-bootstrap http://deb.debian.org/debian/ \
-    --mirror-chroot http://deb.debian.org/debian/ \
-    --mirror-binary http://deb.debian.org/debian/ \
-    --parent-mirror-bootstrap http://deb.debian.org/debian/ \
-    --security false \
-    --apt-recommends true
+# Master script faz tudo end-to-end (recomendado):
+sudo /caminho/pra/TMJOs/tools/tmjos-build.sh
 
-# 3. Popula config/ com hooks TMJOs
-sudo /caminho/pra/TMJOs/tools/tmjos-live-build-setup.sh
+# (Pre-checks RAM/swap/disco → lb clean → lb config Debian limpo →
+# popula hooks → lb build em tmux session "tmjos-build")
 
-# 4. Build
-sudo lb build 2>&1 | tee build.log
+# Stepwise alternativo:
+#   sudo tools/tmjos-lb-config.sh    # gera config Debian
+#   sudo tools/tmjos-hooks-setup.sh  # popula hooks
+#   sudo lb build 2>&1 | tee build.log
 
 # ISO sai em ~/tmjos-debian-build/*.iso (~30-60min)
 ```

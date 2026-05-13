@@ -80,13 +80,24 @@ grep -r '^LB_.*archive.ubuntu\|trixie/updates' config/ || true
 
 ## 📦 FASE 3 — POPULAR CONFIG COM TMJOS
 
-### Passo 3.1: Rodar o setup script do TMJOs
+### Passo 3.1: Rodar os scripts TMJOs
+
+**Opção A (recomendado): master script faz tudo end-to-end**
 
 ```bash
-# Caminho pro clone do repo TMJOs (substitua pelo seu)
 TMJOS_REPO=~/Projetos/GitHub/TMJOs
+sudo "$TMJOS_REPO/tools/tmjos-build.sh"
+# (executa pre-checks RAM/swap/disco → lb clean → lb config Debian →
+#  popula hooks → dispara lb build em tmux session "tmjos-build")
+```
 
-sudo "$TMJOS_REPO/tools/tmjos-live-build-setup.sh"
+**Opção B: stepwise (debug)**
+
+```bash
+TMJOS_REPO=~/Projetos/GitHub/TMJOs
+sudo "$TMJOS_REPO/tools/tmjos-lb-config.sh"     # gera config/ com flags Debian
+sudo "$TMJOS_REPO/tools/tmjos-hooks-setup.sh"   # popula hooks (sem sed corretivo)
+sudo lb build 2>&1 | tee build.log              # build manual
 ```
 
 O script popula:

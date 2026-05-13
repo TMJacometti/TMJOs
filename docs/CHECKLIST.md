@@ -63,8 +63,17 @@ sudo lb config \
 
 ### ✅ FASE 3 — POPULA CONFIG TMJOS
 
+**Opção A (recomendado): master script faz tudo (config + hooks + build)**
+
 ```bash
-sudo ~/Projetos/GitHub/TMJOs/tools/tmjos-live-build-setup.sh
+sudo ~/Projetos/GitHub/TMJOs/tools/tmjos-build.sh
+```
+
+**Opção B: stepwise (debug)**
+
+```bash
+sudo ~/Projetos/GitHub/TMJOs/tools/tmjos-lb-config.sh    # config Debian limpo
+sudo ~/Projetos/GitHub/TMJOs/tools/tmjos-hooks-setup.sh  # popula hooks
 ```
 
 - [ ] `config/hooks/0100-tmjos-debian-base.chroot_early` instala a base Debian main
