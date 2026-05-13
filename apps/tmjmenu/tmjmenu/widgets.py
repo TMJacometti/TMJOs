@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from gi.repository import Gio, Gtk
+from gi.repository import Gdk, Gio, Gtk
 
 from . import config
 from .search import AppEntry
@@ -52,6 +52,19 @@ def show_pin_context_menu(
     popover = Gtk.PopoverMenu.new_from_model(menu_model)
     popover.set_parent(parent)
     popover.set_has_arrow(True)
+    popover.set_autohide(True)
+    popover.set_position(Gtk.PositionType.TOP)
+
+    key = Gtk.EventControllerKey.new()
+
+    def _on_key_pressed(_controller, keyval, _keycode, _state):
+        if keyval == Gdk.KEY_Escape:
+            popover.popdown()
+            return True
+        return False
+
+    key.connect("key-pressed", _on_key_pressed)
+    popover.add_controller(key)
 
     if on_popover_state is not None:
         on_popover_state(True)

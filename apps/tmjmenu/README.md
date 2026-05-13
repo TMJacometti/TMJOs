@@ -1,11 +1,12 @@
 # TMJMenu
 
-Menu de aplicações proprietário do TMJOs. Substitui o Activities Overview do GNOME por uma interface popup compacta com search, apps pinados e recentes — estilo Win11 Start mas com identidade TMJOs (paleta neon).
+Menu de aplicações proprietário do TMJOs. Fornece uma interface popup compacta com search, apps pinados e recentes — estilo Start/Menu moderno, mas com identidade TMJOs.
 
 ## Stack
 
 - Python 3.12+
 - GTK4 + libadwaita (via PyGObject)
+- gtk4-layer-shell para o dock no Wayland/Hyprland
 - Lê `/usr/share/applications/*.desktop` (XDG)
 - Persistência em `~/.config/tmjmenu/`
 
@@ -13,6 +14,9 @@ Menu de aplicações proprietário do TMJOs. Substitui o Activities Overview do 
 
 - **TMJMenu** (`tmjmenu`) — popup search-launcher, abre via Super key
 - **TMJDock** (`tmjdock`) — barra sempre visível embaixo, substitui o Plank
+
+No Wayland/Hyprland, o `tmjdock` usa `gtk4-layer-shell` para ficar ancorado
+no rodape. Sem layer-shell, ele cai no fallback X11 usado em desenvolvimento.
 
 ## Run
 
@@ -23,9 +27,9 @@ tmjdock          # roda a dock (daemon)
 
 ## Autostart
 
-`tmjdock` é configurado pra autostart via `data/tmjdock.desktop` (instalado em `~/.config/autostart/`). Quando empacotado como .deb, vai em `/etc/xdg/autostart/`.
+`tmjdock` é configurado pra autostart via `data/tmjdock.desktop` (instalado em `~/.config/autostart/`). Quando empacotado como `.apk`, vai em `/etc/xdg/autostart/`.
 
 ## Empacotamento
 
-Distribuído como `tmjmenu.deb` no APT repo TMJOs. Source em
-`packages/sources/tmjmenu/`, build via `tools/vendor-tmjmenu.sh` + dpkg-buildpackage.
+Distribuído como `tmjmenu.apk` no repo APK TMJOs. APKBUILD em
+`packages/tmjmenu/`.

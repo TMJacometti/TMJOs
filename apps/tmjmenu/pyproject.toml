@@ -21,8 +21,8 @@ classifiers = [
     "Topic :: Desktop Environment",
 ]
 
-# Runtime: PyGObject + GTK4 + libadwaita são fornecidos pelo sistema
-# (instalar via apt: python3-gi gir1.2-gtk-4.0 gir1.2-adw-1).
+# Runtime: PyGObject + GTK4 + libadwaita + gtk4-layer-shell
+# sao fornecidos pelo sistema.
 
 [project.scripts]
 tmjmenu = "tmjmenu.app:main"

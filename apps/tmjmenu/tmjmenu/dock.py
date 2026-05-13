@@ -6,9 +6,9 @@ Substitui o Plank. Layout estilo Windows Start (TMJOs à esquerda):
     │ ⬢ TMJ  ⊞ ShowApps │ □ VSCode  □ Terminal  □ Files  │
     └──────────────────────────────────────────────────────┘
        ↑       ↑                ↑
-       │       │                pinados (config.py — persistido em
+       │       │                pinados (config.py - persistido em
        │       │                ~/.config/tmjmenu/pinned.json)
-       │       Activities Overview (gdbus org.gnome.Shell)
+       │       Todos os apps (abre TMJMenu)
        Botão TMJOs (abre TMJMenu popup)
 """
 
@@ -17,6 +17,7 @@ from __future__ import annotations
 import shutil
 import subprocess
 import sys
+import os
 from pathlib import Path
 
 import gi
@@ -25,10 +26,17 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 gi.require_version("Gdk", "4.0")
 
+try:
+    gi.require_version("Gtk4LayerShell", "1.0")
+    from gi.repository import Gtk4LayerShell as LayerShell
+except (ImportError, ValueError):
+    LayerShell = None
+
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
 
 from . import config
 from .launcher import launch
+from .monitors import shell_geometry, shell_monitor
 from .search import AppEntry, discover_apps
 from .widgets import show_pin_context_menu
 from .x11 import hide_window_offscreen, make_dock, query_pointer_y, show_window_at
@@ -36,7 +44,7 @@ from .x11 import hide_window_offscreen, make_dock, query_pointer_y, show_window_
 
 DOCK_APP_ID = "br.com.tmjsistemas.tmjdock"
 ICON_SIZE = 48
-DOCK_PADDING = 12         # padding interno (entre borda e ícones)
+DOCK_PADDING = 6          # padding interno (entre borda e ícones)
 ITEM_SPACING = 6          # espaçamento entre ícones
 
 # Auto-hide:
@@ -44,7 +52,7 @@ ITEM_SPACING = 6          # espaçamento entre ícones
 #   AUTO_HIDE_POLL_MS    → frequência do polling de pointer position.
 #   AUTO_HIDE_HIDE_DELAY_MS → debounce antes de esconder (evita
 #                              flicker quando user move o mouse).
-AUTO_HIDE_REVEAL_PX = 8
+AUTO_HIDE_REVEAL_PX = 64
 AUTO_HIDE_POLL_MS = 400  # slower polling pra menos overhead em VMs
 AUTO_HIDE_HIDE_DELAY_MS = 600
 
@@ -168,6 +176,7 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         self.set_decorated(False)
         self.set_resizable(False)
         self.add_css_class("tmjdock-window")
+        self._layer_shell_enabled = self._setup_layer_shell()
 
         # Discover apps disponíveis (pra resolver desktop_id → AppEntry)
         self._all_apps: dict[str, AppEntry] = {
@@ -194,14 +203,11 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # editado manualmente).
         self._setup_pinned_watch()
 
-        # Auto-hide state. Dock começa visível. Cache de geometria pra
-        # evitar recalcular monitor a cada tick.
+        # Auto-hide no fallback X11, sempre usando o monitor 0 como
+        # referencia. No layer-shell Wayland, a dock fica fixa por enquanto.
         self._hidden = False
         self._mouse_over_dock = False
-        # Auto-hide condicional: off em VM (strut churn cascateia Mutter
-        # re-layouts caros em virt). Hardware real → auto-hide funciona.
-        # Em VM, Super+Shift+H é no-op (não reativa, evita confusão).
-        self._auto_hide_enabled = not _running_in_vm()
+        self._auto_hide_enabled = not self._layer_shell_enabled
         self._pinned = not self._auto_hide_enabled
         # Counter de popovers abertos (context menu pin/unpin). Enquanto > 0
         # a dock NÃO esconde mesmo se mouse sair (senão menu some no meio
@@ -220,15 +226,47 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         motion.connect("leave", lambda *_a: self._set_mouse_over(False))
         self.add_controller(motion)
 
-        # X11 hints depois que window mapped E allocation finalizada.
-        # GTK4 emite "map" antes da allocation real estar pronta, então
-        # passamos via idle_add (próximo tick do main loop, depois do
-        # measure/allocate). Sem isso, centralização horizontal pega
-        # uma width parcial e a dock fica deslocada à esquerda.
-        self.connect("realize", lambda _w: GLib.idle_add(
-            self._apply_x11_dock_hints))
-        self.connect("map", lambda _w: GLib.idle_add(
-            self._after_first_map))
+        if not self._layer_shell_enabled:
+            # Setar _NET_WM_WINDOW_TYPE_DOCK ANTES do XMapWindow é
+            # crítico: Mutter decide placement no map; se a janela ainda
+            # for NORMAL nesse momento, ele centraliza no monitor focado
+            # e ignora configures depois. realize fires entre
+            # XCreateWindow e XMapWindow — rodando síncrono aqui,
+            # `_apply_x11_dock_hints` seta o tipo antes do map.
+            #
+            # Allocation real pode não estar pronta no realize — o helper
+            # cai pra preferred/natural size nesse caso. Depois, no map,
+            # `_after_first_map` re-aplica via idle com a allocation
+            # finalizada (DOCK type já tá setado, Mutter aceita configure).
+            self.connect("realize", lambda _w: self._apply_x11_dock_hints())
+            self.connect("map", lambda _w: GLib.idle_add(
+                self._after_first_map))
+
+    def _setup_layer_shell(self) -> bool:
+        """Configura layer-shell quando disponivel.
+
+        No Hyprland/Wayland este e o caminho real: ancora a dock no rodape,
+        centralizada pela layer surface. Sem gtk4-layer-shell — ou em
+        compositors que importam o módulo mas não advertem o protocolo
+        (Mutter/KWin), is_supported() retorna False — seguimos pelo
+        fallback X11 (XWayland forçado via _select_backend).
+        """
+        if LayerShell is None or not _running_on_wayland():
+            return False
+        if hasattr(LayerShell, "is_supported") and not LayerShell.is_supported():
+            return False
+
+        LayerShell.init_for_window(self)
+        LayerShell.set_namespace(self, "tmjdock")
+        LayerShell.set_layer(self, LayerShell.Layer.TOP)
+        monitor = shell_monitor()
+        if monitor is not None:
+            LayerShell.set_monitor(self, monitor)
+        LayerShell.set_anchor(self, LayerShell.Edge.BOTTOM, True)
+        LayerShell.set_anchor(self, LayerShell.Edge.LEFT, False)
+        LayerShell.set_anchor(self, LayerShell.Edge.RIGHT, False)
+        LayerShell.set_margin(self, LayerShell.Edge.BOTTOM, 4)
+        return True
 
     def _after_first_map(self) -> bool:
         """Após primeiro map, aplica X11 hints + inicia polling auto-hide
@@ -249,7 +287,7 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # Notify::geometry no monitor primário pega resize só do
         # próprio display sem hotplug.
         if monitors.get_n_items() > 0:
-            primary = monitors.get_item(0)
+            primary = shell_monitor()
             try:
                 primary.connect(
                     "notify::geometry",
@@ -258,10 +296,6 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             except Exception:
                 pass
 
-        # Inicia polling do cursor pra auto-hide — só em hardware real.
-        # Em VM, _auto_hide_enabled é False (set no __init__ via
-        # _running_in_vm()) e _pinned começa True, deixando dock
-        # sempre visível. Zero polling, zero strut churn.
         if self._auto_hide_enabled:
             GLib.timeout_add(AUTO_HIDE_POLL_MS, self._auto_hide_tick)
         return False  # idle_add: rodar uma vez
@@ -275,7 +309,7 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         """Limpa e re-popula a bar. Chamado on init e on pinned.json change.
 
         Re-discovery dos apps pra pegar apps instalados depois do __init__
-        do tmjdock (ex: user instalou TMJStore via apt, pinou via popup
+        do tmjdock (ex: user instalou TMJStore via apk, pinou via popup
         TMJMenu — sem o re-discovery, a dock skipava silenciosamente
         porque _all_apps não tinha o desktop_id novo).
         """
@@ -290,7 +324,7 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # 1. Botão TMJOs (esquerda, Windows Start style)
         self._bar.append(self._build_menu_button())
 
-        # 2. Botão "Show all apps" (Activities Overview)
+        # 2. Botão "Show all apps" (abre TMJMenu)
         self._bar.append(self._build_show_apps_button())
 
         # 3. Separador
@@ -327,8 +361,9 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         # rebuild parcial quando outro processo tá escrevendo.
         if event_type == Gio.FileMonitorEvent.CHANGES_DONE_HINT:
             self._build_bar()
-            # idle_add: re-centralizar após allocation nova
-            GLib.idle_add(self._apply_x11_dock_hints)
+            if not self._layer_shell_enabled:
+                # idle_add: re-centralizar após allocation nova
+                GLib.idle_add(self._apply_x11_dock_hints)
 
     # ── Botões ───────────────────────────────────────────────────────
 
@@ -352,7 +387,7 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         gesture = Gtk.GestureClick.new()
         gesture.set_button(3)  # right
         gesture.connect(
-            "released",
+            "pressed",
             lambda *_args, w=btn, a=app: show_pin_context_menu(
                 w, a,
                 on_change=self._on_pin_changed,
@@ -412,25 +447,8 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             pass
 
     def _on_show_apps_clicked(self, _btn: Gtk.Button) -> None:
-        """Abre o Activities Overview do GNOME Shell.
-
-        Em GNOME 46+, org.gnome.Shell.ShowApplications via D-Bus
-        retorna AccessDenied pra apps unprivileged. Então simulamos
-        o keypress da tecla Super (que é o overlay-key default —
-        nossa config só bind Super+Space e Super+Shift+H, Super
-        sozinha continua abrindo Activities).
-        """
-        try:
-            GLib.spawn_async(
-                ["xdotool", "key", "Super_L"],
-                flags=(
-                    GLib.SpawnFlags.SEARCH_PATH
-                    | GLib.SpawnFlags.STDOUT_TO_DEV_NULL
-                    | GLib.SpawnFlags.STDERR_TO_DEV_NULL
-                ),
-            )
-        except GLib.Error:
-            pass
+        """Abre o launcher de apps do TMJOS."""
+        self._on_menu_button_clicked(_btn)
 
     def _on_pin_changed(self) -> None:
         """Callback do context menu — re-build da bar com estado novo.
@@ -439,9 +457,10 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         aqui torna o feedback imediato (sem esperar o monitor).
         """
         self._build_bar()
-        # idle_add: deixa o GTK refazer measure+allocate antes de
-        # re-centralizar (senão dock_width fica do tamanho antigo).
-        GLib.idle_add(self._apply_x11_dock_hints)
+        if not self._layer_shell_enabled:
+            # idle_add: deixa o GTK refazer measure+allocate antes de
+            # re-centralizar (senão dock_width fica do tamanho antigo).
+            GLib.idle_add(self._apply_x11_dock_hints)
 
     # ── X11 dock hints ───────────────────────────────────────────────
 
@@ -549,11 +568,9 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             No-op com notification informando.
         """
         if not self._auto_hide_enabled:
-            # Em VM, auto-hide cascateia Mutter relayout caro. Toggle
-            # silenciosamente seria confuso — informa o user.
             self._notify(
                 "TMJDock",
-                "Auto-hide indisponível em VM (use hardware real)",
+                "Auto-hide Wayland entra na proxima iteracao",
                 "dialog-information-symbolic",
             )
             return
@@ -605,7 +622,8 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         if xid is None:
             return
         _, my, _, mh = self._cached_monitor_geom
-        hide_window_offscreen(xid, my + mh)
+        _dw, dh = self._cached_dock_size or (0, 72)
+        hide_window_offscreen(xid, my + mh, dh)
         self._hidden = True
 
     def _show_dock(self) -> None:
@@ -617,7 +635,7 @@ class TMJDockWindow(Gtk.ApplicationWindow):
         mx, my, mw, mh = self._cached_monitor_geom
         dw, dh = self._cached_dock_size
         win_x = mx + (mw - dw) // 2
-        margin = 12
+        margin = 4
         win_y = my + mh - dh - margin
         show_window_at(xid, win_x, win_y, dw, dh)
         self._hidden = False
@@ -650,20 +668,12 @@ class TMJDockWindow(Gtk.ApplicationWindow):
             if not xid:
                 return False
 
-            display = self.get_display()
-            if display is None:
-                return False
-            monitors = display.get_monitors()
-            if monitors is None or monitors.get_n_items() == 0:
-                return False
-            monitor = monitors.get_item(0)
-            if monitor is None:
-                # Pode acontecer durante resize/hotplug — monitor lista
-                # virou inconsistente entre n_items() e get_item(0).
-                return False
-            geometry = monitor.get_geometry()
+            geometry = shell_geometry()
             if geometry is None:
                 return False
+            gx, gy, gw, gh = (
+                geometry.x, geometry.y, geometry.width, geometry.height
+            )
 
             # GTK4: get_width()/get_height() retornam a allocation real
             # (depois de measure+allocate). Se ainda for 0, defer.
@@ -677,17 +687,15 @@ class TMJDockWindow(Gtk.ApplicationWindow):
 
             make_dock(
                 xid=xid,
-                monitor_x=geometry.x,
-                monitor_y=geometry.y,
-                monitor_width=geometry.width,
-                monitor_height=geometry.height,
+                monitor_x=gx,
+                monitor_y=gy,
+                monitor_width=gw,
+                monitor_height=gh,
                 dock_width=dock_w,
                 dock_height=dock_h,
             )
             # Cache pro auto-hide tick não recalcular toda vez
-            self._cached_monitor_geom = (
-                geometry.x, geometry.y, geometry.width, geometry.height,
-            )
+            self._cached_monitor_geom = (gx, gy, gw, gh)
             self._cached_dock_size = (dock_w, dock_h)
         except Exception:
             pass
@@ -737,7 +745,33 @@ class TMJDockApp(Adw.Application):
         window.present()
 
 
+def _running_on_wayland() -> bool:
+    display = Gdk.Display.get_default()
+    if display is None:
+        return False
+    return "Wayland" in display.__gtype__.name
+
+
+_WLROOTS_DESKTOPS = ("hyprland", "sway", "wayfire", "river", "labwc", "niri")
+
+
+def _select_backend() -> None:
+    """Força XWayland em compositors Wayland sem wlr-layer-shell
+    (Mutter/GNOME, KWin/KDE). Sem isso, GTK4 conecta nativo no Wayland,
+    `get_xid()` retorna None, e o fallback X11 (que usa o tipo DOCK +
+    strut pra Mutter respeitar placement) não consegue rodar.
+    """
+    if "GDK_BACKEND" in os.environ:
+        return
+    if os.environ.get("XDG_SESSION_TYPE") != "wayland":
+        return
+    desktop = os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
+    if not any(name in desktop for name in _WLROOTS_DESKTOPS):
+        os.environ["GDK_BACKEND"] = "x11"
+
+
 def main() -> int:
+    _select_backend()
     app = TMJDockApp()
     return app.run(sys.argv)
 

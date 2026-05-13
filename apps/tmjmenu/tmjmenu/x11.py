@@ -49,8 +49,8 @@ def make_dock(xid: int, monitor_x: int, monitor_y: int,
 
         # === Position: bottom-centered do monitor especificado ===
         win_x = monitor_x + (monitor_width - dock_width) // 2
-        # 12px de margin do bottom edge (visual "floating")
-        margin = 12
+        # Pequena margem do bottom edge (visual "floating", mas perto da borda)
+        margin = 4
         win_y = monitor_y + monitor_height - dock_height - margin
         win.configure(x=win_x, y=win_y, width=dock_width, height=dock_height)
 
@@ -80,6 +80,68 @@ def make_dock(xid: int, monitor_x: int, monitor_y: int,
         atom_desktop = d.intern_atom("_NET_WM_DESKTOP")
         win.change_property(atom_desktop, CARDINAL, 32, [0xFFFFFFFF])
 
+        d.sync()
+        d.close()
+        return True
+    except Exception:
+        return False
+
+
+def make_popup(xid: int, x: int, y: int, width: int, height: int) -> bool:
+    """Posiciona um popup (TMJMenu) num ponto específico do desktop.
+
+    Approach: `_NET_WM_WINDOW_TYPE_SPLASH`. Mutter pula smart-placement
+    pra splash windows e respeita a posição do cliente, igual faz pra
+    DOCK. Diferente de override_redirect, é uma janela gerenciada
+    normalmente — recebe foco do WM, popovers internos funcionam sem
+    weirdness de grab.
+
+    Sticky em todos os desktops + ABOVE pra ficar visível mesmo se o
+    user trocar de workspace entre realize e map.
+
+    Esta função tem que rodar no handler de `realize` (entre
+    XCreateWindow e XMapWindow): Mutter decide placement no
+    MapRequest, então o type tem que estar setado antes.
+    """
+    if not _XLIB_OK:
+        return False
+    try:
+        d = display.Display()
+        win = d.create_resource_object("window", xid)
+
+        atom_type = d.intern_atom("_NET_WM_WINDOW_TYPE")
+        atom_splash = d.intern_atom("_NET_WM_WINDOW_TYPE_SPLASH")
+        win.change_property(atom_type, ATOM, 32, [atom_splash])
+
+        atom_state = d.intern_atom("_NET_WM_STATE")
+        atom_above = d.intern_atom("_NET_WM_STATE_ABOVE")
+        win.change_property(atom_state, ATOM, 32, [atom_above])
+
+        atom_desktop = d.intern_atom("_NET_WM_DESKTOP")
+        win.change_property(atom_desktop, CARDINAL, 32, [0xFFFFFFFF])
+
+        win.configure(x=x, y=y, width=width, height=height)
+        d.sync()
+        d.close()
+        return True
+    except Exception:
+        return False
+
+
+def focus_popup(xid: int) -> bool:
+    """Set keyboard focus pra um popup SPLASH.
+
+    Mutter não dá foco automático pra SPLASH no map (diferente de
+    NORMAL/DIALOG). XSetInputFocus com RevertToParent garante que o
+    GtkSearchEntry receba teclas (incluindo Esc). Chamar no handler
+    de `map` (depois do XMapWindow).
+    """
+    if not _XLIB_OK:
+        return False
+    try:
+        d = display.Display()
+        win = d.create_resource_object("window", xid)
+        win.set_input_focus(X.RevertToParent, X.CurrentTime)
         d.sync()
         d.close()
         return True
@@ -137,8 +199,12 @@ def query_pointer_y() -> Optional[int]:
         return None
 
 
-def hide_window_offscreen(xid: int, screen_height: int) -> bool:
-    """Move a window pra fora da tela (y = screen_height + 10).
+def hide_window_offscreen(
+    xid: int,
+    screen_bottom: int,
+    dock_height: int,
+) -> bool:
+    """Move a window quase toda para fora do monitor de referencia.
 
     Também zera o _NET_WM_STRUT_PARTIAL pra que windows maximizadas
     aproveitem o espaço que estava reservado pela dock.
@@ -151,9 +217,6 @@ def hide_window_offscreen(xid: int, screen_height: int) -> bool:
         d = display.Display()
         win = d.create_resource_object("window", xid)
 
-        # Move pra baixo da tela
-        win.configure(y=screen_height + 10)
-
         # Strut zerado — libera espaço pra windows maximizadas
         atom_strut = d.intern_atom("_NET_WM_STRUT_PARTIAL")
         win.change_property(atom_strut, CARDINAL, 32,
@@ -161,6 +224,11 @@ def hide_window_offscreen(xid: int, screen_height: int) -> bool:
         atom_strut_old = d.intern_atom("_NET_WM_STRUT")
         win.change_property(atom_strut_old, CARDINAL, 32,
                             [0, 0, 0, 0])
+
+        # Deixa uma borda de 2px visivel no monitor alvo. Isso evita que a
+        # dock "suma para sempre" e facilita o reveal por mouse.
+        hidden_y = screen_bottom - 2
+        win.configure(y=hidden_y, height=dock_height)
 
         d.sync()
         d.close()
@@ -185,7 +253,7 @@ def show_window_at(xid: int, x: int, y: int,
         win.configure(x=x, y=y, width=dock_width, height=dock_height)
 
         # Restaura strut bottom
-        margin = 12
+        margin = 4
         strut_bottom = dock_height + margin
         bottom_start_x = x
         bottom_end_x = x + dock_width - 1

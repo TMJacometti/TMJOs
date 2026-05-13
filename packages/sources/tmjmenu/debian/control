@@ -16,20 +16,21 @@ Depends: ${misc:Depends},
          python3-xlib,
          gir1.2-gtk-4.0,
          gir1.2-adw-1,
+         x11-utils,
          xdotool
-Recommends: tmjos-branding
+Recommends: tmjos-branding,
+            gir1.2-gtk4layershell-1.0,
+            libgtk4-layer-shell0
 Description: TMJOs proprietary application menu + dock
  Replaces Plank dock and GNOME Activities Overview with two integrated
  components, both GTK4 + libadwaita native (same stack as TMJPad):
  .
    * tmjmenu — popup search launcher, opened by Super key
-   * tmjdock — bottom-centered dock with pinned apps + central TMJOs
-     button that opens tmjmenu
+   * tmjdock — dock no painel INTERNO do laptop (eDP/LVDS/DSI) com
+     anchor bottom-center via gtk4-layer-shell (Wayland nativo) ou
+     X11 hints (XWayland/Xorg fallback). Detecção do monitor interno
+     ignora qual está marcado como primary — sempre ancora no laptop.
  .
- Postinst disables /etc/xdg/autostart/plank.desktop (if present) so
- tmjdock takes over without two docks fighting for screen space.
- The Plank package itself is left installed (tmjos-dock scripts like
- tmjos-first-run remain functional).
- .
- Wayland support deferred to v2.0 (will use gtk4-layer-shell instead
- of X11 hints).
+ gir1.2-gtk4layershell-1.0 + libgtk4-layer-shell0 são Recommends pra
+ layer-shell Wayland; se ausentes, tmjdock cai pro fallback X11 sem
+ quebrar.

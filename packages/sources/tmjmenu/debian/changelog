@@ -1,3 +1,25 @@
+tmjmenu (1.3.4-16) trixie; urgency=medium
+
+  * Fix: TMJDock posicionado no MEIO da tela em vez de bottom-center
+    do painel interno. Causa: monitors.get_item(0) pegava qualquer
+    monitor, não o painel do laptop. Em laptop com monitor externo
+    marcado como primary, dock ia parar lá em vez do eDP.
+  * Add tmjmenu/monitors.py: helper module com shell_monitor() e
+    shell_geometry() que priorizam connector interno (eDP/LVDS/DSI),
+    fallback pra primary, fallback pra primeiro monitor. Plus env
+    overrides TMJOS_MONITOR_CONNECTOR e TMJOS_MONITOR_GEOMETRY pra
+    casos edge (kiosk/etc).
+  * Wayland nativo via gtk4-layer-shell quando disponível
+    (Recommends). Mutter trata layer-shell direto, sem hint hacks
+    nem XWayland. Fallback X11 hints continua pra Xorg/XWayland.
+  * Padding interno reduzido (12 → 6) — bar mais compacto.
+  * AUTO_HIDE_REVEAL_PX aumentado (8 → 64) — área de hover maior
+    pra detectar mouse aproximando do bottom edge.
+  * Botão central renomeado: "Activities Overview" → "Todos os apps"
+    (abre TMJMenu popup com lista completa de apps).
+
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Wed, 13 May 2026 14:30:00 -0300
+
 tmjmenu (1.3.4-15) trixie; urgency=medium
 
   * No-change rebuild para publicar o TMJMenu/TMJDock no repo trixie

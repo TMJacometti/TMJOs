@@ -19,24 +19,41 @@ depois.
 
 from __future__ import annotations
 
+import os
 import sys
 
 import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
+gi.require_version("Gdk", "4.0")
 
-from gi.repository import Adw, GLib, Gtk  # noqa: E402
+try:
+    gi.require_version("Gtk4LayerShell", "1.0")
+    from gi.repository import Gtk4LayerShell as LayerShell
+except (ImportError, ValueError):
+    LayerShell = None
+
+try:
+    from Xlib import display as _xlib_display  # noqa: F401
+    _XLIB_OK = True
+except ImportError:
+    _XLIB_OK = False
+
+from gi.repository import Adw, Gdk, GLib, Gtk  # noqa: E402
 
 from . import config
 from .launcher import launch
+from .monitors import shell_geometry, shell_monitor
 from .search import AppEntry, discover_apps, search
 from .widgets import show_pin_context_menu
+from .x11 import focus_popup, make_popup
 
 
 APP_ID = "br.com.tmjsistemas.tmjmenu"
 WINDOW_WIDTH = 600
 WINDOW_HEIGHT = 500
+MENU_MARGIN = 8
 
 
 class TMJMenuWindow(Gtk.ApplicationWindow):
@@ -49,6 +66,7 @@ class TMJMenuWindow(Gtk.ApplicationWindow):
         self.set_resizable(False)
         self.set_decorated(False)
         self.add_css_class("tmjmenu-window")
+        self._layer_shell_enabled = self._setup_layer_shell()
 
         self._apps: list[AppEntry] = discover_apps()
 
@@ -91,6 +109,106 @@ class TMJMenuWindow(Gtk.ApplicationWindow):
 
         # Foco no search entry pra digitar direto
         self._search_entry.grab_focus()
+
+        if not self._layer_shell_enabled:
+            # OR + position têm que rolar ANTES do XMapWindow — realize
+            # fires entre XCreateWindow e XMapWindow, então é a hook certa.
+            # Mudar override_redirect depois do map é no-op até o próximo
+            # unmap/remap, e o Mutter já teria decidido placement.
+            self.connect("realize", lambda _w: self._position_x11_fallback())
+            # OR windows não recebem foco do WM — grab manual no map
+            # pra search entry capturar teclas.
+            self.connect("map", lambda _w: self._focus_x11_fallback())
+
+    def _setup_layer_shell(self) -> bool:
+        """Ancora o menu perto da dock em compositors wlroots-based.
+
+        wlr-layer-shell-unstable-v1 só é implementado por Hyprland/Sway/
+        wayfire/river/labwc/niri. Mutter (GNOME) e KWin (Plasma) não
+        suportam — `is_supported()` retorna False e caímos no X11
+        fallback (override_redirect via XWayland, ver _select_backend).
+        """
+        if LayerShell is None or not _running_on_wayland():
+            return False
+        if hasattr(LayerShell, "is_supported") and not LayerShell.is_supported():
+            return False
+
+        LayerShell.init_for_window(self)
+        LayerShell.set_namespace(self, "tmjmenu")
+        LayerShell.set_layer(self, LayerShell.Layer.OVERLAY)
+        monitor = shell_monitor()
+        if monitor is not None:
+            LayerShell.set_monitor(self, monitor)
+        LayerShell.set_anchor(self, LayerShell.Edge.BOTTOM, True)
+        LayerShell.set_margin(self, LayerShell.Edge.BOTTOM, 64)
+        return True
+
+    def _position_x11_fallback(self) -> bool:
+        debug = bool(os.environ.get("TMJMENU_DEBUG"))
+        if not _XLIB_OK:
+            if debug:
+                print("[tmjmenu] _XLIB_OK=False — Xlib não disponível",
+                      file=sys.stderr)
+            return False
+        native = self.get_native()
+        if native is None:
+            if debug:
+                print("[tmjmenu] get_native() is None", file=sys.stderr)
+            return False
+        surface = native.get_surface()
+        if surface is None or not hasattr(surface, "get_xid"):
+            if debug:
+                print(
+                    f"[tmjmenu] surface={surface} sem get_xid (backend"
+                    " Wayland nativo?)",
+                    file=sys.stderr,
+                )
+            return False
+        xid = surface.get_xid()
+        if not xid:
+            if debug:
+                print("[tmjmenu] xid=0", file=sys.stderr)
+            return False
+
+        geometry = shell_geometry()
+        if geometry is None:
+            if debug:
+                print("[tmjmenu] shell_geometry() is None", file=sys.stderr)
+            return False
+        gx, gy, gw, gh = (
+            geometry.x, geometry.y, geometry.width, geometry.height
+        )
+        x = gx + (gw - WINDOW_WIDTH) // 2
+        y = gy + gh - WINDOW_HEIGHT - 64
+        final_y = max(gy + MENU_MARGIN, y)
+        ok = make_popup(
+            xid,
+            x=x,
+            y=final_y,
+            width=WINDOW_WIDTH,
+            height=WINDOW_HEIGHT,
+        )
+        if debug:
+            print(
+                f"[tmjmenu] make_popup xid={xid} monitor=({gx},{gy} "
+                f"{gw}x{gh}) → ({x},{final_y} "
+                f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}) ok={ok}",
+                file=sys.stderr,
+            )
+        return False
+
+    def _focus_x11_fallback(self) -> None:
+        if not _XLIB_OK:
+            return
+        native = self.get_native()
+        if native is None:
+            return
+        surface = native.get_surface()
+        if surface is None or not hasattr(surface, "get_xid"):
+            return
+        xid = surface.get_xid()
+        if xid:
+            focus_popup(xid)
 
     def _populate(self, query: str) -> None:
         """Refaz a list box baseado na query atual."""
@@ -153,7 +271,7 @@ class TMJMenuWindow(Gtk.ApplicationWindow):
         gesture = Gtk.GestureClick.new()
         gesture.set_button(3)  # right click
         gesture.connect(
-            "released",
+            "pressed",
             lambda *_args, w=row, a=app: show_pin_context_menu(
                 w, a, self._on_pin_changed
             ),
@@ -215,7 +333,36 @@ class TMJMenuApp(Adw.Application):
         window.present()
 
 
+def _running_on_wayland() -> bool:
+    display = Gdk.Display.get_default()
+    if display is None:
+        return False
+    return "Wayland" in display.__gtype__.name
+
+
+_WLROOTS_DESKTOPS = ("hyprland", "sway", "wayfire", "river", "labwc", "niri")
+
+
+def _select_backend() -> None:
+    """Em compositors Wayland que não suportam wlr-layer-shell
+    (Mutter/GNOME, KWin/KDE), força XWayland. O cliente roda sob XWayland,
+    `get_xid()` fica disponível, e o fallback override_redirect ancora o
+    popup no monitor certo. Wlroots-based stays Wayland nativo.
+
+    Chamado em main() antes de criar Adw.Application — GTK4 lê
+    GDK_BACKEND quando o primeiro Gdk.Display abre.
+    """
+    if "GDK_BACKEND" in os.environ:
+        return
+    if os.environ.get("XDG_SESSION_TYPE") != "wayland":
+        return
+    desktop = os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
+    if not any(name in desktop for name in _WLROOTS_DESKTOPS):
+        os.environ["GDK_BACKEND"] = "x11"
+
+
 def main() -> int:
+    _select_backend()
     app = TMJMenuApp()
     return app.run(sys.argv)
 
