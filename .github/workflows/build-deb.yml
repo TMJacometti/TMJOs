@@ -149,6 +149,11 @@ jobs:
           publish_dir: ./apt-repo
           publish_branch: gh-pages
           enable_jekyll: false
+          # force_orphan=true: cria branch gh-pages do zero a cada deploy.
+          # Garante que pacotes velhos (suite trixie/noble legados) sumam
+          # quando refatoramos o reprepro pra suite única `stable`. Sem
+          # isso, peaceiris faz incremental update e órfãos persistem.
+          force_orphan: true
           commit_message: 'apt repo update from ${{ github.sha }}'
 
       - name: Upload .deb artifacts (always)
