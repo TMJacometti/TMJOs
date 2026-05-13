@@ -1,65 +1,54 @@
 # TMJOs APT repo source
 
-Este diretório contém os **sources** dos pacotes `.deb` do TMJOs.
-Cada subpasta em `sources/` vira um `.deb` no APT repo público.
+Sources dos pacotes `.deb` do TMJOs Suite — apps neon que instalam via apt em qualquer Linux Debian-based.
 
 ## 📂 Estrutura
 
 ```
 packages/
-├── conf/              # reprepro config (trixie suite)
+├── conf/              # reprepro config (suite stable)
 ├── keys/              # GPG public key (TMJOs archive keyring)
 ├── sources/           # source dir de cada pacote
-│   ├── tmjos/         # meta-package
-│   ├── tmjos-branding/
-│   ├── tmjos-calamares-branding/
-│   ├── tmjos-os-identity/
-│   ├── tmjos-defaults/
-│   ├── tmjos-hello/   # smoke test
-│   ├── tmjmenu/       # TMJMenu + TMJDock
-│   ├── tmjpad/
-│   └── tmjstore/
+│   ├── tmjpad/        # editor Rust
+│   ├── tmjmenu/       # launcher + dock (Python, migra pra Rust)
+│   └── tmjstore/      # software center (Python, migra pra Rust)
 └── README.md          # este arquivo
 ```
 
 ## 🚀 Build local (desenvolvimento)
 
 ```bash
-# Build de um pacote específico
-cd packages/sources/tmjos-branding
+# Vendor upstream files
+cd <repo-root>
+tools/vendor-tmjpad.sh   # ou vendor-tmjmenu.sh, vendor-tmjstore.sh
+
+# Build do pacote
+cd packages/sources/tmjpad
 dpkg-buildpackage -us -uc -b
 ls ../../*.deb
 ```
 
 ## 🤖 Build via CI
 
-Push pra `main` que toca em `packages/sources/<pkg>/` dispara
-`.github/workflows/build-deb.yml` que:
+Push pra `main` ou qualquer `feature/**` que toque em `apps/**` ou `packages/**` dispara
+`.github/workflows/build-deb.yml`:
 
-1. Builda o `.deb`
-2. Assina com a GPG key TMJOs (secret `GPG_SIGNING_KEY`)
-3. Atualiza repo via reprepro
-4. Push pra branch `gh-pages` (= APT repo público)
+1. Vendor (`tools/vendor-*.sh`)
+2. `dpkg-buildpackage` em cada `packages/sources/*/`
+3. `reprepro includedeb stable` pra cada `.deb`
+4. Deploy pra branch `gh-pages` (= APT repo público em `packages.tmjos.com.br`)
 
-## 📦 Como user instala/atualiza
-
-ISO TMJOs v2.0+ já vem com o repo pré-configurado:
+## 📦 Como user instala
 
 ```bash
-# /etc/apt/sources.list.d/tmjos.list
-deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] \
-  https://packages.tmjos.com.br trixie main apps extras
-```
+curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg \
+  | sudo tee /usr/share/keyrings/tmjos-archive-keyring.gpg > /dev/null
 
-Daí o user roda:
+echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br stable main' \
+  | sudo tee /etc/apt/sources.list.d/tmjos.list > /dev/null
 
-```bash
 sudo apt update
-sudo apt upgrade tmjos       # atualiza todo o core
-sudo apt install tmjpad      # instala app individual
+sudo apt install tmjpad tmjmenu tmjstore
 ```
 
-## 🚧 Status atual
-
-**v2.0 alpha** — migração Ubuntu (noble) → Debian (trixie) em andamento.
-Repo APT publica apenas suite `trixie`. v1.x (noble) está congelado.
+Funciona em qualquer Linux Debian-based: Ubuntu, Debian, Mint, Pop!_OS, Kali, Tails, Parrot, elementaryOS, Zorin OS, etc.

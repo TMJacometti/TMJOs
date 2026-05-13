@@ -33,7 +33,6 @@ jobs:
               build-essential \
               devscripts debhelper dpkg-dev reprepro \
               gnupg lintian fakeroot \
-              imagemagick \
               cargo rustc pkg-config \
               libgtk-4-dev libadwaita-1-dev
 
@@ -52,7 +51,6 @@ jobs:
       - name: Vendor upstream files (apps/* → packages/sources/*/vendor/)
         run: |
           set -e
-          # Cada package que precisa de upstream tem um tools/vendor-<pkg>.sh
           for vs in tools/vendor-*.sh; do
               [ -f "$vs" ] || continue
               echo "::group::Running $vs"
@@ -72,7 +70,6 @@ jobs:
                   cd "$pkg_dir"
                   dpkg-buildpackage -us -uc -b
               )
-              # debs vão pra packages/sources/<pkg>/../*.deb (pai)
               mv packages/sources/*.deb        packages/dist/ 2>/dev/null || true
               mv packages/sources/*.changes    packages/dist/ 2>/dev/null || true
               mv packages/sources/*.buildinfo  packages/dist/ 2>/dev/null || true
@@ -85,57 +82,66 @@ jobs:
           set -e
           mkdir -p apt-repo
           cp -r packages/conf apt-repo/
-          # Custom domain: GitHub Pages reads this file from gh-pages and
-          # auto-populates the Custom Domain field in repo Settings → Pages.
-          # Let's Encrypt cert provisioning takes ~15min after first publish.
+          # Custom domain: GitHub Pages reads this file from gh-pages
           echo 'packages.tmjos.com.br' > apt-repo/CNAME
-          # Importa as .debs no reprepro pra suite trixie (Debian 13, v2.0+).
-          # Em v2.1 vamos separar components (main/apps/extras) — por ora
-          # tudo vai pra `main`.
+          # Suite única `stable` — agnóstica de distro. Funciona em
+          # qualquer Linux Debian-based (Ubuntu/Debian/Mint/Pop/Kali/etc).
           for deb in packages/dist/*.deb; do
-              echo "Adding $deb to reprepro (trixie)..."
-              # --ignore=wrongdistribution: packages podem ter codename
-              # diferente em debian/changelog mas são distro-agnostic
-              # (apps GTK4/Python). Em v2.0 stable vamos uniformizar.
+              echo "Adding $deb to reprepro (stable)..."
               reprepro --basedir apt-repo --ignore=wrongdistribution \
-                  includedeb trixie "$deb"
+                  includedeb stable "$deb"
           done
-          # Copia a public key pro repo (user adiciona como signed-by)
+          # Public key pro repo (user adiciona como signed-by)
           mkdir -p apt-repo/keys
           cp packages/keys/tmjos-archive-keyring.asc apt-repo/keys/
-          # Convert pra formato binário de keyring (signed-by espera isso)
           gpg --dearmor < packages/keys/tmjos-archive-keyring.asc \
               > apt-repo/keys/tmjos-archive-keyring.gpg
-          # README e index simples
+          # Landing page
           cat > apt-repo/index.html << 'HTML'
           <!DOCTYPE html>
-          <html><head><title>TMJOs APT Repo</title>
-          <style>body{font-family:monospace;background:#0a0e2a;color:#e6e6e6;
-          max-width:760px;margin:40px auto;padding:0 20px}
-          a{color:#00d4ff}h1{color:#00d4ff}code{background:#1a1e3a;
-          padding:2px 6px;border-radius:3px}</style></head>
+          <html lang="pt-br"><head>
+          <meta charset="utf-8">
+          <title>TMJOs Suite — APT Repo</title>
+          <style>
+            body{font-family:'JetBrains Mono',monospace;background:#0a0e2a;
+                 color:#e6e6e6;max-width:780px;margin:40px auto;padding:0 20px;
+                 line-height:1.6}
+            h1{color:#00d4ff;font-size:2em}
+            h2{color:#ff2d95;margin-top:2em}
+            a{color:#00d4ff}
+            a:hover{color:#ff2d95}
+            code,pre{background:#1a1e3a;padding:2px 6px;border-radius:3px;
+                     color:#e6e6e6}
+            pre{padding:14px;overflow-x:auto;border:1px solid #1a1e3a}
+            .tag{background:#1a1e3a;color:#00d4ff;padding:2px 8px;
+                 border-radius:3px;font-size:0.85em}
+          </style></head>
           <body>
-          <h1>🐉 TMJOs APT Repo</h1>
-          <p>Pacotes oficiais TMJOs assinados com GPG.</p>
-          <h2>Setup (Debian 13 trixie)</h2>
+          <h1>🐉 TMJOs Suite</h1>
+          <p>Apps proprietários TMJOs assinados com GPG.
+          Funciona em <strong>qualquer Linux Debian-based</strong> com apt:
+          Ubuntu, Debian, Linux Mint, Pop!_OS, Kali, Tails, Parrot,
+          elementaryOS, Zorin OS, etc.</p>
+
+          <h2>Setup</h2>
           <pre><code>curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg | sudo tee /usr/share/keyrings/tmjos-archive-keyring.gpg > /dev/null
-          echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br trixie main apps extras' | sudo tee /etc/apt/sources.list.d/tmjos.list
-          sudo apt update
-          sudo apt install tmjos</code></pre>
-          <h2>Pacotes disponíveis</h2>
-          <p>Veja <a href="dists/trixie/main/binary-amd64/Packages">Packages</a></p>
+          echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br stable main' | sudo tee /etc/apt/sources.list.d/tmjos.list
+          sudo apt update</code></pre>
+
+          <h2>Apps disponíveis</h2>
+          <pre><code>sudo apt install tmjpad    # Editor de texto Rust com session persistence
+          sudo apt install tmjmenu   # Popup launcher + dock (TMJMenu + TMJDock)
+          sudo apt install tmjstore  # Software center proprietário</code></pre>
+
+          <p>Ver lista completa: <a href="dists/stable/main/binary-amd64/Packages">Packages</a></p>
+
+          <h2>Source</h2>
+          <p>Código em <a href="https://github.com/TMJacometti/TMJOs">github.com/TMJacometti/TMJOs</a></p>
           </body></html>
           HTML
           ls -R apt-repo/dists/ | head -30
 
       - name: Deploy to gh-pages
-        # Publica de main, qualquer feature/** branch (pra permitir
-        # testes via apt upgrade durante dev), ou trigger manual.
-        # Quando uma feature estabilizar e for pra release, restringir
-        # pra só main pode fazer sentido — mas durante o ciclo v2.0,
-        # permitir deploy de feature acelera
-        # o feedback loop drasticamente (testar fix imediatamente em
-        # sistema instalado, em vez de esperar merge).
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/feature/') || github.event_name == 'workflow_dispatch'
         uses: peaceiris/actions-gh-pages@v4
         with:

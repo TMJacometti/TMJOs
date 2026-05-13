@@ -1,8 +1,8 @@
-# Contribuindo com o TMJOs
+# Contribuindo com TMJOs Suite
 
-Valeu pelo interesse em contribuir! 🐧
+Valeu pelo interesse! 🐉
 
-O TMJOs é uma distro Linux focada em **clean, minimalismo e produtividade pra devs**. Mantemos o escopo enxuto de propósito — nem toda feature legal cabe na distro.
+TMJOs é uma **suite de apps neon proprietários** pra Linux Debian-based. Foco: hardcore dev productivity + identidade visual forte. Cada app é independente — mantemos o escopo enxuto.
 
 ---
 
@@ -10,15 +10,15 @@ O TMJOs é uma distro Linux focada em **clean, minimalismo e produtividade pra d
 
 ### 🐛 Reportar Bugs
 
-1. Procure se já existe uma [issue](https://github.com/tmjacometti/tmjos/issues) similar
+1. Procure se já existe uma [issue](https://github.com/TMJacometti/TMJOs/issues) similar
 2. Se não houver, abra uma nova usando o template de **Bug Report**
 3. Descreva como reproduzir, o que esperava e o que aconteceu
-4. Inclua sua versão (`TMJOs v1.0`), hardware e logs relevantes
+4. Inclua sua distro + versão do app + logs relevantes
 
 ### ✨ Sugerir Features
 
 1. Abra uma issue usando o template de **Feature Request**
-2. Explique o caso de uso — por que isso ajudaria os usuários do TMJOs?
+2. Explique o caso de uso — por que isso ajudaria os usuários TMJOs?
 3. Antes de implementar mudanças grandes, **discuta primeiro**. Evita retrabalho.
 
 ### 💻 Enviar Código
@@ -26,9 +26,9 @@ O TMJOs é uma distro Linux focada em **clean, minimalismo e produtividade pra d
 1. **Fork** do repositório
 2. Crie uma branch: `git checkout -b feature/sua-feature` ou `fix/seu-fix`
 3. Faça suas mudanças seguindo as convenções abaixo
-4. Teste localmente (preferencialmente em VM)
+4. Teste localmente
 5. Commit com mensagem semântica (veja abaixo)
-6. **Push** e abra um **Pull Request** usando o template
+6. **Push** e abra um **Pull Request**
 
 ---
 
@@ -48,61 +48,75 @@ chore:    tarefas de manutenção (deps, build, etc)
 ```
 
 Exemplos:
-- `feat: adiciona wallpaper TMJOs blue`
-- `fix: corrige hook de live-build`
-- `docs: atualiza guia de build com nova versão do live-build`
+- `feat(tmjpad): add syntax highlighting`
+- `fix(tmjdock): posicionamento no monitor interno`
+- `chore(deps): bump gtk4-rs to 0.11`
 
 ### Estrutura de Pastas
 
 ```
-tmjos/
-├── docs/          # Documentação técnica
-├── scripts/       # Scripts de build e customização
-├── assets/        # Wallpapers, ícones, screenshots
-├── .github/       # Templates de issue/PR, workflows
-└── .local/        # (gitignored — não commitar)
+TMJOs/
+├── apps/             # source dos apps proprietários (Rust + Python)
+│   ├── tmjpad/       # editor Rust
+│   ├── tmjmenu/      # launcher + dock
+│   └── tmjstore/     # software center
+├── packages/         # debian packaging
+│   ├── conf/         # reprepro config
+│   ├── keys/         # GPG public key
+│   └── sources/      # debian/* de cada pacote
+├── tools/            # vendor scripts pra cada pacote
+├── assets/           # logos, wallpapers (branding visual)
+└── .github/          # CI workflows, templates
 ```
 
 ### Estilo de Código
 
-- **Shell scripts**: `set -euo pipefail` no topo, validar com `bash -n` e idealmente `shellcheck`
-- **Markdown**: linhas curtas (~80 chars), use code fences com linguagem
-- Comentários em inglês quando o público-alvo é amplo, em PT-BR quando é interno
+- **Rust**: `cargo fmt` + `cargo clippy`. `rustc 1.75+`.
+- **Python**: PEP 8, type hints quando possível, GTK4 + PyGObject.
+- **Shell**: `set -euo pipefail` no topo, validar com `bash -n`.
+- **Markdown**: linhas curtas (~80 chars), use code fences com linguagem.
+- Comentários em PT-BR informal.
 
----
+### Branding visual (não mexer sem combinar)
 
-## O Que Está no Escopo
-
-✅ Fica no TMJOs:
-- Customizações do GNOME que mantêm a interface limpa
-- Apps essenciais pra dev (editor, git, container runtime)
-- Scripts e docs do processo de build
-- Temas, wallpapers e branding
-- Otimizações de tamanho/performance da ISO
-
-❌ **Fora** do escopo (geralmente):
-- Aplicativos pesados (suite office, players, etc.)
-- Customizações que duplicam funcionalidades do GNOME
-- Mudanças que aumentam significativamente o tamanho da ISO
+- Paleta: cyan `#00d4ff`, magenta `#ff2d95`, navy `#0a0e2a`, dark `#050714`, light `#e6e6e6`
+- Fontes: JetBrains Mono (mono), Cantarell (UI fallback)
+- Logo: dragão + gear, em [assets/logos/](assets/logos/)
 
 ---
 
 ## Build Local
 
-Pra testar suas mudanças no script de customização sem refazer toda ISO, dá pra rodar em uma VM Debian 13 (trixie) limpa OU em um container `debian:trixie`:
+### TMJPad (Rust):
 
 ```bash
-# Em uma VM/container Debian 13 (NÃO no seu host!)
-sudo bash scripts/tmjos_customize.sh
+sudo apt install -y cargo rustc pkg-config libgtk-4-dev libadwaita-1-dev
+cd apps/tmjpad
+cargo run --release
 ```
 
-⚠️ **Não rode esse script no seu host de trabalho** — ele adiciona repos extras e instala stack completa do TMJOs. Use VM ou container.
+### TMJMenu/TMJStore (Python):
+
+```bash
+sudo apt install -y python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
+cd apps/tmjmenu   # ou tmjstore
+python3 -m tmjmenu
+```
+
+### Build .deb local:
+
+```bash
+tools/vendor-tmjpad.sh   # popula vendor/
+cd packages/sources/tmjpad
+dpkg-buildpackage -us -uc -b
+sudo dpkg -i ../tmjpad_*.deb
+```
 
 ---
 
 ## Dúvidas?
 
-- 💬 Discussions: https://github.com/tmjacometti/tmjos/discussions
-- 🐛 Issues: https://github.com/tmjacometti/tmjos/issues
+- 💬 [Discussions](https://github.com/TMJacometti/TMJOs/discussions)
+- 🐛 [Issues](https://github.com/TMJacometti/TMJOs/issues)
 
-Toda contribuição é bem-vinda — desde reportar typo até enviar uma feature grande. 🚀
+Toda contribuição é bem-vinda — desde reportar typo até enviar feature grande. 🚀
