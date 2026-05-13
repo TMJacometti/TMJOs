@@ -2,35 +2,39 @@ Source: tmjmenu
 Section: utils
 Priority: optional
 Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
-Build-Depends: debhelper-compat (= 13)
+Build-Depends: debhelper-compat (= 13),
+               cargo,
+               rustc,
+               pkg-config,
+               libgtk-4-dev,
+               libadwaita-1-dev
 Standards-Version: 4.6.2
 Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjmenu
 Vcs-Git: https://github.com/TMJacometti/TMJOs.git
 Vcs-Browser: https://github.com/TMJacometti/TMJOs
 
 Package: tmjmenu
-Architecture: all
+Architecture: amd64
 Depends: ${misc:Depends},
-         python3 (>= 3.10),
-         python3-gi,
-         python3-xlib,
-         gir1.2-gtk-4.0,
-         gir1.2-adw-1,
+         ${shlibs:Depends},
+         libgtk-4-1,
+         libadwaita-1-0,
          x11-utils,
          xdotool
-Recommends: tmjos-branding,
-            gir1.2-gtk4layershell-1.0,
+Recommends: gir1.2-gtk4layershell-1.0,
             libgtk4-layer-shell0
-Description: TMJOs proprietary application menu + dock
- Replaces Plank dock and GNOME Activities Overview with two integrated
- components, both GTK4 + libadwaita native (same stack as TMJPad):
+Description: TMJOs popup launcher + dock (Rust)
+ Suite TMJOs de UX shell: dois binários compartilhando código.
  .
-   * tmjmenu — popup search launcher, opened by Super key
-   * tmjdock — dock no painel INTERNO do laptop (eDP/LVDS/DSI) com
-     anchor bottom-center via gtk4-layer-shell (Wayland nativo) ou
-     X11 hints (XWayland/Xorg fallback). Detecção do monitor interno
-     ignora qual está marcado como primary — sempre ancora no laptop.
+   * tmjmenu — popup search launcher (Super+Space). Lista apps XDG,
+     busca fuzzy por nome/comment/keywords.
+   * tmjdock — dock bottom-center no painel INTERNO do laptop
+     (eDP/LVDS/DSI). Botão TMJOs com gradient cyan/magenta + pinned
+     apps. Wayland nativo via gtk4-layer-shell (Recommends), fallback
+     X11 hints.
  .
- gir1.2-gtk4layershell-1.0 + libgtk4-layer-shell0 são Recommends pra
- layer-shell Wayland; se ausentes, tmjdock cai pro fallback X11 sem
- quebrar.
+ Reescrito em Rust + gtk4-rs + libadwaita em v2.0.0 (era Python +
+ PyGObject). Binary statically linked, single-binary distribution.
+ .
+ gir1.2-gtk4layershell-1.0 + libgtk4-layer-shell0 são Recommends —
+ sem eles, tmjdock cai pro fallback X11 sem quebrar.

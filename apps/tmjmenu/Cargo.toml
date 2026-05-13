@@ -1,0 +1,49 @@
+[package]
+name = "tmjmenu"
+version = "2.0.0"
+edition = "2021"
+rust-version = "1.75"
+description = "TMJOs popup search launcher + dock — GTK4 + libadwaita native"
+license = "GPL-3.0-or-later"
+authors = ["TMJOs Team <tmjos-archive@tmjsistemas.com.br>"]
+homepage = "https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjmenu"
+repository = "https://github.com/TMJacometti/TMJOs"
+
+# 2 binários compartilhando código em src/lib.rs:
+#   tmjmenu — popup search launcher (Super+Space)
+#   tmjdock — dock bottom-center com botão TMJOs + pinned apps
+[[bin]]
+name = "tmjmenu"
+path = "src/bin/tmjmenu.rs"
+
+[[bin]]
+name = "tmjdock"
+path = "src/bin/tmjdock.rs"
+
+[lib]
+name = "tmjmenu"
+path = "src/lib.rs"
+
+[dependencies]
+gtk = { package = "gtk4", version = "0.10", features = ["v4_12"] }
+adw = { package = "libadwaita", version = "0.8", features = ["v1_5"] }
+glib = "0.21"
+gio = "0.21"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+dirs = "5.0"
+anyhow = "1.0"
+
+# Wayland: anchor da dock no monitor interno via layer-shell.
+# Falha gracioso (returns None) se libgtk4-layer-shell0 não estiver
+# instalado — daí cai pro fallback X11.
+gtk4-layer-shell = "0.6"
+
+# X11: window type, struts, position. Pure Rust, sem FFI Xlib.
+x11rb = "0.13"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true
