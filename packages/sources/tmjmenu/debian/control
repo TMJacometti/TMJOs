@@ -7,7 +7,8 @@ Build-Depends: debhelper-compat (= 13),
                rustc,
                pkg-config,
                libgtk-4-dev,
-               libadwaita-1-dev
+               libadwaita-1-dev,
+               libgtk4-layer-shell-dev
 Standards-Version: 4.6.2
 Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjmenu
 Vcs-Git: https://github.com/TMJacometti/TMJOs.git
