@@ -1,73 +1,10 @@
-tmjpad (2.0.0-1) trixie; urgency=medium
+tmjpad (2.0.0) stable; urgency=medium
 
-  * REWRITE COMPLETA EM RUST. TMJPad agora é Rust + gtk4-rs +
-    libadwaita (era Python + PyGObject). Primeiro app TMJOs no
-    pipeline de migração Rust (v3.0 = TMJOs Rust-only).
-  * Single binary em /usr/bin/tmjpad (~3-5MB statically linked) —
-    sem deps Python no runtime.
-  * Startup time 5-10x mais rápido vs versão Python (~100ms vs ~500ms).
-  * Memory footprint -60% (~15MB vs ~40MB Python+GObject).
-  * Architecture: amd64 (era all/Python). Pacotes futuros pra arm64
-    quando hardware demandar.
-  * Paridade total com a versão 0.1.2-2 Python:
-    - Multi-tab com reordenação
-    - Auto-save debounced 500ms
-    - Session persistence atômica (~/.config/tmjpad/{session.json,
-      buffers/<uuid>.txt})
-    - Find & Replace inline (Ctrl+F/Ctrl+H, case-insensitive, wrap)
-    - Dark theme TMJOs neon (cyan #00d4ff, magenta #ff2d95, navy
-      #0a0e2a) + JetBrains Mono
-    - Cursor restoration entre sessões
-    - GTK4 + libadwaita nativo
-  * Build via cargo (Build-Depends: cargo, rustc, libgtk-4-dev,
-    libadwaita-1-dev). vendor/rust-deps/ contém todas as crates
-    pra build offline (cargo build --release --offline --locked).
-  * tools/vendor-tmjpad.sh reescrito pra Rust workflow.
+  * REWRITE COMPLETA EM RUST. TMJPad agora e Rust + gtk4-rs +
+    libadwaita (era Python + PyGObject).
+  * Single binary /usr/bin/tmjpad. Startup 5-10x mais rapido.
+  * Memory footprint -60%. Architecture: amd64.
+  * Paridade total com versao Python: multi-tab, auto-save,
+    session persistence atomica, find/replace, dark theme neon.
 
- -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Wed, 13 May 2026 15:00:00 -0300
-
-tmjpad (0.1.2-2) trixie; urgency=medium
-
-  * No-change rebuild para publicar o TMJPad no repo trixie da linha
-    TMJOs v2.0.
-
- -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Tue, 12 May 2026 23:00:00 -0300
-
-tmjpad (0.1.2-1) noble; urgency=medium
-
-  * Fix: TMJPad icon not appearing in v1.3.0-1 ISO despite gtk-update-icon-cache.
-    Root cause: hicolor icon-theme.cache can be stale on live-CD boot
-    (squashfs is read-only, cache rebuild from postinst doesn't always
-    propagate to the running gnome-shell instance).
-  * Solution: install the icon in 3 paths for maximum fallback coverage:
-      - /usr/share/icons/hicolor/512x512/apps/tmjpad.png (matches the
-        real 1024×1024 source asset; 512 is the largest standard
-        hicolor bucket)
-      - /usr/share/icons/hicolor/256x256/apps/tmjpad.png (legacy)
-      - /usr/share/pixmaps/tmjpad.png — XDG fallback path that is
-        ALWAYS consulted by Icon=name lookups regardless of cache state.
-    The pixmaps fallback is what fixes the live-CD case.
-
- -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 22:05:00 -0300
-
-tmjpad (0.1.1-1) noble; urgency=medium
-
-  * First .deb-packaged release.
-  * Fixes the v1.2 ISO icon-cache miss: postinst now runs
-    gtk-update-icon-cache so the dedicated TMJPad icon (book +
-    colored T/M/J letters) renders instead of falling back to the
-    generic TMJOs logo.
-  * No code changes vs the v1.2 in-ISO version — same Find/Replace,
-    same persistence, same focus-on-tab behavior.
-
- -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 17:45:00 -0300
-
-tmjpad (0.1.0-1) noble; urgency=low
-
-  * Initial release as part of TMJOs v1.2 ISO (in-ISO install via
-    customize.sh, not yet a .deb). This entry documents the first
-    public release of TMJPad.
-  * Full session persistence with atomic writes.
-  * Multiple tabs, Find & Replace, dark theme.
-
- -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Sun, 10 May 2026 12:00:00 -0300
+ -- TMJOs Team <tmjos-archive@tmjsistemas.com.br>  Fri, 06 Jun 2026 12:00:00 -0300

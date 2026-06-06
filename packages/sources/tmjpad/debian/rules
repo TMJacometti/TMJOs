@@ -1,47 +1,27 @@
 #!/usr/bin/make -f
 
-# TMJPad é Rust + gtk4-rs desde v2.0.0. Build flow:
-#   1. tools/vendor-tmjpad.sh popula vendor/ com src/ + Cargo.{toml,lock}
-#      + rust-deps/ (todas as crates vendored) + .cargo/config.toml +
-#      data/ (desktop, appdata, icon).
-#   2. dpkg-buildpackage chama este rules.
-#   3. override_dh_auto_build: cargo build --release --offline
-#      (reads vendored deps from rust-deps/ via .cargo/config.toml).
-#   4. override_dh_auto_install: copia binary + desktop + appdata + icon.
-
 %:
 	dh $@
 
 override_dh_auto_build:
 	@if [ ! -f vendor/Cargo.toml ]; then \
-		echo ""; \
-		echo "ERROR: vendor/Cargo.toml missing."; \
-		echo "Run tools/vendor-tmjpad.sh from the repo root before building."; \
-		echo "(CI does this automatically via the build-deb workflow.)"; \
-		echo ""; \
+		echo "ERROR: vendor/Cargo.toml missing. Run tools/vendor-tmjpad.sh first."; \
 		exit 1; \
 	fi
-	# Remove .orig files and reset cargo checksums (dpkg-source breaks them)
-	find vendor/rust-deps -name '*.orig' -delete 2>/dev/null || true
-	find vendor/rust-deps -name '.cargo-checksum.json' -exec sed -i 's#"files":{[^}]*}#"files":{}#' {} \;
 	cd vendor && cargo build --release --offline --locked
 
 override_dh_auto_install:
-	# Binary → /usr/bin/tmjpad
 	mkdir -p debian/tmjpad/usr/bin
 	cp vendor/target/release/tmjpad debian/tmjpad/usr/bin/tmjpad
 	chmod +x debian/tmjpad/usr/bin/tmjpad
 
-	# Desktop entry → /usr/share/applications/
 	mkdir -p debian/tmjpad/usr/share/applications
 	cp vendor/data/tmjpad.desktop debian/tmjpad/usr/share/applications/
 
-	# AppStream metadata → /usr/share/metainfo/ (TMJStore + gnome-software)
 	mkdir -p debian/tmjpad/usr/share/metainfo
 	cp vendor/data/tmjpad.appdata.xml \
 		debian/tmjpad/usr/share/metainfo/br.com.tmjsistemas.tmjpad.appdata.xml
 
-	# Icon em múltiplos paths pra max fallback coverage
 	mkdir -p debian/tmjpad/usr/share/icons/hicolor/512x512/apps
 	cp vendor/data/tmjpad.png debian/tmjpad/usr/share/icons/hicolor/512x512/apps/
 	mkdir -p debian/tmjpad/usr/share/icons/hicolor/256x256/apps
@@ -50,4 +30,3 @@ override_dh_auto_install:
 	cp vendor/data/tmjpad.png debian/tmjpad/usr/share/pixmaps/tmjpad.png
 
 override_dh_auto_test:
-	# Skip cargo test (deps vendored, alguns testes precisam de network).

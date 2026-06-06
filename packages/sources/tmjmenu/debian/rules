@@ -1,49 +1,32 @@
 #!/usr/bin/make -f
 
-# tmjmenu é Rust + gtk4-rs desde v2.0.0. Build flow:
-#   1. tools/vendor-tmjmenu.sh popula vendor/ com src/, Cargo.{toml,lock},
-#      rust-deps/ (vendored crates), .cargo/config.toml, data/.
-#   2. dpkg-buildpackage chama este rules.
-#   3. override_dh_auto_build: cargo build --release --offline.
-#   4. override_dh_auto_install: copia binários + desktops + appdata + icon.
-
 %:
 	dh $@
 
 override_dh_auto_build:
 	@if [ ! -f vendor/Cargo.toml ]; then \
-		echo ""; \
-		echo "ERROR: vendor/Cargo.toml missing."; \
-		echo "Run tools/vendor-tmjmenu.sh from the repo root."; \
-		echo ""; \
+		echo "ERROR: vendor/Cargo.toml missing. Run tools/vendor-tmjmenu.sh first."; \
 		exit 1; \
 	fi
-	find vendor/rust-deps -name '*.orig' -delete 2>/dev/null || true
-	find vendor/rust-deps -name '.cargo-checksum.json' -exec sed -i 's#"files":{[^}]*}#"files":{}#' {} \;
 	cd vendor && cargo build --release --offline --locked
 
 override_dh_auto_install:
-	# Binários → /usr/bin/{tmjmenu,tmjdock}
 	mkdir -p debian/tmjmenu/usr/bin
 	cp vendor/target/release/tmjmenu debian/tmjmenu/usr/bin/tmjmenu
 	cp vendor/target/release/tmjdock debian/tmjmenu/usr/bin/tmjdock
 	chmod +x debian/tmjmenu/usr/bin/tmjmenu \
 	         debian/tmjmenu/usr/bin/tmjdock
 
-	# First-run script (sh, configura keybindings)
 	cp vendor/data/tmjmenu-first-run debian/tmjmenu/usr/bin/tmjmenu-first-run
 	chmod +x debian/tmjmenu/usr/bin/tmjmenu-first-run
 
-	# Desktop entries (apps menu)
 	mkdir -p debian/tmjmenu/usr/share/applications
 	cp vendor/data/tmjmenu.desktop debian/tmjmenu/usr/share/applications/
 
-	# AppStream metadata (pra TMJStore + gnome-software descobrir)
 	mkdir -p debian/tmjmenu/usr/share/metainfo
 	cp vendor/data/br.com.tmjsistemas.tmjmenu.appdata.xml \
 		debian/tmjmenu/usr/share/metainfo/
 
-	# Icon nos 3 paths padrão (fallback robusto)
 	mkdir -p debian/tmjmenu/usr/share/icons/hicolor/512x512/apps
 	cp vendor/data/tmjmenu.png debian/tmjmenu/usr/share/icons/hicolor/512x512/apps/
 	mkdir -p debian/tmjmenu/usr/share/icons/hicolor/256x256/apps
@@ -51,12 +34,8 @@ override_dh_auto_install:
 	mkdir -p debian/tmjmenu/usr/share/pixmaps
 	cp vendor/data/tmjmenu.png debian/tmjmenu/usr/share/pixmaps/tmjmenu.png
 
-	# Autostart (system-wide):
-	#   tmjdock.desktop — sobe a dock no login
-	#   tmjmenu-first-run.desktop — configura Super+Space keybinding
 	mkdir -p debian/tmjmenu/etc/xdg/autostart
 	cp vendor/data/tmjdock.desktop           debian/tmjmenu/etc/xdg/autostart/
 	cp vendor/data/tmjmenu-first-run.desktop debian/tmjmenu/etc/xdg/autostart/
 
 override_dh_auto_test:
-	# Skip cargo test (deps vendored)
