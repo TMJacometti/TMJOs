@@ -1,0 +1,56 @@
+# TMJOs Distro — packages to purge
+# Everything that makes Ubuntu heavy and annoying
+
+## Snap ecosystem (cancer)
+snapd
+snap-confine
+gnome-software-plugin-snap
+
+## Ubuntu bloat
+ubuntu-advantage-tools
+ubuntu-pro-client
+apport
+whoopsie
+kerneloops
+
+## Office / productivity (user installs if needed)
+libreoffice*
+thunderbird
+
+## Games
+gnome-mines
+gnome-sudoku
+gnome-mahjongg
+aisleriot
+
+## GNOME remnants (we use XFCE)
+gnome-shell
+gnome-session
+gdm3
+nautilus
+gnome-calendar
+gnome-contacts
+gnome-weather
+gnome-maps
+gnome-photos
+gnome-music
+gnome-videos
+totem
+rhythmbox
+shotwell
+cheese
+evolution
+gedit
+eog
+
+## XFCE stock that TMJOs replaces
+xfce4-panel
+mousepad
+
+## Misc bloat
+transmission-gtk
+remmina
+simple-scan
+usb-creator-gtk
+ubuntu-report
+popularity-contest

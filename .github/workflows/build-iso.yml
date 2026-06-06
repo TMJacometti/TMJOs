@@ -1,0 +1,68 @@
+name: Build TMJOs ISO
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'distro/**'
+      - 'assets/**'
+      - '.github/workflows/build-iso.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install live-build
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y live-build debootstrap squashfs-tools \
+              xorriso grub-efi-amd64-bin mtools dosfstools
+
+      - name: Build ISO
+        run: |
+          chmod +x distro/build.sh distro/hooks/*.sh
+          sudo distro/build.sh
+
+      - name: Generate checksums
+        run: |
+          cd /tmp/tmjos-build
+          sha256sum *.iso > SHA256SUMS
+          md5sum *.iso > MD5SUMS
+
+      - name: Upload ISO to Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          sudo apt-get install -y awscli
+
+          R2_ENDPOINT="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          BUCKET="tmjos-releases"
+          PREFIX="tmjos-releases"
+
+          ISO_FILE=$(find /tmp/tmjos-build -maxdepth 1 -name "*.iso" | head -1)
+          ISO_NAME=$(basename "$ISO_FILE")
+
+          echo "Uploading $ISO_NAME to R2..."
+          aws s3 cp "$ISO_FILE" "s3://${BUCKET}/${PREFIX}/${ISO_NAME}" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --no-progress
+
+          echo "Uploading checksums..."
+          aws s3 cp /tmp/tmjos-build/SHA256SUMS "s3://${BUCKET}/${PREFIX}/SHA256SUMS" \
+              --endpoint-url "$R2_ENDPOINT"
+          aws s3 cp /tmp/tmjos-build/MD5SUMS "s3://${BUCKET}/${PREFIX}/MD5SUMS" \
+              --endpoint-url "$R2_ENDPOINT"
+
+          echo "Upload complete: ${PREFIX}/${ISO_NAME}"

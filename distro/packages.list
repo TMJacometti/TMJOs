@@ -1,0 +1,69 @@
+# TMJOs Distro — packages to install
+# Base: Ubuntu 26.04 minimal (no snap, no bloat)
+# Target: Developer workstation, amd64 only
+
+## Desktop Environment (XFCE minimal — no panel, tmjDock replaces it)
+xfwm4
+xfdesktop4
+xfce4-settings
+xfce4-session
+xfce4-terminal
+xfce4-screenshooter
+xfce4-taskmanager
+xfce4-notifyd
+thunar
+thunar-archive-plugin
+ristretto
+lightdm
+lightdm-gtk-greeter
+
+## System essentials
+network-manager
+network-manager-gnome
+pulseaudio
+pavucontrol
+blueman
+gvfs
+gvfs-backends
+file-roller
+xdg-utils
+xdg-user-dirs
+dbus-x11
+policykit-1-gnome
+
+## Fonts
+fonts-jetbrains-mono
+fonts-noto
+fonts-noto-color-emoji
+
+## Dev tools — core
+git
+curl
+wget
+unzip
+build-essential
+pkg-config
+cmake
+
+## Dev tools — Python 3.12
+python3.12
+python3.12-venv
+python3-pip
+
+## Dev tools — Node.js (via nodesource)
+nodejs
+
+## Dev tools — .NET 10
+dotnet-sdk-10.0
+
+## Dev tools — editors
+# code (VSCode installed via hook — .deb from Microsoft)
+# tmjpad (installed from TMJOs APT repo)
+
+## Utilities
+htop
+neofetch
+tree
+ripgrep
+fd-find
+bat

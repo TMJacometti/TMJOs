@@ -197,12 +197,35 @@ impl FindReplaceBar {
         let flags = TextSearchFlags::CASE_INSENSITIVE | TextSearchFlags::VISIBLE_ONLY;
         let cursor_iter = buf.iter_at_mark(&buf.get_insert());
 
+        // Advance past current selection to avoid re-finding the same match
+        let search_from = if forward {
+            if buf.has_selection() {
+                if let Some((_sel_start, sel_end)) = buf.selection_bounds() {
+                    sel_end
+                } else {
+                    cursor_iter
+                }
+            } else {
+                cursor_iter
+            }
+        } else {
+            if buf.has_selection() {
+                if let Some((sel_start, _sel_end)) = buf.selection_bounds() {
+                    sel_start
+                } else {
+                    cursor_iter
+                }
+            } else {
+                cursor_iter
+            }
+        };
+
         let result = if forward {
-            cursor_iter
+            search_from
                 .forward_search(&needle, flags, None)
                 .or_else(|| buf.start_iter().forward_search(&needle, flags, None))
         } else {
-            cursor_iter
+            search_from
                 .backward_search(&needle, flags, None)
                 .or_else(|| buf.end_iter().backward_search(&needle, flags, None))
         };

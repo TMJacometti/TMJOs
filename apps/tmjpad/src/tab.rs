@@ -87,8 +87,7 @@ impl Tab {
         self.buffer.property::<i32>("cursor-position")
     }
 
-    /// Salva pro path setado. Retorna true em sucesso, false em erro ou
-    /// se o path não tá setado.
+    /// Salva pro path setado com atomic write (tmp + rename).
     pub fn save_to_disk(&self) -> bool {
         let state = self.state.borrow();
         let Some(path) = state.path.clone() else {
@@ -96,8 +95,15 @@ impl Tab {
         };
         drop(state);
 
-        if std::fs::write(&path, self.text()).is_err() {
-            eprintln!("tmjpad: save failed");
+        let target = std::path::Path::new(&path);
+        let tmp = target.with_extension("tmjpad.tmp");
+        if std::fs::write(&tmp, self.text()).is_err() {
+            eprintln!("tmjpad: save failed (write tmp)");
+            return false;
+        }
+        if std::fs::rename(&tmp, target).is_err() {
+            eprintln!("tmjpad: save failed (rename)");
+            let _ = std::fs::remove_file(&tmp);
             return false;
         }
         self.dirty.set(false);
