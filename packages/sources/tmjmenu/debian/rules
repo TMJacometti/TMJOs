@@ -19,7 +19,7 @@ override_dh_auto_build:
 		exit 1; \
 	fi
 	find vendor/rust-deps -name '*.orig' -delete 2>/dev/null || true
-	find vendor/rust-deps -name '.cargo-checksum.json' -exec sed -i 's/"files":{[^}]*}/"files":{}/' {} +
+	find vendor/rust-deps -name '.cargo-checksum.json' -exec sed -i 's/"files":{[^}]*}/"files":{}/' {} \;
 	cd vendor && cargo build --release --offline --locked
 
 override_dh_auto_install:
