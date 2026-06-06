@@ -3,6 +3,10 @@
 %:
 	dh $@
 
+override_dh_clean:
+	# Some vendored Rust crates checksum Cargo.toml.orig; keep it through clean.
+	dh_clean -XCargo.toml.orig
+
 override_dh_auto_build:
 	@if [ ! -f vendor/Cargo.toml ]; then \
 		echo "ERROR: vendor/Cargo.toml missing. Run tools/vendor-tmjpad.sh first."; \
