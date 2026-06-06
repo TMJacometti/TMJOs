@@ -21,7 +21,8 @@ override_dh_auto_build:
 		echo ""; \
 		exit 1; \
 	fi
-	# Build Rust offline (deps já vendored em vendor/rust-deps/).
+	# Remove .orig files created by dpkg-source (breaks cargo checksum)
+	find vendor/rust-deps -name '*.orig' -delete 2>/dev/null || true
 	cd vendor && cargo build --release --offline --locked
 
 override_dh_auto_install:
