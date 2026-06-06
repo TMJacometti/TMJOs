@@ -1,22 +1,18 @@
 # TMJMenu
 
-Menu de aplicações proprietário do TMJOs. Fornece uma interface popup compacta com search, apps pinados e recentes — estilo Start/Menu moderno, mas com identidade TMJOs.
+Menu de aplicacoes e dock nativos do TMJOs. Substitui o painel XFCE na distro.
 
 ## Stack
 
-- Python 3.12+
-- GTK4 + libadwaita (via PyGObject)
-- gtk4-layer-shell para o dock no Wayland/Hyprland
-- Lê `/usr/share/applications/*.desktop` (XDG)
-- Persistência em `~/.config/tmjmenu/`
+- Rust 1.75+ (edition 2021)
+- GTK4 + libadwaita (gtk4-rs)
+- Le `/usr/share/applications/*.desktop` (XDG)
+- Persistencia em `~/.config/tmjmenu/`
 
 ## Componentes
 
-- **TMJMenu** (`tmjmenu`) — popup search-launcher, abre via Super key
-- **TMJDock** (`tmjdock`) — barra sempre visível embaixo, substitui o Plank
-
-No Wayland/Hyprland, o `tmjdock` usa `gtk4-layer-shell` para ficar ancorado
-no rodape. Sem layer-shell, ele cai no fallback X11 usado em desenvolvimento.
+- **TMJMenu** (`tmjmenu`) — popup search-launcher (Super+Space)
+- **TMJDock** (`tmjdock`) — dock bottom, sempre visivel, substitui o painel XFCE
 
 ## Run
 
@@ -27,9 +23,16 @@ tmjdock          # roda a dock (daemon)
 
 ## Autostart
 
-`tmjdock` é configurado pra autostart via `data/tmjdock.desktop` (instalado em `~/.config/autostart/`). Quando empacotado como `.apk`, vai em `/etc/xdg/autostart/`.
+`tmjdock` e configurado pra autostart via `data/tmjdock.desktop` (instalado em `/etc/xdg/autostart/`).
 
 ## Empacotamento
 
-Distribuído como `tmjmenu.apk` no repo APK TMJOs. APKBUILD em
-`packages/tmjmenu/`.
+Distribuido como `tmjmenu.deb` via APT repo TMJOs (`packages.tmjos.com.br`).
+
+```bash
+sudo apt install tmjmenu
+```
+
+## Licenca
+
+GPLv3 — junto com o TMJOs.

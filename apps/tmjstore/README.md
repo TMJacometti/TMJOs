@@ -1,37 +1,36 @@
 # TMJStore
 
-Software Center proprietário do TMJOs. Descobre apps TMJOs via AppStream metadata, instala via APT.
+Software Center nativo do TMJOs. Descobre apps TMJOs via AppStream metadata, instala via APT.
 
-## Diferenças vs gnome-software / snap-store / etc
+## Diferenciais
 
-- **Só apps TMJOs**: filtra origem `tmjos` no APT repo. Não polui com Spotify, Telegram, GIMP, etc.
-- **Visual TMJOs neon**: paleta cyan/magenta, JetBrains Mono, dark.
-- **Zero capitalismo**: sem "Editor's choice", sem patrocinados, sem recomendações de tracking.
-- **Fonte única**: APT repo `packages.tmjos.com.br`.
+- **So apps TMJOs**: filtra origem `tmjos` no APT repo
+- **Visual TMJOs neon**: paleta cyan/magenta, JetBrains Mono, dark
+- **Fonte unica**: APT repo `packages.tmjos.com.br`
 
 ## Stack
 
-- Python 3.12+
-- GTK4 + libadwaita
-- libappstream-glib (parsing AppStream metadata)
-- subprocess (apt install / apt remove / apt upgrade via pkexec)
+- Rust 1.75+ (edition 2021)
+- GTK4 + libadwaita (gtk4-rs)
+- AppStream metadata (discovery)
+- APT via pkexec (install/remove/upgrade)
 
 ## UX
 
 ```
-┌─────────────────────────────────────────────┐
-│  TMJStore                          [_] [□] [×]│
-├─────────────────────────────────────────────┤
-│  [ Apps ]  [ Instalados ]  [ Updates (2) ]  │
-├─────────────────────────────────────────────┤
-│  ┌────┐  TMJPad                             │
-│  │📒│  Editor sem frescura com persistência │
-│  └────┘                          [ Install ]│
-│                                             │
-│  ┌────┐  TMJMenu                            │
-│  │🐉│  Menu + dock proprietário             │
-│  └────┘                       [ Installed ✓]│
-└─────────────────────────────────────────────┘
++---------------------------------------------+
+|  TMJStore                          [_] [x]  |
++---------------------------------------------+
+|  [ Apps ]  [ Instalados ]  [ Updates (2) ]  |
++---------------------------------------------+
+|  TMJPad                                     |
+|  Editor sem frescura com persistencia       |
+|                                  [ Install ]|
+|                                             |
+|  TMJMenu                                    |
+|  Menu + dock nativo                         |
+|                               [ Installed ] |
++---------------------------------------------+
 ```
 
 ## Run
@@ -39,3 +38,13 @@ Software Center proprietário do TMJOs. Descobre apps TMJOs via AppStream metada
 ```bash
 tmjstore
 ```
+
+## Empacotamento
+
+```bash
+sudo apt install tmjstore
+```
+
+## Licenca
+
+GPLv3 — junto com o TMJOs.
