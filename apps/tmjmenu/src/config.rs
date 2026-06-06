@@ -9,9 +9,10 @@ use std::{fs, io};
 
 const DEFAULT_PINNED: &[&str] = &[
     "code.desktop",
-    "org.gnome.Terminal.desktop",
-    "org.gnome.Nautilus.desktop",
+    "xfce4-terminal.desktop",
+    "thunar.desktop",
     "tmjpad.desktop",
+    "tmjstore.desktop",
 ];
 
 pub fn config_dir() -> PathBuf {
