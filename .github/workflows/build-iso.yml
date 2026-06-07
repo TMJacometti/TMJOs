@@ -58,8 +58,6 @@ jobs:
           AWS_DEFAULT_REGION: auto
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
         run: |
-          sudo apt-get install -y awscli
-
           R2_ENDPOINT="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
           BUCKET="tmjos-releases"
           PREFIX="tmjos-releases"
