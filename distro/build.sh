@@ -25,8 +25,8 @@ lb config \
     --distribution "$SUITE" \
     --archive-areas "main restricted universe multiverse" \
     --architectures "$ARCH" \
-    --binary-images iso \
-    --bootloader grub-efi \
+    --binary-images iso-hybrid \
+    --bootloader "grub-efi,grub-pc" \
     --debian-installer false \
     --linux-flavours "generic" \
     --memtest none \
