@@ -27,14 +27,14 @@ lb config \
     --archive-areas "main restricted universe multiverse" \
     --architectures "$ARCH" \
     --binary-images iso-hybrid \
-    --bootloaders "grub-efi" \
+    --bootloader grub-efi \
     --debian-installer live \
     --linux-flavours "generic" \
     --memtest none \
     --iso-application "TMJOs" \
     --iso-publisher "TMJ Sistemas" \
     --iso-volume "TMJOs" \
-    --image-name "tmjos-26.04-$ARCH"
+    --iso-preparer "TMJOs Builder"
 
 # Mirror (main Ubuntu)
 lb config \
@@ -74,12 +74,14 @@ cp "$REPO_ROOT/assets/logos/TMJOs_Logo_Circular.png" \
 echo "[TMJOs] Starting live-build... this takes a while."
 sudo lb build 2>&1 | tee "$BUILD_DIR/build.log"
 
-# Output
+# Output — rename to our convention
 ISO_FILE=$(find "$BUILD_DIR" -maxdepth 1 -name "*.iso" | head -1)
 if [ -n "$ISO_FILE" ]; then
-    ISO_SIZE=$(du -h "$ISO_FILE" | cut -f1)
+    FINAL_NAME="$BUILD_DIR/tmjos-26.04-${ARCH}.iso"
+    mv "$ISO_FILE" "$FINAL_NAME"
+    ISO_SIZE=$(du -h "$FINAL_NAME" | cut -f1)
     echo "========================================="
-    echo "  ISO ready: $ISO_FILE"
+    echo "  ISO ready: $FINAL_NAME"
     echo "  Size: $ISO_SIZE"
     echo "========================================="
 else
