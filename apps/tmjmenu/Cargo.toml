@@ -35,13 +35,11 @@ dirs = "5.0"
 anyhow = "1.0"
 
 gtk4-layer-shell = { version = "0.6", optional = true }
+x11rb = "0.13"
 
 [features]
 default = []
 wayland = ["gtk4-layer-shell"]
-
-# X11: window type, struts, position. Pure Rust, sem FFI Xlib.
-x11rb = "0.13"
 
 [profile.release]
 opt-level = 3

@@ -140,5 +140,3 @@ fn parse_geometry(value: &str) -> Option<MonitorGeometry> {
         height,
     })
 }
-
-use gio::prelude::*;

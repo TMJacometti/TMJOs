@@ -2,7 +2,7 @@
 
 use gtk::gdk;
 use gtk::prelude::*;
-use gtk::{CssProvider, StyleContext, STYLE_PROVIDER_PRIORITY_APPLICATION};
+use gtk::CssProvider;
 
 /// CSS TMJOs — paleta neon shared por tmjmenu (popup) e tmjdock.
 ///
@@ -89,10 +89,10 @@ pub fn install_shared_css() {
     let provider = CssProvider::new();
     provider.load_from_string(SHARED_CSS);
     if let Some(display) = gdk::Display::default() {
-        StyleContext::add_provider_for_display(
+        gtk::style_context_add_provider_for_display(
             &display,
             &provider,
-            STYLE_PROVIDER_PRIORITY_APPLICATION,
+            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
         );
     }
 }

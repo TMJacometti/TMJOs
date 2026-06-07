@@ -5,12 +5,9 @@
 
 use adw::prelude::*;
 use gio::ApplicationFlags;
-use gtk::glib::clone;
 use gtk::{
-    gdk, gio, glib, Align, Box as GtkBox, Button, Image, Label, Orientation, Separator, Window,
+    gdk, gio, glib, Align, Box as GtkBox, Button, Image, Orientation, Separator, Window,
 };
-use std::cell::Cell;
-use std::rc::Rc;
 
 use tmjmenu::config;
 use tmjmenu::launcher;
@@ -195,14 +192,9 @@ fn setup_x11_dock(window: &Window) {
     }
 }
 
-fn get_x11_window_id(surface: &gdk::Surface) -> Option<u32> {
-    #[cfg(all(unix, feature = "x11"))]
-    {
-        use gdk_x11::X11Surface;
-        if let Some(x11_surface) = surface.downcast_ref::<X11Surface>() {
-            return Some(x11_surface.xid() as u32);
-        }
-    }
-    // Fallback: try to read from GDK property
+fn get_x11_window_id(_surface: &gdk::Surface) -> Option<u32> {
+    // Requires gdk4-x11 crate for proper XID extraction.
+    // For now the X11 dock hints won't apply until gdk4-x11 is available
+    // in the build environment. The dock still displays correctly without hints.
     None
 }

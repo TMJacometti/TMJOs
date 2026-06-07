@@ -5,7 +5,6 @@
 
 use adw::prelude::*;
 use gio::ApplicationFlags;
-use gtk::glib::clone;
 use gtk::{
     gdk, gio, glib, Align, Box as GtkBox, EventControllerKey, Image, Label, ListBox,
     ListBoxRow, Orientation, ScrolledWindow, SearchEntry, SelectionMode, Window,
@@ -136,16 +135,6 @@ fn build_popup(app: &adw::Application) {
 
     window.present();
     search_entry.grab_focus();
-
-    // X11 popup hints (fallback quando não tem layer-shell)
-    glib::idle_add_local_once(clone!(@weak window => move || {
-        if let Some(surface) = window.surface() {
-            if let Some(native) = surface.downcast_ref::<gdk::Surface>() {
-                // Try to get XID for X11 popup positioning
-                // On Wayland this is a no-op
-            }
-        }
-    }));
 }
 
 fn populate_list(list_box: &ListBox, apps: &[&AppEntry]) {

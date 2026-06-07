@@ -2,7 +2,6 @@
 
 use quick_xml::events::Event;
 use quick_xml::Reader;
-use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -36,12 +35,12 @@ pub struct TMJApp {
 }
 
 fn metainfo_dirs() -> Vec<PathBuf> {
-    let mut dirs = Vec::new();
+    let mut paths = Vec::new();
     if let Some(home) = dirs::home_dir() {
-        dirs.push(home.join(".local/share/metainfo"));
+        paths.push(home.join(".local/share/metainfo"));
     }
-    dirs.push(PathBuf::from("/usr/share/metainfo"));
-    dirs
+    paths.push(PathBuf::from("/usr/share/metainfo"));
+    paths
 }
 
 fn list_tmj_packages() -> Vec<String> {
@@ -143,7 +142,6 @@ fn parse_appdata_xml(path: &Path) -> AppDataInfo {
     };
 
     let mut reader = Reader::from_str(&content);
-    let mut buf = Vec::new();
     let mut current_tag = String::new();
     let mut in_component = false;
     let mut in_description = false;
@@ -156,7 +154,7 @@ fn parse_appdata_xml(path: &Path) -> AppDataInfo {
     let mut desc_parts: Vec<String> = Vec::new();
 
     loop {
-        match reader.read_event_into(&mut buf) {
+        match reader.read_event() {
             Ok(Event::Start(ref e)) => {
                 let tag = String::from_utf8_lossy(e.name().as_ref()).to_string();
                 let tag_local = tag.split('}').last().unwrap_or(&tag).to_string();
@@ -244,7 +242,6 @@ fn parse_appdata_xml(path: &Path) -> AppDataInfo {
             Err(_) => break,
             _ => {}
         }
-        buf.clear();
     }
 
     info

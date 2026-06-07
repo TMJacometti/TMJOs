@@ -10,7 +10,7 @@
 use anyhow::{anyhow, Context, Result};
 use x11rb::connection::Connection;
 use x11rb::protocol::xproto::{
-    AtomEnum, ChangeWindowAttributesAux, ConfigureWindowAux, ConnectionExt, PropMode, Window,
+    AtomEnum, ConfigureWindowAux, ConnectionExt, PropMode,
 };
 use x11rb::rust_connection::RustConnection;
 
