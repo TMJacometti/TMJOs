@@ -6,21 +6,27 @@ echo "[TMJOs] Installing dev tools (all pre-installed, zero setup for user)..."
 # Git (from packages.list, but ensure latest)
 apt-get install -y git
 
-# Python 3.12 — set as default python3
-apt-get install -y python3.12 python3.12-venv python3-pip
-update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1
-update-alternatives --set python3 /usr/bin/python3.12
+# Python 3 — use whatever version ships with this Ubuntu release
+apt-get install -y python3 python3-venv python3-pip
 
 # Node.js LTS via NodeSource
 curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
 apt-get install -y nodejs
 
-# .NET 10 SDK
-curl -fsSL https://packages.microsoft.com/config/ubuntu/26.04/packages-microsoft-prod.deb -o /tmp/ms-prod.deb
-dpkg -i /tmp/ms-prod.deb
-rm /tmp/ms-prod.deb
-apt-get update
-apt-get install -y dotnet-sdk-10.0
+# .NET SDK — try Ubuntu 26.04 feed, fallback to 24.04 feed
+if curl -fsSL -o /tmp/ms-prod.deb https://packages.microsoft.com/config/ubuntu/26.04/packages-microsoft-prod.deb 2>/dev/null; then
+    echo "[TMJOs] Using Microsoft feed for Ubuntu 26.04"
+elif curl -fsSL -o /tmp/ms-prod.deb https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb 2>/dev/null; then
+    echo "[TMJOs] Falling back to Microsoft feed for Ubuntu 24.04"
+else
+    echo "[TMJOs] WARNING: Microsoft .NET feed not available, skipping .NET"
+fi
+if [ -f /tmp/ms-prod.deb ]; then
+    dpkg -i /tmp/ms-prod.deb
+    rm /tmp/ms-prod.deb
+    apt-get update
+    apt-get install -y dotnet-sdk-10.0 || apt-get install -y dotnet-sdk-9.0 || echo "[TMJOs] WARNING: .NET SDK not available"
+fi
 
 # VSCode (pre-installed, opens out of the box)
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-archive-keyring.gpg

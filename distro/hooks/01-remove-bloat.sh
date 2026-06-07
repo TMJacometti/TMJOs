@@ -14,7 +14,7 @@ Pin-Priority: -10
 EOF
 
 # Purge packages from remove.list
-SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPT_DIR="/tmp/tmjos-distro"
 while IFS= read -r pkg; do
     pkg="${pkg%%#*}"
     pkg="$(echo "$pkg" | xargs)"

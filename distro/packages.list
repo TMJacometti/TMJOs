@@ -31,6 +31,9 @@ xdg-user-dirs
 dbus-x11
 policykit-1-gnome
 
+## Icons
+papirus-icon-theme
+
 ## Fonts
 fonts-jetbrains-mono
 fonts-noto
@@ -45,16 +48,16 @@ build-essential
 pkg-config
 cmake
 
-## Dev tools — Python 3.12
-python3.12
-python3.12-venv
+## Dev tools — Python
+python3
+python3-venv
 python3-pip
 
-## Dev tools — Node.js (via nodesource)
-nodejs
+## Dev tools — Node.js (installed via nodesource in hook)
+# nodejs
 
-## Dev tools — .NET 10
-dotnet-sdk-10.0
+## Dev tools — .NET 10 (installed via Microsoft repo in hook)
+# dotnet-sdk-10.0
 
 ## Dev tools — editors
 # code (VSCode installed via hook — .deb from Microsoft)
@@ -62,7 +65,7 @@ dotnet-sdk-10.0
 
 ## Utilities
 htop
-neofetch
+fastfetch
 tree
 ripgrep
 fd-find

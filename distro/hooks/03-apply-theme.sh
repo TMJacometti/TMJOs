@@ -3,7 +3,7 @@ set -e
 
 echo "[TMJOs] Applying TMJOs dark theme..."
 
-SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPT_DIR="/tmp/tmjos-distro"
 THEME_DIR="$SCRIPT_DIR/theme"
 
 # Default skeleton for new users
@@ -28,7 +28,7 @@ cp "$THEME_DIR/terminalrc" "$SKEL/.config/xfce4/terminal/terminalrc"
 
 # Wallpaper
 mkdir -p /usr/share/backgrounds/tmjos
-cp "$SCRIPT_DIR/../assets/wallpapers/tmjos_wallpaper_4k.png" /usr/share/backgrounds/tmjos/
+cp "$SCRIPT_DIR/assets/wallpapers/tmjos_wallpaper_4k.png" /usr/share/backgrounds/tmjos/
 
 # LightDM greeter config
 cat > /etc/lightdm/lightdm-gtk-greeter.conf << 'EOF'
