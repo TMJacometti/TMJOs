@@ -19,7 +19,6 @@ lightdm-gtk-greeter
 
 ## Live session boot
 casper
-lupin-casper
 
 ## System essentials
 xorg
