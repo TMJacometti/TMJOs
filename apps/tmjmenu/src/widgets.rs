@@ -1,7 +1,6 @@
 //! Widgets e CSS compartilhados entre tmjmenu e tmjdock.
 
 use gtk::gdk;
-use gtk::prelude::*;
 use gtk::CssProvider;
 
 /// CSS TMJOs — paleta neon shared por tmjmenu (popup) e tmjdock.

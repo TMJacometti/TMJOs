@@ -13,6 +13,7 @@ use x11rb::protocol::xproto::{
     AtomEnum, ConfigureWindowAux, ConnectionExt, PropMode,
 };
 use x11rb::rust_connection::RustConnection;
+use x11rb::wrapper::ConnectionExt as WrapperConnectionExt;
 
 /// Cria uma conexão X11 + retorna o atom de uma propriedade.
 fn intern_atom(conn: &RustConnection, name: &str) -> Result<u32> {
