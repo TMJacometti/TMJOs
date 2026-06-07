@@ -39,7 +39,7 @@ mod imp {
             let window = self.window.get_or_init(|| {
                 let _ = std::fs::create_dir_all(config_dir());
                 let session = Session::load();
-                TMJPadWindow::new(&app, session)
+                TMJPadWindow::new(&*app, session)
             });
             window.present();
         }
