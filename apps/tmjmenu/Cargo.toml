@@ -34,10 +34,11 @@ serde_json = "1.0"
 dirs = "5.0"
 anyhow = "1.0"
 
-# Wayland: anchor da dock no monitor interno via layer-shell.
-# Falha gracioso (returns None) se libgtk4-layer-shell0 não estiver
-# instalado — daí cai pro fallback X11.
-gtk4-layer-shell = "0.6"
+gtk4-layer-shell = { version = "0.6", optional = true }
+
+[features]
+default = []
+wayland = ["gtk4-layer-shell"]
 
 # X11: window type, struts, position. Pure Rust, sem FFI Xlib.
 x11rb = "0.13"

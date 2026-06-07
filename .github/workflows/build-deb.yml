@@ -34,8 +34,7 @@ jobs:
               devscripts debhelper dpkg-dev reprepro \
               gnupg lintian fakeroot \
               cargo rustc pkg-config \
-              libgtk-4-dev libadwaita-1-dev \
-              libgtk4-layer-shell-dev
+              libgtk-4-dev libadwaita-1-dev
 
       - name: Import GPG signing key
         env:

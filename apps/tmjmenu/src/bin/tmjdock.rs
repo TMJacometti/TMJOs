@@ -132,28 +132,32 @@ fn build_dock(app: &adw::Application) {
 }
 
 fn try_setup_layer_shell(window: &Window) -> bool {
-    if !gtk4_layer_shell::is_supported() {
-        return false;
+    #[cfg(feature = "wayland")]
+    {
+        if !gtk4_layer_shell::is_supported() {
+            return false;
+        }
+
+        gtk4_layer_shell::init_for_window(window);
+        gtk4_layer_shell::set_layer(window, gtk4_layer_shell::Layer::Top);
+        gtk4_layer_shell::set_namespace(window, "tmjdock");
+
+        gtk4_layer_shell::set_anchor(window, gtk4_layer_shell::Edge::Bottom, true);
+        gtk4_layer_shell::set_anchor(window, gtk4_layer_shell::Edge::Left, false);
+        gtk4_layer_shell::set_anchor(window, gtk4_layer_shell::Edge::Right, false);
+
+        gtk4_layer_shell::set_margin(window, gtk4_layer_shell::Edge::Bottom, 8);
+        gtk4_layer_shell::set_exclusive_zone(window, DOCK_HEIGHT);
+
+        if let Some(monitor) = monitors::shell_monitor() {
+            gtk4_layer_shell::set_monitor(window, &monitor);
+        }
+
+        return true;
     }
 
-    gtk4_layer_shell::init_for_window(window);
-    gtk4_layer_shell::set_layer(window, gtk4_layer_shell::Layer::Top);
-    gtk4_layer_shell::set_namespace(window, "tmjdock");
-
-    // Anchor bottom-center
-    gtk4_layer_shell::set_anchor(window, gtk4_layer_shell::Edge::Bottom, true);
-    gtk4_layer_shell::set_anchor(window, gtk4_layer_shell::Edge::Left, false);
-    gtk4_layer_shell::set_anchor(window, gtk4_layer_shell::Edge::Right, false);
-
-    gtk4_layer_shell::set_margin(window, gtk4_layer_shell::Edge::Bottom, 8);
-    gtk4_layer_shell::set_exclusive_zone(window, DOCK_HEIGHT);
-
-    // Try to anchor to internal monitor
-    if let Some(monitor) = monitors::shell_monitor() {
-        gtk4_layer_shell::set_monitor(window, &monitor);
-    }
-
-    true
+    #[cfg(not(feature = "wayland"))]
+    false
 }
 
 fn setup_x11_dock(window: &Window) {
