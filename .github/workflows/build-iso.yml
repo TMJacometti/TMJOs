@@ -46,6 +46,7 @@ jobs:
 
       - name: Generate checksums
         run: |
+          sudo chmod -R a+rw /tmp/tmjos-build
           cd /tmp/tmjos-build
           sha256sum *.iso > SHA256SUMS
           md5sum *.iso > MD5SUMS
