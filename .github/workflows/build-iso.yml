@@ -25,7 +25,19 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y live-build debootstrap squashfs-tools \
-              xorriso grub-efi-amd64-bin mtools dosfstools syslinux-utils
+              xorriso grub-efi-amd64-bin mtools dosfstools
+
+      - name: Ensure debootstrap knows about plucky
+        run: |
+          if [ ! -f /usr/share/debootstrap/scripts/plucky ]; then
+            echo "Adding plucky symlink for debootstrap..."
+            sudo ln -sf gutsy /usr/share/debootstrap/scripts/plucky
+          fi
+
+      - name: Debug live-build options
+        run: |
+          lb config --help 2>&1 | head -100 || true
+          dpkg -l live-build | tail -1
 
       - name: Build ISO
         run: |

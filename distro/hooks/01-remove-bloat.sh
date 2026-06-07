@@ -3,8 +3,10 @@ set -e
 
 echo "[TMJOs] Removing bloat..."
 
-# Kill snap completely
-systemctl disable --now snapd.service snapd.socket snapd.seeded.service 2>/dev/null || true
+# Kill snap completely (ln -sf /dev/null masks services in chroot where systemctl is unavailable)
+ln -sf /dev/null /etc/systemd/system/snapd.service 2>/dev/null || true
+ln -sf /dev/null /etc/systemd/system/snapd.socket 2>/dev/null || true
+ln -sf /dev/null /etc/systemd/system/snapd.seeded.service 2>/dev/null || true
 apt-get purge -y snapd snap-confine 2>/dev/null || true
 rm -rf /snap /var/snap /var/lib/snapd /var/cache/snapd
 cat > /etc/apt/preferences.d/no-snap.pref << 'EOF'

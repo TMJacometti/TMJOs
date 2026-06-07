@@ -17,7 +17,18 @@ ristretto
 lightdm
 lightdm-gtk-greeter
 
+## Live session boot
+casper
+lupin-casper
+
 ## System essentials
+xorg
+sudo
+locales
+gnupg
+ca-certificates
+lsb-release
+apt-transport-https
 network-manager
 network-manager-gnome
 pulseaudio
@@ -31,8 +42,13 @@ xdg-user-dirs
 dbus-x11
 policykit-1-gnome
 
-## Icons
+## Theme
 papirus-icon-theme
+gnome-themes-extra
+
+## Boot splash
+plymouth
+plymouth-themes
 
 ## Fonts
 fonts-jetbrains-mono

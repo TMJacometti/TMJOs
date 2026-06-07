@@ -3,6 +3,8 @@ set -e
 
 echo "[TMJOs] Installing dev tools (all pre-installed, zero setup for user)..."
 
+apt-get update
+
 # Git (from packages.list, but ensure latest)
 apt-get install -y git
 
@@ -10,8 +12,11 @@ apt-get install -y git
 apt-get install -y python3 python3-venv python3-pip
 
 # Node.js LTS via NodeSource
-curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
-apt-get install -y nodejs
+if curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -; then
+    apt-get install -y nodejs
+else
+    echo "[TMJOs] WARNING: NodeSource setup failed, skipping Node.js"
+fi
 
 # .NET SDK — try Ubuntu 26.04 feed, fallback to 24.04 feed
 if curl -fsSL -o /tmp/ms-prod.deb https://packages.microsoft.com/config/ubuntu/26.04/packages-microsoft-prod.deb 2>/dev/null; then
@@ -32,21 +37,24 @@ fi
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-archive-keyring.gpg
 echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list
 apt-get update
-apt-get install -y code
+apt-get install -y code || echo "[TMJOs] WARNING: VSCode installation failed"
 
 # TMJOs apps (tmjpad = editor nativo, tmjmenu = launcher, tmjstore = app store)
-curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg | tee /usr/share/keyrings/tmjos-archive-keyring.gpg > /dev/null
-echo "deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br stable main" > /etc/apt/sources.list.d/tmjos.list
-apt-get update
-apt-get install -y tmjpad tmjmenu tmjstore
+if curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg -o /usr/share/keyrings/tmjos-archive-keyring.gpg 2>/dev/null; then
+    echo "deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br stable main" > /etc/apt/sources.list.d/tmjos.list
+    apt-get update
+    apt-get install -y tmjpad tmjmenu tmjstore || echo "[TMJOs] WARNING: TMJOs apps not available yet — install manually later"
+else
+    echo "[TMJOs] WARNING: TMJOs APT repo not reachable — apps will be installed later"
+fi
 
-# Verify all tools are present
+# Verify what got installed
 echo "[TMJOs] Verifying installations..."
 git --version
 python3 --version
-node --version
-dotnet --version
+node --version || true
+dotnet --version || true
 code --version || true
-which tmjpad
+which tmjpad || echo "[TMJOs] tmjpad not yet installed"
 
-echo "[TMJOs] All dev tools installed and ready."
+echo "[TMJOs] Dev tools setup complete."

@@ -20,13 +20,12 @@ rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
-# Initialize live-build
+# Initialize live-build (single lb config call — a second call resets the first)
 lb config \
-    --mode ubuntu \
     --distribution "$SUITE" \
     --archive-areas "main restricted universe multiverse" \
     --architectures "$ARCH" \
-    --binary-images iso-hybrid \
+    --binary-images iso \
     --bootloader grub-efi \
     --debian-installer false \
     --linux-flavours "generic" \
@@ -34,10 +33,6 @@ lb config \
     --iso-application "TMJOs" \
     --iso-publisher "TMJ Sistemas" \
     --iso-volume "TMJOs" \
-    --iso-preparer "TMJOs Builder"
-
-# Mirror (main Ubuntu)
-lb config \
     --parent-mirror-bootstrap "http://archive.ubuntu.com/ubuntu" \
     --parent-mirror-chroot-security "http://security.ubuntu.com/ubuntu" \
     --mirror-bootstrap "http://archive.ubuntu.com/ubuntu" \
@@ -72,7 +67,7 @@ cp "$REPO_ROOT/assets/logos/TMJOs_Logo_Circular.png" \
 
 # Build
 echo "[TMJOs] Starting live-build... this takes a while."
-sudo lb build 2>&1 | tee "$BUILD_DIR/build.log"
+lb build 2>&1 | tee "$BUILD_DIR/build.log"
 
 # Output — rename to our convention
 ISO_FILE=$(find "$BUILD_DIR" -maxdepth 1 -name "*.iso" | head -1)
