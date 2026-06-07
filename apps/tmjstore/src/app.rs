@@ -178,16 +178,22 @@ fn refresh_apps(state: Rc<AppState>) {
     clear_list(&state.installed_list);
     clear_list(&state.updates_list);
 
-    let (tx, rx) = glib::MainContext::channel::<Vec<TMJApp>>(glib::Priority::DEFAULT);
+    let (tx, rx) = std::sync::mpsc::channel::<Vec<TMJApp>>();
     std::thread::spawn(move || {
         let apps = discover::discover_tmj_apps();
         let _ = tx.send(apps);
     });
 
     let st = state.clone();
-    rx.attach(None, move |apps| {
-        populate_lists(&st, &apps);
-        glib::ControlFlow::Break
+    glib::idle_add_local(move || {
+        match rx.try_recv() {
+            Ok(apps) => {
+                populate_lists(&st, &apps);
+                glib::ControlFlow::Break
+            }
+            Err(std::sync::mpsc::TryRecvError::Empty) => glib::ControlFlow::Continue,
+            Err(_) => glib::ControlFlow::Break,
+        }
     });
 }
 

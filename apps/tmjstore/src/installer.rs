@@ -29,7 +29,7 @@ fn spawn_apt(action: &str, pkg: &str, on_done: impl Fn(bool, &str) + 'static) {
     argv.push(action.to_string());
     argv.push(pkg.to_string());
 
-    let (tx, rx) = glib::MainContext::channel::<(bool, String)>(glib::Priority::DEFAULT);
+    let (tx, rx) = std::sync::mpsc::channel::<(bool, String)>();
 
     std::thread::spawn(move || {
         let result = std::process::Command::new(&argv[0])
@@ -53,8 +53,14 @@ fn spawn_apt(action: &str, pkg: &str, on_done: impl Fn(bool, &str) + 'static) {
         let _ = tx.send((success, msg));
     });
 
-    rx.attach(None, move |(success, msg)| {
-        on_done(success, &msg);
-        glib::ControlFlow::Break
+    glib::idle_add_local(move || {
+        match rx.try_recv() {
+            Ok((success, msg)) => {
+                on_done(success, &msg);
+                glib::ControlFlow::Break
+            }
+            Err(std::sync::mpsc::TryRecvError::Empty) => glib::ControlFlow::Continue,
+            Err(_) => glib::ControlFlow::Break,
+        }
     });
 }
