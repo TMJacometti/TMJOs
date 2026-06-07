@@ -46,7 +46,7 @@ mod imp {
 glib::wrapper! {
     pub struct TMJPadWindow(ObjectSubclass<imp::TMJPadWindow>)
         @extends gtk::Widget, gtk::Window, gtk::ApplicationWindow, ApplicationWindow,
-        @implements gio::ActionGroup, gio::ActionMap;
+        @implements gio::ActionGroup, gio::ActionMap, gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
 }
 
 impl TMJPadWindow {
@@ -77,15 +77,15 @@ impl TMJPadWindow {
 
         let new_btn = Button::from_icon_name("document-new-symbolic");
         new_btn.set_tooltip_text(Some("New tab (Ctrl+N)"));
-        new_btn.connect_clicked(clone!(@weak self as win => move |_| { win.new_tab(); }));
+        new_btn.connect_clicked(clone!(#[weak(rename_to = win)] self, move |_| { win.new_tab(); }));
 
         let open_btn = Button::from_icon_name("document-open-symbolic");
         open_btn.set_tooltip_text(Some("Open file (Ctrl+O)"));
-        open_btn.connect_clicked(clone!(@weak self as win => move |_| { win.open_file_dialog(); }));
+        open_btn.connect_clicked(clone!(#[weak(rename_to = win)] self, move |_| { win.open_file_dialog(); }));
 
         let save_btn = Button::from_icon_name("document-save-symbolic");
         save_btn.set_tooltip_text(Some("Save (Ctrl+S)"));
-        save_btn.connect_clicked(clone!(@weak self as win => move |_| { win.save_active_tab(); }));
+        save_btn.connect_clicked(clone!(#[weak(rename_to = win)] self, move |_| { win.save_active_tab(); }));
 
         header.pack_start(&new_btn);
         header.pack_start(&open_btn);
@@ -112,10 +112,10 @@ impl TMJPadWindow {
         box_v.append(&status_label);
         self.set_content(Some(&box_v));
 
-        notebook.connect_switch_page(clone!(@weak self as win => move |_, _, index| {
+        notebook.connect_switch_page(clone!(#[weak(rename_to = win)] self, move |_, _, index| {
             win.on_tab_switched(index as usize);
         }));
-        notebook.connect_page_reordered(clone!(@weak self as win => move |_, widget, new_index| {
+        notebook.connect_page_reordered(clone!(#[weak(rename_to = win)] self, move |_, widget, new_index| {
             win.on_tab_reordered(widget, new_index as usize);
         }));
 
@@ -247,7 +247,7 @@ impl TMJPadWindow {
                 let Some(win) = win_weak.upgrade() else { return };
                 t.dirty.set(true);
                 win.update_tab_label(&t);
-                t.schedule_autosave(clone!(@weak win => move || {
+                t.schedule_autosave(clone!(#[weak] win, move || {
                     win.save_session();
                 }));
             });
@@ -363,7 +363,7 @@ impl TMJPadWindow {
         dialog.open(
             Some(self),
             None::<&gio::Cancellable>,
-            clone!(@weak self as win => move |result| {
+            clone!(#[weak(rename_to = win)] self, move |result| {
                 let Ok(file) = result else { return };
                 if let Some(path) = file.path() {
                     win.new_tab_with_path(Some(path.to_string_lossy().into_owned()));
@@ -396,7 +396,7 @@ impl TMJPadWindow {
         dialog.save(
             Some(self),
             None::<&gio::Cancellable>,
-            clone!(@weak self as win => move |result| {
+            clone!(#[weak(rename_to = win)] self, move |result| {
                 let Ok(file) = result else { return };
                 let Some(path) = file.path() else { return };
                 let path_str = path.to_string_lossy().into_owned();

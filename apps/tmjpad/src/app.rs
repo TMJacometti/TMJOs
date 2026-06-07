@@ -3,7 +3,7 @@
 use adw::prelude::*;
 use adw::subclass::prelude::*;
 use gio::ApplicationFlags;
-use gtk::{gdk, glib, CssProvider, StyleContext, STYLE_PROVIDER_PRIORITY_APPLICATION};
+use gtk::{gdk, glib, CssProvider, STYLE_PROVIDER_PRIORITY_APPLICATION};
 
 use crate::css::DARK_CSS;
 use crate::persistence::{config_dir, Session};
@@ -85,7 +85,7 @@ fn install_css() {
     let provider = CssProvider::new();
     provider.load_from_string(DARK_CSS);
     if let Some(display) = gdk::Display::default() {
-        StyleContext::add_provider_for_display(
+        gtk::style_context_add_provider_for_display(
             &display,
             &provider,
             STYLE_PROVIDER_PRIORITY_APPLICATION,
