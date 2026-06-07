@@ -28,7 +28,7 @@ lb config \
     --architectures "$ARCH" \
     --binary-images iso-hybrid \
     --bootloader grub-efi \
-    --debian-installer live \
+    --debian-installer none \
     --linux-flavours "generic" \
     --memtest none \
     --iso-application "TMJOs" \
