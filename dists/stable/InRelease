@@ -1,0 +1,48 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Origin: TMJOs
+Label: TMJOs
+Suite: stable
+Codename: stable
+Date: Sat, 04 Jul 2026 17:26:29 UTC
+Architectures: amd64
+Components: main
+Description: TMJOs Suite — apps neon proprietários para Linux Debian-based
+MD5Sum:
+ 6e7f15f4f7d60110a23cda78d74040ad 3919 main/binary-amd64/Packages
+ 211978705466ccd9abc47b1010e9d2a2 1783 main/binary-amd64/Packages.gz
+ d173e257eafc7cf25ec9f48aaeb5ce8b 157 main/binary-amd64/Release
+ d41d8cd98f00b204e9800998ecf8427e 0 main/source/Sources
+ 7029066c27ac6f5ef18d660d5741979a 20 main/source/Sources.gz
+ 3a14a587adb32299a9c5af44e8a779bf 158 main/source/Release
+SHA1:
+ 11f55129e8b10c05143fa276af89dce9265df429 3919 main/binary-amd64/Packages
+ 2e9fbf98ae7e5420a8e84f11006fdb47be9b863d 1783 main/binary-amd64/Packages.gz
+ 6cc8af62dddde2106db2275bba1928cbd6e8e68b 157 main/binary-amd64/Release
+ da39a3ee5e6b4b0d3255bfef95601890afd80709 0 main/source/Sources
+ 46c6643f07aa7f6bfe7118de926b86defc5087c4 20 main/source/Sources.gz
+ f7bec04bc48b64d94d19e33fbbc9d4672f91834c 158 main/source/Release
+SHA256:
+ e7e8bd2389dcf871db51814913365a0a9dab02369a979d5e406411a7b78d44b0 3919 main/binary-amd64/Packages
+ e91cd1c3b9270b47766ed1e4cb6c49db66580d20c8588cb879e210e51311c31b 1783 main/binary-amd64/Packages.gz
+ 60c2b3b1a1b0b40321f203ac96db0011ced80214341efdf6a85b90ee4ef6547d 157 main/binary-amd64/Release
+ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 main/source/Sources
+ 59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 main/source/Sources.gz
+ c176ff657ec15500aed8297cf9f86bf38cb0879e652e3c0e574b389f183d5894 158 main/source/Release
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCgAdFiEEhpHfLTAcLENAH163dUhY4qWMQ2MFAmpJQkUACgkQdUhY4qWM
+Q2PykRAAkVTSrFHu0mx13MeBd+IHAH5wZy+yDwbgidKEuVmOpfDuE9nlFYNzG7Qr
+Pe6LAMU2FfWtfi6U2ut5S2m6FuZZEmzx9BV3dgEnBJyoUtMYPU2/Z7KbptigyMhT
+LzXZEMBVBMTaBZkEp0hEaubhKr+IjFYxLQJv2VhpcPRVioA3cKI4FUF4C2M3lEO7
+VXdfbS2qZZyq2aPqRoopewR5Nyh/IpVDqwVgJcD5sGNY+p9/H9pU54qKyavlHvcj
+s8AaCwmFKsC8KPuf3l4MXF7RfOhJZqgM9pKyMzdyYeoLkmGO7+1pgzCoS1MPj2Yw
+abM/hr59wdI2M1ybsDawjwjQVl0/bjFf2t6ruewLDX5+pWDs71vuIzBinYyKktSE
+SB1Dwo1+tmawy+63pKxUnVp1EG/rMLSD1/wm49fUx6OM9/JQWD/8lqiI98qGRGHL
+WAIdCTQxehmd4Rz34nRFslaWn7C/vK5AAjXB4dlRHMhcHLYgZQxYDvOhSImpLfrX
+65aozZQI4LZjMs59NqffKqICrD+gYLWVhrc3hyJg+TJNErev+PSZujQ2f6n/WAP7
+7E5LQ81hzkzvgxwoES5uSMVLzsyvg1Y9gKqgxT9N6wdLHcGASJqvjKGCBLgGIELK
+AiupP6jRXJv6dzvF0ndFU0y2D54/cXdCzkSfFqG2EZPqqEwyV3E=
+=FY/s
+-----END PGP SIGNATURE-----

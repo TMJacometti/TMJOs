@@ -1,0 +1,90 @@
+Package: tmjmenu
+Version: 2.0.0
+Architecture: amd64
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Installed-Size: 4891
+Depends: libadwaita-1-0 (>= 1.0.1), libc6 (>= 2.39), libgcc-s1 (>= 4.2), libglib2.0-0t64 (>= 2.54.0), libgtk-4-1 (>= 4.12.0), x11-utils, xdotool
+Recommends: gir1.2-gtk4layershell-1.0, libgtk4-layer-shell0
+Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjmenu
+Priority: optional
+Section: utils
+Filename: pool/main/t/tmjmenu/tmjmenu_2.0.0_amd64.deb
+Size: 1575460
+SHA256: 98abb0182ce99c58964da50c31f1fce5fe809ba61d09645221decd5e59875ff6
+SHA1: 1a8fcac2159970672a954255a0ab6b506811aab8
+MD5sum: 2fb986b1baaf70b94448e34fb3298995
+Description: TMJOs popup launcher + dock (Rust)
+ Suite TMJOs de UX shell: dois binários compartilhando código.
+ .
+   * tmjmenu — popup search launcher (Super+Space). Lista apps XDG,
+     busca fuzzy por nome/comment/keywords.
+   * tmjdock — dock bottom-center no painel INTERNO do laptop
+     (eDP/LVDS/DSI). Botão TMJOs com gradient cyan/magenta + pinned
+     apps. Wayland nativo via gtk4-layer-shell (Recommends), fallback
+     X11 hints.
+ .
+ Reescrito em Rust + gtk4-rs + libadwaita em v2.0.0 (era Python +
+ PyGObject). Binary statically linked, single-binary distribution.
+ .
+ gir1.2-gtk4layershell-1.0 + libgtk4-layer-shell0 são Recommends —
+ sem eles, tmjdock cai pro fallback X11 sem quebrar.
+
+Package: tmjpad
+Version: 2.0.0
+Architecture: amd64
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Installed-Size: 3603
+Depends: libadwaita-1-0 (>= 1.0.1), libc6 (>= 2.34), libgcc-s1 (>= 4.2), libglib2.0-0t64 (>= 2.54.0), libgtk-4-1 (>= 4.12.0)
+Recommends: fonts-jetbrains-mono
+Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjpad
+Priority: optional
+Section: editors
+Filename: pool/main/t/tmjpad/tmjpad_2.0.0_amd64.deb
+Size: 1278976
+SHA256: a78bea4a01ccfa3c1a28e5b190ab30d87bfd4ef49683266cc8b76517bce3a91b
+SHA1: 29429ca3238f8f128c87a023d9d772f60506cdc7
+MD5sum: b84160b89f5bfd1edf9fe3691d8f594e
+Description: TMJOs text editor with full session persistence (Rust)
+ TMJPad é o editor de texto nativo do TMJOs — sem plugins, sem syntax
+ highlighting, só multi-tab e persistência total de sessão.
+ .
+ Reescrito em Rust + gtk4-rs + libadwaita em v2.0.0 (era Python).
+ Startup 5-10x mais rápido, footprint -60%, single binary.
+ .
+ Features:
+   * Multi-tab com reordenação (Ctrl+N / Ctrl+W / Ctrl+Tab)
+   * Session persistence atômica (zero data loss em crash)
+   * Auto-save debounced 500ms pros buffer files
+   * Find & Replace inline (Ctrl+F / Ctrl+H)
+   * Dark theme TMJOs neon (cyan/magenta), JetBrains Mono
+   * GTK4 + libadwaita nativo
+
+Package: tmjstore
+Version: 2.0.0
+Architecture: amd64
+Maintainer: TMJOs Team <tmjos-archive@tmjsistemas.com.br>
+Installed-Size: 4472
+Depends: libadwaita-1-0 (>= 1.4~beta), libc6 (>= 2.39), libgcc-s1 (>= 4.2), libglib2.0-0t64 (>= 2.54.0), libgtk-4-1 (>= 4.12.0), libpango-1.0-0 (>= 1.14.0), policykit-1 | polkitd, apt
+Recommends: tmjos-branding
+Homepage: https://github.com/TMJacometti/TMJOs/tree/main/apps/tmjstore
+Priority: optional
+Section: admin
+Filename: pool/main/t/tmjstore/tmjstore_2.0.0_amd64.deb
+Size: 1554882
+SHA256: f72a031f9abc413fc2c6f3d91e6a4d9b075e022aad19631a68f6f6e91a24e4cb
+SHA1: 7868acb7d2739b9ca83d1077c6d7ccd69bd5d5e2
+MD5sum: 8372471b71a3fd04b160547b0601db11
+Description: TMJOs Software Center — apps proprietarios TMJOs (Rust)
+ Descobre apps proprietarios TMJOs no APT repo via AppStream
+ metadata e instala/remove/atualiza via apt + pkexec.
+ .
+ Reescrito em Rust + gtk4-rs + libadwaita em v2.0.0 (era Python).
+ Startup rapido, single binary, zero dependencia Python.
+ .
+ Features:
+   * 3 abas: Apps disponiveis, Instalados, Updates pendentes
+   * Detail page com release history + metadata AppStream
+   * Install/remove/upgrade async via pkexec + apt-get
+   * Visual neon TMJOs (cyan/magenta gradient)
+   * Zero tracking, zero promoted apps
+

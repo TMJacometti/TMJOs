@@ -1,0 +1,8 @@
+Origin: TMJOs
+Label: TMJOs
+Codename: stable
+Suite: stable
+Architectures: amd64 source
+Components: main
+Description: TMJOs Suite — apps neon proprietários para Linux Debian-based
+SignWith: 8691DF2D301C2C43401F5EB7754858E2A58C4363

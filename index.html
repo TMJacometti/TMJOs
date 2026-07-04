@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br"><head>
+<meta charset="utf-8">
+<title>TMJOs Suite — APT Repo</title>
+<style>
+  body{font-family:'JetBrains Mono',monospace;background:#0a0e2a;
+       color:#e6e6e6;max-width:780px;margin:40px auto;padding:0 20px;
+       line-height:1.6}
+  h1{color:#00d4ff;font-size:2em}
+  h2{color:#ff2d95;margin-top:2em}
+  a{color:#00d4ff}
+  a:hover{color:#ff2d95}
+  code,pre{background:#1a1e3a;padding:2px 6px;border-radius:3px;
+           color:#e6e6e6}
+  pre{padding:14px;overflow-x:auto;border:1px solid #1a1e3a}
+  .tag{background:#1a1e3a;color:#00d4ff;padding:2px 8px;
+       border-radius:3px;font-size:0.85em}
+</style></head>
+<body>
+<h1>🐉 TMJOs Suite</h1>
+<p>Apps proprietários TMJOs assinados com GPG.
+Funciona em <strong>qualquer Linux Debian-based</strong> com apt:
+Ubuntu, Debian, Linux Mint, Pop!_OS, Kali, Tails, Parrot,
+elementaryOS, Zorin OS, etc.</p>
+
+<h2>Setup</h2>
+<pre><code>curl -fsSL https://packages.tmjos.com.br/keys/tmjos-archive-keyring.gpg | sudo tee /usr/share/keyrings/tmjos-archive-keyring.gpg > /dev/null
+echo 'deb [signed-by=/usr/share/keyrings/tmjos-archive-keyring.gpg] https://packages.tmjos.com.br stable main' | sudo tee /etc/apt/sources.list.d/tmjos.list
+sudo apt update</code></pre>
+
+<h2>Apps disponíveis</h2>
+<pre><code>sudo apt install tmjpad    # Editor de texto Rust com session persistence
+sudo apt install tmjmenu   # Popup launcher + dock (TMJMenu + TMJDock)
+sudo apt install tmjstore  # Software center proprietário</code></pre>
+
+<p>Ver lista completa: <a href="dists/stable/main/binary-amd64/Packages">Packages</a></p>
+
+<h2>Source</h2>
+<p>Código em <a href="https://github.com/TMJacometti/TMJOs">github.com/TMJacometti/TMJOs</a></p>
+</body></html>
