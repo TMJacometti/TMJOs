@@ -40,15 +40,49 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
     REAL_USER="$SUDO_USER"
+    USER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
 else
     REAL_USER="$(whoami)"
+    USER_HOME="$HOME"
 fi
+
+# Override via env var TMJOS_BUILD_DIR. Default $HOME/tmjos-iso-build
+# (em vez de /tmp — costuma ser tmpfs ou partição menor).
+export BUILD_DIR="${TMJOS_BUILD_DIR:-$USER_HOME/tmjos-iso-build}"
 
 die() {
     echo "" >&2
     echo "✗ ERRO: $*" >&2
     exit 1
 }
+
+# Garante CWD válido — se foi chamado de dentro do BUILD_DIR que vai ser
+# apagado, getcwd() do shell falha pós-rm e tudo derrapa. Sempre roda
+# do REPO_ROOT pra evitar shell preso em dir morto.
+cd "$REPO_ROOT" || die "cd $REPO_ROOT falhou"
+
+# ─────────────────────────────────────────────────────────────────
+# Limpeza total — sempre começa do zero pra evitar state cached
+# inconsistente entre builds (binary stage cache vs bootstrap stale,
+# config/binary desatualizado se mudou flag no distro/build.sh, etc).
+# ─────────────────────────────────────────────────────────────────
+echo "━━━ Limpando build anterior ━━━"
+if [ -d "$BUILD_DIR" ]; then
+    rm -rf "$BUILD_DIR"
+    echo "✓ $BUILD_DIR apagado"
+else
+    echo "✓ $BUILD_DIR não existe (build first run)"
+fi
+
+# Cache opcional do live-build em ~/.cache/live-build/ (debootstrap
+# packages cache, ~500MB-2GB). Mantemos por default pra acelerar
+# bootstrap rerun. Pra wipe total inclui aqui se TMJOS_WIPE_CACHE=1.
+if [ "${TMJOS_WIPE_CACHE:-0}" = "1" ]; then
+    rm -rf "$USER_HOME/.cache/live-build" 2>/dev/null || true
+    rm -rf "$BUILD_DIR.cache" 2>/dev/null || true
+    echo "✓ Cache live-build wiped (TMJOS_WIPE_CACHE=1)"
+fi
+echo ""
 
 # ─────────────────────────────────────────────────────────────────
 # Pre-flight checks
@@ -58,17 +92,25 @@ die() {
 [ -f "$REPO_ROOT/distro/build.sh" ] || die "distro/build.sh não encontrado em $REPO_ROOT"
 
 echo "━━━ Pre-flight checks ━━━"
+echo "  Build dir: $BUILD_DIR"
 
-# Disco
-DISK_FREE_GB=$(df -BG --output=avail /tmp | tail -1 | tr -d ' G')
+# Disco — checa partição que contém o BUILD_DIR (pode ainda não existir,
+# usa o parent dir nesse caso)
+CHECK_PATH="$BUILD_DIR"
+[ -d "$CHECK_PATH" ] || CHECK_PATH="$(dirname "$BUILD_DIR")"
+DISK_FREE_GB=$(df -BG --output=avail "$CHECK_PATH" | tail -1 | tr -d ' G')
 if [ "$DISK_FREE_GB" -lt 10 ]; then
-    die "/tmp tem $DISK_FREE_GB GB livres — precisa de 10GB+ pro build."
+    die "$CHECK_PATH tem $DISK_FREE_GB GB livres — precisa de 10GB+ pro build.
+Pra mudar o local, exporta antes de rodar:
+    sudo TMJOS_BUILD_DIR=/outro/caminho/com/espaco $0"
 fi
-echo "✓ Disco em /tmp: ${DISK_FREE_GB}GB livres"
+echo "✓ Disco em $CHECK_PATH: ${DISK_FREE_GB}GB livres"
 
-# Deps de build
+# Deps de build. isohybrid é crítico — vem em syslinux-utils, é usado
+# pelo last step do lb_binary_iso pra tornar a ISO BIOS+USB-bootable.
+# Sem isso o build gera a ISO mas falha no isohybrid e a ISO some.
 MISSING=""
-for cmd in lb debootstrap xorriso mksquashfs; do
+for cmd in lb debootstrap xorriso mksquashfs isohybrid; do
     command -v "$cmd" >/dev/null 2>&1 || MISSING="$MISSING $cmd"
 done
 
@@ -83,12 +125,23 @@ if [ -n "$MISSING" ]; then
 fi
 echo "✓ Build deps presentes"
 
-# Debootstrap precisa conhecer plucky (Ubuntu 26.04)
-if [ ! -f /usr/share/debootstrap/scripts/plucky ]; then
-    echo "→ Criando symlink debootstrap pra plucky (Ubuntu 26.04)..."
-    ln -sf gutsy /usr/share/debootstrap/scripts/plucky
+# Debootstrap precisa conhecer plucky (Ubuntu 26.04). Se symlink já
+# existe apontando pro script ERRADO (ex: gutsy/2007 com keys antigas
+# que disparam "unknown key" no Ubuntu 26.04), refaz pro noble (24.04
+# LTS — script moderno com chain de keys correta).
+PLUCKY_SCRIPT="/usr/share/debootstrap/scripts/plucky"
+NEEDS_RELINK=true
+if [ -L "$PLUCKY_SCRIPT" ]; then
+    TARGET=$(readlink "$PLUCKY_SCRIPT")
+    if [ "$TARGET" = "noble" ]; then
+        NEEDS_RELINK=false
+    fi
 fi
-echo "✓ debootstrap conhece plucky"
+if $NEEDS_RELINK; then
+    echo "→ Symlinkando plucky → noble (debootstrap script moderno)..."
+    ln -sfn noble "$PLUCKY_SCRIPT"
+fi
+echo "✓ debootstrap conhece plucky (via symlink → noble)"
 
 # Cargo (apps Rust dependem) — usado pelos pacotes durante install
 if ! command -v cargo >/dev/null 2>&1; then
@@ -103,19 +156,29 @@ echo ""
 # ─────────────────────────────────────────────────────────────────
 # Build
 # ─────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────
+# Patch live-build pra remover refs Ubuntu legacy (gfxboot-theme-ubuntu
+# hardcoded, sysvinit default, etc). Idempotente — re-roda OK.
+# ─────────────────────────────────────────────────────────────────
+echo "━━━ Patching live-build (Ubuntu legacy fixes) ━━━"
+chmod +x "$SCRIPT_DIR/patch-live-build.sh"
+"$SCRIPT_DIR/patch-live-build.sh"
+echo ""
+
 echo "━━━ Buildando ISO (20-40min) ━━━"
-echo "  Logs em: /tmp/tmjos-build/build.log"
+echo "  Logs em: $BUILD_DIR/build.log"
 echo ""
 
 chmod +x "$REPO_ROOT/distro/build.sh" "$REPO_ROOT/distro"/hooks/*.sh
+# BUILD_DIR é exportado lá em cima — distro/build.sh respeita
 "$REPO_ROOT/distro/build.sh"
 
 # ─────────────────────────────────────────────────────────────────
 # Resultado
 # ─────────────────────────────────────────────────────────────────
-ISO_FILE=$(find /tmp/tmjos-build -maxdepth 1 -name '*.iso' | head -1)
+ISO_FILE=$(find "$BUILD_DIR" -maxdepth 1 -name '*.iso' | head -1)
 if [ -z "$ISO_FILE" ]; then
-    die "Build terminou mas ISO não foi gerada. Confere /tmp/tmjos-build/build.log."
+    die "Build terminou mas ISO não foi gerada. Confere $BUILD_DIR/build.log."
 fi
 
 ISO_SIZE=$(du -h "$ISO_FILE" | cut -f1)
@@ -147,7 +210,7 @@ echo ""
 # pra não acumular ~7GB de chroot/squashfs entre builds.
 read -r -p "Limpar chroot intermediário (~7GB) e manter só a ISO? [y/N]: " CLEAN_INTERMEDIATE < /dev/tty || CLEAN_INTERMEDIATE="n"
 if [ "${CLEAN_INTERMEDIATE,,}" = "y" ]; then
-    cd /tmp/tmjos-build
+    cd "$BUILD_DIR"
     sudo lb clean --purge 2>/dev/null || true
     rm -rf chroot config binary auto cache
     echo "✓ Intermediário limpo. ISO preservada: $ISO_FILE"

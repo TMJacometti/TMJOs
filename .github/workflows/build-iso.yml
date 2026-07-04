@@ -30,10 +30,16 @@ jobs:
 
       - name: Ensure debootstrap knows about plucky
         run: |
-          if [ ! -f /usr/share/debootstrap/scripts/plucky ]; then
-            echo "Adding plucky symlink for debootstrap..."
-            sudo ln -sf gutsy /usr/share/debootstrap/scripts/plucky
-          fi
+          # plucky → noble (24.04 LTS script moderno). Era 'gutsy' (7.10/
+          # 2007) mas o script antigo referencia keys removidas e gera
+          # "Release signed by unknown key 871920D1991BC93C" pra Ubuntu
+          # 26.04 archive. noble tem keys atuais.
+          sudo ln -sfn noble /usr/share/debootstrap/scripts/plucky
+
+      - name: Patch live-build (remove Ubuntu legacy hardcodes)
+        run: |
+          chmod +x tools/patch-live-build.sh
+          sudo tools/patch-live-build.sh
 
       - name: Debug live-build options
         run: |
